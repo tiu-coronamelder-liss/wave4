@@ -1,0 +1,159 @@
+---
+title: "Longitudinale data"
+author: "Nynke van der Laan, Nadine van der Waal, Jan de Wit"
+date: "3/30/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+rm(list = ls()) #Clear workspace
+knitr::opts_chunk$set(echo = TRUE)
+
+# Disable output of warnings to the generated doc file
+# Set to FALSE for final doc, TRUE for debugging
+knitr::opts_chunk$set(warning = TRUE)
+
+##### Load packages
+# For importing SPSS files
+library(foreign)
+library(plyr)
+library(dplyr)
+library(car)
+library(lavaan)
+
+##### Load dataset of all previous waves (not included on Github) and remove missing values
+
+##### Wave 1
+data_wave1_in <- read.spss('../L_CoronaMelder_wave1_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
+# Filter out the respondents that did not complete the entire survey 
+data_wave1 <- data_wave1_in[!is.na(data_wave1_in$duur),]
+
+##### Wave 2
+data_wave2_in <- read.spss('../L_Corona_app_wave2_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
+# Filter out the respondents that did not complete the entire survey 
+data_wave2 <- data_wave2_in[!is.na(data_wave2_in$duur),]
+
+##### Wave 3
+data_wave3_in <- read.spss('../L_Corona_app_wave3_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
+# Filter out the respondents that did not complete the entire survey 
+data_wave3 <- data_wave3_in[!is.na(data_wave3_in$duur),]
+
+# New method of merging to add all suffixes correctly.
+data_tmp = merge(data_wave1, data_wave3, by = "nomem_encr", all = FALSE, suffix = c("_w1", "_w3")) 
+data_allwaves = merge(data_wave2, data_wave3, by = "nomem_encr", all = FALSE, suffix = c("_w2", "_w3"))
+data_allwaves <- cbind(data_allwaves, select(data_tmp, contains("_w1")))
+
+```
+
+
+```{r prep}
+suffixes <- c("_w1", "_w2", "_w3")
+
+for (s in suffixes) {
+  # From Nadine's analysis
+  
+  # data$Behavior_UTAUT_r = car::recode(data$Behavior_UTAUT, '1=1; 3=0')
+  eval(parse(text=paste("data_allwaves$Behavior_UTAUT_r", s, " = car::recode(data_allwaves$Behavior_UTAUT", s, ", '1=1; 3=0')", sep="")))
+  
+  # data$EE1a_UTAUT_r = car::recode(data$EE1a_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
+  eval(parse(text=paste("data_allwaves$EE1a_UTAUT_r", s, " = car::recode(data_allwaves$EE1a_UTAUT", s, ", '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1')", sep=""))) 
+  
+  # data$EE1b_UTAUT_r = car::recode(data$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
+  eval(parse(text=paste("data_allwaves$EE1b_UTAUT_r", s, " = car::recode(data_allwaves$EE1b_UTAUT", s, ", '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1')", sep="")))  
+
+  # data$Beliefs_datasafety_r = car::recode(data$Beliefs_datasafety, '1=0; 2=0; 3=1; 4=1; NA=0') #Value 0 = not true / don't know, value 1 = true that data is safe
+  eval(parse(text=paste("data_allwaves$Beliefs_datasafety_r", s, " = car::recode(data_allwaves$Beliefs_datasafety", s, ", '1=0; 2=0; 3=1; 4=1; NA=0')", sep="")))  
+
+  # data$HealthLiteracy1r = car::recode(data$HealthLiteracy1, '1=5; 2=4; 3=3; 4=2; 5=1')
+  # === NOTE: not available in all waves? ===
+  #eval(parse(text=paste("data_allwaves$HealthLiteracy1r", s, " = car::recode(data_allwaves$HealthLiteracy1", s, ", '1=5; 2=4; 3=3; 4=2; 5=1')", sep=""))) 
+  
+  # data$HealthLiteracy3r = car::recode(data$HealthLiteracy3, '1=5; 2=4; 3=3; 4=2; 5=1')
+  # === NOTE: not available in all waves? ===
+  #eval(parse(text=paste("data_allwaves$HealthLiteracy3r", s, " = car::recode(data_allwaves$HealthLiteracy3", s, ", '1=5; 2=4; 3=3; 4=2; 5=1')", sep="")))
+  
+  # data$Beliefs_voluntariness_dummy <- car::recode(data$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more voluntariness
+  eval(parse(text=paste("data_allwaves$Beliefs_voluntariness_dummy", s, " = car::recode(data_allwaves$Beliefs_voluntariness", s, ", '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1')", sep="")))
+
+  # data$Beliefs_fear_dummy <- car::recode(data$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+  eval(parse(text=paste("data_allwaves$Beliefs_fear_dummy", s, " = car::recode(data_allwaves$Beliefs_fear", s, ", '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1')", sep="")))
+
+  # data$Beliefs_notificationfear_dummy <- car::recode(data$Beliefs_notificationfear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+  eval(parse(text=paste("data_allwaves$Beliefs_notificationfear_dummy", s, " = car::recode(data_allwaves$Beliefs_notificationfear", s, ", '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1')", sep="")))
+  
+  # data$Beliefs_benefiteconomic_dummy <- car::recode(data$Beliefs_benefiteconomic, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values repesent more benefit
+  eval(parse(text=paste("data_allwaves$Beliefs_benefiteconomic_dummy", s, " = car::recode(data_allwaves$Beliefs_benefiteconomic", s, ", '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1')", sep="")))
+  
+  # data$Beliefs_civicduty_dummy <- car::recode(data$Beliefs_civicduty, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent stronger civic duty
+  eval(parse(text=paste("data_allwaves$Beliefs_civicduty_dummy", s, " = car::recode(data_allwaves$Beliefs_civicduty", s, ", '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1')", sep="")))
+  
+  # data$Beliefs_TrustGovernment_dummy <- car::recode(data$Beliefs_TrustGovernment, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more trust
+  # === NOTE: not available in all waves? ===
+  #eval(parse(text=paste("data_allwaves$Beliefs_TrustGovernment_dummy", s, " = car::recode(data_allwaves$Beliefs_TrustGovernment", s, ", '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1')", sep="")))
+  
+  # data$Beliefs_Protectriskgroups_dummy <- car::recode(data$Beliefs_Protectriskgroups, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values respresent stronger effectiveness for people in risk groups
+  eval(parse(text=paste("data_allwaves$Beliefs_Protectriskgroups_dummy", s, " = car::recode(data_allwaves$Beliefs_Protectriskgroups", s, ", '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1')", sep="")))
+  
+# data$Beliefs_technologyperformance_dummy <- car::recode(data$Beliefs_technologyperformance, 'NA=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
+  eval(parse(text=paste("data_allwaves$Beliefs_technologyperformance_dummy", s, " = car::recode(data_allwaves$Beliefs_technologyperformance", s, ", 'NA=0; 1=0; 2=0; 3=1; 4=1')", sep="")))
+  
+  
+  # We need to merge effort expectancy for users and non-users, to ensure that we don't enter any missing cases in the model.
+  #data$EE1_UTAUT <- rowMeans(data[, c("EE1a_UTAUT_r","EE1b_UTAUT_r")], na.rm = TRUE)
+  eval(parse(text=paste("data_allwaves$EE1_UTAUT", s, " <- rowMeans(data_allwaves[, c(\"EE1a_UTAUT_r",s,"\",\"EE1b_UTAUT_r",s,"\")], na.rm = TRUE)", sep="")))
+  
+  #data$EE2_UTAUT <- rowMeans(data[, c("EE2a_UTAUT","EE2b_UTAUT")], na.rm = TRUE)  
+  eval(parse(text=paste("data_allwaves$EE2_UTAUT", s, " <- rowMeans(data_allwaves[, c(\"EE2a_UTAUT",s,"\",\"EE2b_UTAUT",s,"\")], na.rm = TRUE)", sep="")))
+}
+```
+
+
+```{r growthmodel}
+# I don't know if it is okay to just add all the timesteps as separate regressors (x1 and x2 are time-invariant in the example), but this discussion seems to say so: https://groups.google.com/g/lavaan/c/uZgXzgBoEKA
+
+# Original example
+#model <- '
+  # intercept and slope with fixed coefficients
+    i =~ 1*t1 + 1*t2 + 1*t3 + 1*t4
+    s =~ 0*t1 + 1*t2 + 2*t3 + 3*t4
+  # regressions
+    i ~ x1 + x2
+    s ~ x1 + x2
+  # time-varying covariates
+    t1 ~ c1
+    t2 ~ c2
+    t3 ~ c3
+    t4 ~ c4
+#'
+
+model <- '
+  # Measurement model (stolen from Nadine)
+  PE_UTAUT_w1 =~ PE1_UTAUT_w1 + PE2_UTAUT_w1
+  PE_UTAUT_w2 =~ PE1_UTAUT_w2 + PE2_UTAUT_w2
+  PE_UTAUT_w3 =~ PE1_UTAUT_w3 + PE2_UTAUT_w3
+  
+  SI_UTAUT_w1 =~ SI1_UTAUT_w1 + SI2_UTAUT_w1
+  SI_UTAUT_w2 =~ SI1_UTAUT_w2 + SI2_UTAUT_w2
+  SI_UTAUT_w3 =~ SI1_UTAUT_w3 + SI2_UTAUT_w3
+  
+  FC_UTAUT_w1 =~ FC1_UTAUT_w1 + FC2_UTAUT_w1
+  FC_UTAUT_w2 =~ FC1_UTAUT_w2 + FC2_UTAUT_w2
+  FC_UTAUT_w3 =~ FC1_UTAUT_w3 + FC2_UTAUT_w3
+  
+  EE_UTAUT_w1 =~ EE1_UTAUT_w1 + EE2_UTAUT_w1
+  EE_UTAUT_w2 =~ EE1_UTAUT_w2 + EE2_UTAUT_w2
+  EE_UTAUT_w3 =~ EE1_UTAUT_w3 + EE2_UTAUT_w3
+  
+  # intercept and slope with fixed coefficients
+    i =~ 1*Behavior_UTAUT_r_w1 + 1*Behavior_UTAUT_r_w2 + 1*Behavior_UTAUT_r_w3
+    s =~ 0*Behavior_UTAUT_r_w1 + 1*Behavior_UTAUT_r_w2 + 2*Behavior_UTAUT_r_w3
+  # regressions
+    i ~ PE_UTAUT_w1 + PE_UTAUT_w2 + PE_UTAUT_w3 + SI_UTAUT_w1 + SI_UTAUT_w2 + SI_UTAUT_w3 + FC_UTAUT_w1 + FC_UTAUT_w2 + FC_UTAUT_w3 + EE_UTAUT_w1 + EE_UTAUT_w2 + EE_UTAUT_w3 + Beliefs_voluntariness_dummy_w1 + Beliefs_voluntariness_dummy_w2 + Beliefs_voluntariness_dummy_w3 + lftdcat_w1 + geslacht_w1
+    s ~ PE_UTAUT_w1 + PE_UTAUT_w2 + PE_UTAUT_w3 + SI_UTAUT_w1 + SI_UTAUT_w2 + SI_UTAUT_w3 + FC_UTAUT_w1 + FC_UTAUT_w2 + FC_UTAUT_w3 + EE_UTAUT_w1 + EE_UTAUT_w2 + EE_UTAUT_w3 + Beliefs_voluntariness_dummy_w1 + Beliefs_voluntariness_dummy_w2 + Beliefs_voluntariness_dummy_w3 + lftdcat_w1 + geslacht_w1
+  # time-varying covariates
+  # (left out for now)
+'
+    
+fit <- growth(model, data = data_allwaves)
+summary(fit)
+```
