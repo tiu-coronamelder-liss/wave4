@@ -155,5 +155,5 @@ model <- '
 '
     
 fit <- growth(model, data = data_allwaves)
-summary(fit1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+summary(fit, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 ```
