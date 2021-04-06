@@ -58,8 +58,6 @@ data_allwaves <- cbind(data_allwaves, select(data_tmp, contains("_w1")))
 ```{r selecting data based on behavioural outcome}
 # Create a dataset with only the current users and never users for all analyses in which these groups are compared. 
 data_wave1 <- subset(data_wave1_filter, Behavior_UTAUT != 2)
-data_wave2 <- subset(data_wave2_filter, Behavior_UTAUT != 2)
-data_wave3 <- subset(data_wave3_filter, Behavior_UTAUT != 2)
 data_wave4 <- subset(data_wave4_filter, Behavior_UTAUT != 2)
 ```
 
@@ -110,25 +108,26 @@ data_wave1$EE2_UTAUT <- rowMeans(data_wave1[, c("EE2a_UTAUT","EE2b_UTAUT")], na.
 
 ```{r Create new variables for adherence to measures}
 
-data_wave1$AdherenceNS <- rowMeans(data_wave1[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")], na.rm = TRUE)
+data_wave1$AdherenceNS_w1 <- rowMeans(data_wave1[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")], na.rm = TRUE)
 cronbach(data_wave1[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
 
-data_wave1$AdherenceS <- rowMeans(data_wave1[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")], na.rm = TRUE)
+data_wave1$AdherenceS_w1 <- rowMeans(data_wave1[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")], na.rm = TRUE)
 cronbach(data_wave1[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
 
-data_wave1$AdherenceSelfEfficacy <- rowMeans(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
+data_wave1$AdherenceSelfEfficacy_w1 <- rowMeans(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
 cronbach(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
 
-data_wave1$AdherenceBenefits <- rowMeans(data_wave1[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
+data_wave1$AdherenceBenefits_w1 <- rowMeans(data_wave1[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
 cronbach(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
 
-data_wave1$AdherenceBarriers <- rowMeans(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")], na.rm = TRUE)
+data_wave1$AdherenceBarriers_w1 <- rowMeans(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")], na.rm = TRUE)
 cronbach(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")])
 
+data_wave1_adherence <- subset(data_wave1, Behavior_UTAUT != 8)
+data_wave4_adherence <- subset(data_wave4, Behavior_UTAUT != 8)
 
 
 ```
-
 
 
 ## 1.2. Data inspection WAVE 1
@@ -194,7 +193,7 @@ data_wave4$Beliefs_civicduty_dummy <- car::recode(data_wave4$Beliefs_civicduty, 
 data_wave4$Beliefs_TrustGovernment_dummy <- car::recode(data_wave4$Beliefs_TrustGovernment, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more trust
 #View(data_wave4[,c("Beliefs_TrustGovernment_dummy","Beliefs_TrustGovernment")])
 data_wave4$Beliefs_Protectriskgroups_dummy <- car::recode(data_wave4$Beliefs_Protectriskgroups, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values respresent stronger effectiveness for people in risk groups
-View(data_wave4[,c("Beliefs_Protectriskgroups_dummy","Beliefs_Protectriskgroups")])
+#View(data_wave4[,c("Beliefs_Protectriskgroups_dummy","Beliefs_Protectriskgroups")])
 data_wave4$Beliefs_technologyperformance_dummy <- car::recode(data_wave4$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
 #View(data_wave4[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_dummy")])
 
@@ -516,29 +515,33 @@ summary(fit2_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 ```{r Regression model Adherence Wave 1}
 
+data_wave1$AdherenceSelfEfficacy <- rowMeans(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
+cronbach(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
+
+data_wave1$AdherenceBenefits <- rowMeans(data_wave1[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
+cronbach(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
+
+data_wave1$AdherenceBarriers <- rowMeans(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")], na.rm = TRUE)
+cronbach(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")])
+
+
 model4_w1 <- ' 
 #Measurement model
 
-PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
-PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+Adherence_Selfefficacy =~ HBM_selfefficacy_Test + HBM_selfefficacy_Quarantaine + HBM_selfefficacy_Visits + HBM_selfefficacy_GP
+Adherence_Benefits =~ HBM_perceivedbenefits_Test + HBM_perceivedbenefits_Quarantaine + HBM_perceivedbenefits_Visits + HBM_perceivedbenefits_GP
+Adherence_Barriers =~ HBM_barriers_Test + HBM_barriers_Quarantaine + HBM_barriers_Visits + HBM_barriers_GP
 
 #Regression model
-Behavior_UTAUT_r ~ PSus_HBM + PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+AdherenceS_w1 ~ Adherence_Selfefficacy + Adherence_Benefits + Adherence_Barriers + lftdcat + geslacht
 
 #Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
-PSus_HBM ~~ PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
-PSev_HBM ~~ HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
-HBM_selfefficacy_CoronaMelder ~~ HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
-HBM_barriers_CoronaMelder ~~ HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
-HBM_perceivedbenefits_CoronaMelder ~~ lftdcat + geslacht
+Adherence_Selfefficacy ~~ Adherence_Benefits + Adherence_Barriers + lftdcat + geslacht
+Adherence_Benefits ~~ Adherence_Barriers + lftdcat + geslacht
+Adherence_Barriers ~~ lftdcat + geslacht
 lftdcat ~~ geslacht'
 
-
-#SIMPLE EFFECTS voor interacties
-
-# Comparing different models http://www.talkstats.com/threads/sem-comparing-models-with-different-variables.38047/ 
-
-fit4_w1 <- sem(model4_w1, data = data_wave1, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+fit4_w1 <- sem(model4_w1, data = data_wave1, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
 summary(fit4_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 
