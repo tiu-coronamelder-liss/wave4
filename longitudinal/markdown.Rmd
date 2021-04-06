@@ -4,6 +4,7 @@ author: "Nynke van der Laan, Nadine van der Waal, Jan de Wit"
 date: "3/30/2021"
 output: word_document
 ---
+# PART 0 LOADING DATA AND PACKAGES, DATA CLEANING
 
 ```{r setup, include=FALSE}
 rm(list = ls()) #Clear workspace
@@ -20,31 +21,545 @@ library(plyr)
 library(dplyr)
 library(car)
 library(lavaan)
+library(ggplot2)
+library(semTools)# to calculate reliability
+library(semPlot) # visualising SEM
+library(psy) # to calculate alpha
 
 ##### Load dataset of all previous waves (not included on Github) and remove missing values
 
 ##### Wave 1
 data_wave1_in <- read.spss('../L_CoronaMelder_wave1_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
 # Filter out the respondents that did not complete the entire survey 
-data_wave1 <- data_wave1_in[!is.na(data_wave1_in$duur),]
+data_wave1_filter <- data_wave1_in[!is.na(data_wave1_in$duur),]
 
 ##### Wave 2
 data_wave2_in <- read.spss('../L_Corona_app_wave2_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
 # Filter out the respondents that did not complete the entire survey 
-data_wave2 <- data_wave2_in[!is.na(data_wave2_in$duur),]
+data_wave2_filter <- data_wave2_in[!is.na(data_wave2_in$duur),]
 
 ##### Wave 3
 data_wave3_in <- read.spss('../L_Corona_app_wave3_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
 # Filter out the respondents that did not complete the entire survey 
-data_wave3 <- data_wave3_in[!is.na(data_wave3_in$duur),]
+data_wave3_filter <- data_wave3_in[!is.na(data_wave3_in$duur),]
+
+##### Wave 4
+data_wave4_in <- read.spss('../L_Corona_app_wave4_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
+# Filter out the respondents that did not complete the entire survey 
+data_wave4_filter <- data_wave4_in[!is.na(data_wave4_in$duur),]
 
 # New method of merging to add all suffixes correctly.
 data_tmp = merge(data_wave1, data_wave3, by = "nomem_encr", all = FALSE, suffix = c("_w1", "_w3")) 
-data_allwaves = merge(data_wave2, data_wave3, by = "nomem_encr", all = FALSE, suffix = c("_w2", "_w3"))
+data_allwaves = merge(data_wave2_filter, data_wave3_filter, by = "nomem_encr", all = FALSE, suffix = c("_w2", "_w3"))
 data_allwaves <- cbind(data_allwaves, select(data_tmp, contains("_w1")))
 
 ```
 
+```{r selecting data based on behavioural outcome}
+# Create a dataset with only the current users and never users for all analyses in which these groups are compared. 
+data_wave1 <- subset(data_wave1_filter, Behavior_UTAUT != 2)
+data_wave2 <- subset(data_wave2_filter, Behavior_UTAUT != 2)
+data_wave3 <- subset(data_wave3_filter, Behavior_UTAUT != 2)
+data_wave4 <- subset(data_wave4_filter, Behavior_UTAUT != 2)
+```
+
+
+# PART 1 DATA PREPARATION AND INSPECTION
+
+## 1.1. Data preparation WAVE 1
+
+```{r recodings}
+#List of recodings that must be performed before runnng SEM. The beliefs are recoded into dummy variables.
+data_wave1$Behavior_UTAUT_r = car::recode(data_wave1$Behavior_UTAUT, '1=1; 3=0')
+#View(data_wave1[,c("Behavior_UTAUT_r","Behavior_UTAUT")])
+data_wave1$EE1a_UTAUT_r = car::recode(data_wave1$EE1a_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
+data_wave1$EE1b_UTAUT_r = car::recode(data_wave1$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
+data_wave1$Beliefs_datasafety_r = car::recode(data_wave1$Beliefs_datasafety, '1=0; 2=0; 3=1; 4=1; 99=0') #Value 0 = not true / don't know, value 1 = true that data is safe
+#View(data_wave1[,c("Beliefs_datasafety","Beliefs_datasafety_r")])
+data_wave1$HealthLiteracy1r = car::recode(data_wave1$HealthLiteracy1, '1=5; 2=4; 3=3; 4=2; 5=1')
+data_wave1$HealthLiteracy3r = car::recode(data_wave1$HealthLiteracy3, '1=5; 2=4; 3=3; 4=2; 5=1')
+data_wave1$Beliefs_voluntariness_dummy <- car::recode(data_wave1$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more voluntariness
+#View(data_wave1[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
+data_wave1$Beliefs_fear_dummy <- car::recode(data_wave1$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+#View(data_wave1[,c("Beliefs_fear","Beliefs_fear_dummy")])
+data_wave1$Beliefs_notificationfear_dummy <- car::recode(data_wave1$Beliefs_notificationfear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+#View(data_wave1[,c("Beliefs_notificationfear_dummy","Beliefs_notificationfear")])
+data_wave1$Beliefs_benefiteconomic_dummy <- car::recode(data_wave1$Beliefs_benefiteconomic, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values repesent more benefit
+#View(data_wave1[,c("Beliefs_benefiteconomic","Beliefs_benefiteconomic_dummy")])
+data_wave1$Beliefs_civicduty_dummy <- car::recode(data_wave1$Beliefs_civicduty, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent stronger civic duty
+#View(data_wave1[,c("Beliefs_civicduty_dummy","Beliefs_civicduty")])
+data_wave1$Beliefs_TrustGovernment_dummy <- car::recode(data_wave1$Beliefs_TrustGovernment, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more trust
+#View(data_wave1[,c("Beliefs_TrustGovernment_dummy","Beliefs_TrustGovernment")])
+data_wave1$Beliefs_Protectriskgroups_dummy <- car::recode(data_wave1$Beliefs_Protectriskgroups, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values respresent stronger effectiveness for people in risk groups
+#View(data_wave1[,c("Beliefs_Protectriskgroups_dummy","Beliefs_Protectriskgroups")])
+data_wave1$Beliefs_technologyperformance_dummy <- car::recode(data_wave1$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
+#View(data_wave1[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_dummy")])
+
+
+#data_wave1$oplcat_r <- car::recode(data_wave1$oplcat, '1=1; 2=1; 3=2; 4=2; 5=3; 6=3')
+#View(data_wave1[,c("oplcat","oplcat_r")])
+#data_wave1$lftdcat_r <- car::recode(data_wave1$lftdcat, '1=1; 2=1; 3=1; 4=2; 5=2; 6=3; 7=3')
+#View(data_wave1[,c("lftdcat","lftdcat_r")])
+``` 
+
+```{r Merge two UTAUT Effort Expectancy items for users and non-users}
+# We need to merge effort expectancy for users and non-users, to ensure that we don't enter any missing cases in the model.
+data_wave1$EE1_UTAUT <- rowMeans(data_wave1[, c("EE1a_UTAUT_r","EE1b_UTAUT_r")], na.rm = TRUE)
+data_wave1$EE2_UTAUT <- rowMeans(data_wave1[, c("EE2a_UTAUT","EE2b_UTAUT")], na.rm = TRUE)
+```
+
+```{r Create new variables for adherence to measures}
+
+data_wave1$AdherenceNS <- rowMeans(data_wave1[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")], na.rm = TRUE)
+cronbach(data_wave1[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
+
+data_wave1$AdherenceS <- rowMeans(data_wave1[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")], na.rm = TRUE)
+cronbach(data_wave1[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
+
+data_wave1$AdherenceSelfEfficacy <- rowMeans(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
+cronbach(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
+
+data_wave1$AdherenceBenefits <- rowMeans(data_wave1[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
+cronbach(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
+
+data_wave1$AdherenceBarriers <- rowMeans(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")], na.rm = TRUE)
+cronbach(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")])
+
+
+
+```
+
+
+
+## 1.2. Data inspection WAVE 1
+```{r Histograms per variable}
+# Based on the histogram the distribution is fairly normal.
+data_wave1$PE_UTAUTx <- rowMeans(data_wave1[, c("PE1_UTAUT", "PE2_UTAUT")], na.rm = TRUE)
+hist(data_wave1$PE_UTAUTx)
+# Based on the histogram the distribution is a bit skewed.
+data_wave1$EE1_UTAUTx <- rowMeans(data_wave1[, c("EE1a_UTAUT_r","EE1b_UTAUT_r")], na.rm = TRUE)
+data_wave1$EE2_UTAUTx <- rowMeans(data_wave1[, c("EE2a_UTAUT","EE2b_UTAUT")], na.rm = TRUE)
+data_wave1$EE_UTAUTx <- rowMeans(data_wave1[, c("EE1_UTAUT", "EE2_UTAUT")], na.rm = TRUE)
+hist(data_wave1$EE_UTAUTx)
+# Based on the histogram the distribution seems to be highly centered around te mean (narrow distribution).
+data_wave1$SI_UTAUTx <- rowMeans(data_wave1[, c("SI1_UTAUT", "SI2_UTAUT")], na.rm = TRUE)
+hist(data_wave1$SI_UTAUTx)
+# Based on the histogram the distribution is is strongly skewed.
+data_wave1$FC_UTAUTx <- rowMeans(data_wave1[, c("FC1_UTAUT", "FC2_UTAUT")], na.rm = TRUE)
+hist(data_wave1$FC_UTAUTx)
+# Based on the histogram the distribution is very much skewed (positive skew).
+data_wave1$Beliefs_falsesecurityx <- rowMeans(data_wave1[, c("Beliefs_falsesecurity1", "Beliefs_falsesecurity2")], na.rm = TRUE)
+hist(data_wave1$Beliefs_falsesecurityx)
+# Based on the histogram the distribution is very much skewed (positive skew).
+data_wave1$Beliefs_Conspiracyx <- rowMeans(data_wave1[, c("Beliefs_Conspiracy1", "Beliefs_Conspiracy2")], na.rm = TRUE)
+hist(data_wave1$Beliefs_Conspiracyx)
+# Based on the histogram the distribution is normal.
+data_wave1$Beliefs_monitoringx <- rowMeans(data_wave1[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_r")], na.rm = TRUE)
+hist(data_wave1$Beliefs_monitoringx)
+# Based on the histogram the distribution is fairly normal.
+data_wave1$HBM_PSus_selfx <- rowMeans(data_wave1[, c("HBM_PSus_self1", "HBM_PSus_self2")], na.rm = TRUE)
+hist(data_wave1$HBM_PSus_selfx)
+# Based on the histogram the distribution is quite skewed (heavy in the right tail).
+data_wave1$HBM_PSev_selfx <- rowMeans(data_wave1[, c("HBM_PSev_self1", "HBM_PSev_self2")], na.rm = TRUE)
+hist(data_wave1$HBM_PSev_selfx)
+# Based on the histogram the distribution is quite skewed (heavy in the right tail).
+data_wave1$DS_Mobilex <- rowMeans(data_wave1[, c("DS_Mobile1", "DS_Mobile2")], na.rm = TRUE)
+hist(data_wave1$DS_Mobilex)
+# Based on the histogram the distribution is highly skewed; no further analysis of this variable will be done. 
+data_wave1$HealthLiteracyx <- rowMeans(data_wave1[, c("HealthLiteracy1r", "HealthLiteracy2", "HealthLiteracy3r")], na.rm = TRUE)
+hist(data_wave1$HealthLiteracyx)
+# Data splitsen hoge vs. midden. vs lage health literacy
+#data$CatHL <- cut(data$HealthLiteracy, breaks = c(0,1.333333,3.66666,5), labels = c("Laag", "Midden", "Hoog"))
+```
+
+## 1.1. Data preparation WAVE 4
+```{r recodings}
+#List of recodings that must be performed before runnng SEM. The beliefs are recoded into dummy variables.
+data_wave4$Behavior_UTAUT_r = car::recode(data_wave4$Behavior_UTAUT, '1=1; 3=0')
+#View(data_wave4[,c("Behavior_UTAUT_r","Behavior_UTAUT")])
+data_wave4$EE1a_UTAUT_r = car::recode(data_wave4$EE1a_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
+data_wave4$EE1b_UTAUT_r = car::recode(data_wave4$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
+data_wave4$Beliefs_datasafety_r = car::recode(data_wave4$Beliefs_datasafety, '1=0; 2=0; 3=1; 4=1; 99=0') #Value 0 = not true / don't know, value 1 = true that data is safe
+#View(data_wave4[,c("Beliefs_datasafety","Beliefs_datasafety_r")])
+data_wave4$Beliefs_voluntariness_dummy <- car::recode(data_wave4$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more voluntariness
+#View(data_wave4[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
+data_wave4$Beliefs_fear_dummy <- car::recode(data_wave4$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+#View(data_wave4[,c("Beliefs_fear","Beliefs_fear_dummy")])
+data_wave4$Beliefs_notificationfear_dummy <- car::recode(data_wave4$Beliefs_notificationfear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+#View(data_wave4[,c("Beliefs_notificationfear_dummy","Beliefs_notificationfear")])
+data_wave4$Beliefs_benefiteconomic_dummy <- car::recode(data_wave4$Beliefs_benefiteconomic, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values repesent more benefit
+#View(data_wave4[,c("Beliefs_benefiteconomic","Beliefs_benefiteconomic_dummy")])
+data_wave4$Beliefs_civicduty_dummy <- car::recode(data_wave4$Beliefs_civicduty, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent stronger civic duty
+#View(data_wave4[,c("Beliefs_civicduty_dummy","Beliefs_civicduty")])
+data_wave4$Beliefs_TrustGovernment_dummy <- car::recode(data_wave4$Beliefs_TrustGovernment, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more trust
+#View(data_wave4[,c("Beliefs_TrustGovernment_dummy","Beliefs_TrustGovernment")])
+data_wave4$Beliefs_Protectriskgroups_dummy <- car::recode(data_wave4$Beliefs_Protectriskgroups, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values respresent stronger effectiveness for people in risk groups
+View(data_wave4[,c("Beliefs_Protectriskgroups_dummy","Beliefs_Protectriskgroups")])
+data_wave4$Beliefs_technologyperformance_dummy <- car::recode(data_wave4$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
+#View(data_wave4[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_dummy")])
+
+#data_wave4$oplcat_r <- car::recode(data_wave4$oplcat, '1=1; 2=1; 3=2; 4=2; 5=3; 6=3')
+#View(data_wave4[,c("oplcat","oplcat_r")])
+#data_wave4$lftdcat_r <- car::recode(data_wave4$lftdcat, '1=1; 2=1; 3=1; 4=2; 5=2; 6=3; 7=3')
+#View(data_wave4[,c("lftdcat","lftdcat_r")])
+``` 
+
+```{r Merge two UTAUT Effort Expectancy items for users and non-users}
+# We need to merge effort expectancy for users and non-users, to ensure that we don't enter any missing cases in the model.
+data_wave4$EE1_UTAUT <- rowMeans(data_wave4[, c("EE1a_UTAUT_r","EE1b_UTAUT_r")], na.rm = TRUE)
+data_wave4$EE2_UTAUT <- rowMeans(data_wave4[, c("EE2a_UTAUT","EE2b_UTAUT")], na.rm = TRUE)
+```
+
+```{r Create new variable for adherence to measures}
+
+data_wave4$AdherenceNS <- rowMeans(data_wave4[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")], na.rm = TRUE)
+cronbach(data_wave4[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
+
+data_wave4$AdherenceS <- rowMeans(data_wave4[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")], na.rm = TRUE)
+cronbach(data_wave4[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
+
+data_wave4$AdherenceSelfEfficacy <- rowMeans(data_wave4[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
+cronbach(data_wave4[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
+
+data_wave4$AdherenceBenefits <- rowMeans(data_wave4[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
+cronbach(data_wave4[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
+
+data_wave4$AdherenceBarriers <- rowMeans(data_wave4[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")], na.rm = TRUE)
+cronbach(data_wave4[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")])
+
+```
+
+
+## 1.2. Data inspection WAVE 4
+```{r Histograms per variable}
+# Based on the histogram the distribution is fairly normal.
+data_wave4$PE_UTAUTx <- rowMeans(data_wave4[, c("PE1_UTAUT", "PE2_UTAUT")], na.rm = TRUE)
+hist(data_wave4$PE_UTAUTx)
+
+ggplot(data_wave4, aes(x=PE_UTAUTx, color=Behavior_UTAUT_r)) + geom_histogram()
+# Based on the histogram the distribution is a bit skewed.
+data_wave4$EE1_UTAUTx <- rowMeans(data_wave4[, c("EE1a_UTAUT_r","EE1b_UTAUT_r")], na.rm = TRUE)
+data_wave4$EE2_UTAUTx <- rowMeans(data_wave4[, c("EE2a_UTAUT","EE2b_UTAUT")], na.rm = TRUE)
+data_wave4$EE_UTAUTx <- rowMeans(data_wave4[, c("EE1_UTAUT", "EE2_UTAUT")], na.rm = TRUE)
+hist(data_wave4$EE_UTAUTx)
+# Based on the histogram the distribution seems to be highly centered around te mean (narrow distribution).
+data_wave4$SI_UTAUTx <- rowMeans(data_wave4[, c("SI1_UTAUT", "SI2_UTAUT")], na.rm = TRUE)
+hist(data_wave4$SI_UTAUTx)
+# Based on the histogram the distribution is is strongly skewed.
+data_wave4$FC_UTAUTx <- rowMeans(data_wave4[, c("FC1_UTAUT", "FC2_UTAUT")], na.rm = TRUE)
+hist(data_wave4$FC_UTAUTx)
+# Based on the histogram the distribution is very much skewed (positive skew).
+data_wave4$Beliefs_falsesecurityx <- rowMeans(data_wave4[, c("Beliefs_falsesecurity1", "Beliefs_falsesecurity2")], na.rm = TRUE)
+hist(data_wave4$Beliefs_falsesecurityx)
+# Based on the histogram the distribution is very much skewed (positive skew).
+data_wave4$Beliefs_Conspiracyx <- rowMeans(data_wave4[, c("Beliefs_Conspiracy1", "Beliefs_Conspiracy2")], na.rm = TRUE)
+hist(data_wave4$Beliefs_Conspiracyx)
+# Based on the histogram the distribution is normal.
+data_wave4$Beliefs_monitoringx <- rowMeans(data_wave4[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_r")], na.rm = TRUE)
+hist(data_wave4$Beliefs_monitoringx)
+# Based on the histogram the distribution is fairly normal.
+data_wave4$HBM_PSus_selfx <- rowMeans(data_wave4[, c("HBM_PSus_self1", "HBM_PSus_self2")], na.rm = TRUE)
+hist(data_wave4$HBM_PSus_selfx)
+# Based on the histogram the distribution is quite skewed (heavy in the right tail).
+data_wave4$HBM_PSev_selfx <- rowMeans(data_wave4[, c("HBM_PSev_self1", "HBM_PSev_self2")], na.rm = TRUE)
+hist(data_wave4$HBM_PSev_selfx)
+# NOG FIXEN
+#Based on the histogram the distribution is quite skewed (heavy in the right tail).
+#data_wave4$INEFFx <- rowMeans(data_wave4[, c("INEFFa", "INEFFb", "INEFFc", "INEFFd", "INEFFe", "INEFFf", "INEFFg", "INEFFh")], na.rm = TRUE)
+#hist(data_wave4$DS_Mobilex)
+```
+
+# PART 2 REGRESSION MODELS UTAUT
+## 2.1. Regression model UTAUT WAVE 1
+
+```{r Regression model UTAUT Wave 1}
+# Set up measurement model 
+## There appears to be a problem with Psus, as the standardized factor loading is >1. Gaskin's approach is used to work around this problem, using an equality constraint: https://www.youtube.com/watch?v=Vx24KFf-rAo&t=4s. 
+
+model_w1 <- ' 
+#Measurement model
+
+PE_UTAUT =~ PE1_UTAUT + PE2_UTAUT 
+SI_UTAUT =~ SI1_UTAUT + SI2_UTAUT
+FC_UTAUT =~ FC1_UTAUT + FC2_UTAUT
+EE_UTAUT =~ EE1_UTAUT + EE2_UTAUT
+
+#Regression model
+Behavior_UTAUT_r ~ PE_UTAUT + SI_UTAUT + FC_UTAUT + EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+PE_UTAUT ~~ SI_UTAUT + FC_UTAUT + EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+SI_UTAUT ~~ FC_UTAUT + EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+FC_UTAUT ~~ EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+EE_UTAUT ~~ Beliefs_voluntariness_dummy + lftdcat + geslacht
+Beliefs_voluntariness_dummy ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+fit_w1 <- sem(model_w1, data = data_wave1, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+reliability(fit_w1) # PE_UTAUT: alpha = .92
+                 # SI_UTAUT: alpha = .78
+                 # FC_UTAUT: alpha = .78
+                 # EE_UTAUT: alpha = .64
+                 # PSus_HBM: alpha = .79
+                 # PSev_HBM: alpha = .73
+
+parameterestimates(fit_w1) #unstandardized parameters
+standardizedsolution(fit_w1) #standardized parameters
+
+# Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, the model already has a good fit: 
+## CFI   = .98
+## RMSEA = .050 (90% CI [.044, .056])
+## SRMR  = .027
+## However, the p-value of chi square is significant, but this could be due to the large N. 
+
+# Statistics (sample means and covariance matrix)
+inspect(fit_w1, "sampstat")
+
+## Unstandardized model matrices
+est_fit <- inspect(fit_w1, "est")
+est_fit$lambda # unstandardised loadings
+est_fit$psi # covariance matrix
+
+## Standardized model matrices
+std_fit <- inspect(fit_w1, "std")
+std_fit$lambda # standardised loadings. All items load well on the latent factors, only EE1_UTAUT is doubtful (b=.54). So overall, convergent validity is ok. 
+std_fit$psi # latent variable correlation matrix shows that latent variables are not very highly correlated (< .85), so we can speak of discriminant validity.
+
+# Improve model (if needed, in this case I don't think it is)
+## By correlatoin matrix. From this table, no problematic residual correlations were identified (should be <.1). Only perceived severity and EE have residual correlations exceeding this treshold. 
+resid(fit_w1, type ="cor")
+
+## By looking at modification indices. 
+mod_ind <- modificationindices(fit_w1)
+head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
+
+# Compare models
+fits <- list()
+fits$fit1 <- fit_w1
+# Create a new model by adding an additional syntax to a model
+model2 <- paste0(model, "\n", "PE1_UTAUT ~~ FC1_UTAUT")
+fits$fit2 <- cfa(model2, data_wave1)
+round(sapply(fits, function(X) fitmeasures(X)), 3) #all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
+
+#Plotting (just to get a vizualisation of whether the model is correct)
+semPaths(fit_w1, "std")
+                 
+```
+
+## 2.2. Regression model UTAUT WAVE 4
+
+```{r Regression model UTAUT Wave 4}
+
+model_w4 <- ' 
+#Measurement model
+PE_UTAUT =~ PE1_UTAUT + PE2_UTAUT 
+SI_UTAUT =~ SI1_UTAUT + SI2_UTAUT
+FC_UTAUT =~ FC1_UTAUT + FC2_UTAUT
+EE_UTAUT =~ EE1_UTAUT + EE2_UTAUT
+
+#Regression model
+Behavior_UTAUT_r ~ PE_UTAUT + SI_UTAUT + FC_UTAUT + EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+PE_UTAUT ~~ SI_UTAUT + FC_UTAUT + EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+SI_UTAUT ~~ FC_UTAUT + EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+FC_UTAUT ~~ EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+EE_UTAUT ~~ Beliefs_voluntariness_dummy + lftdcat + geslacht
+Beliefs_voluntariness_dummy ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+fit_w4 <- sem(model_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+reliability(fit_w4) # PE_UTAUT: alpha = .93
+                    # SI_UTAUT: alpha = .82
+                    # FC_UTAUT: alpha = .80
+                    # EE_UTAUT: alpha = .63
+                    # PSus_HBM: alpha = .78
+                    # PSev_HBM: alpha = .73
+
+parameterestimates(fit_w4) #unstandardized parameters
+standardizedsolution(fit_w4) #standardized parameters
+
+# Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, the model already has a good fit: 
+## CFI   = 1.00
+## RMSEA = .043 (90% CI [.036, .050])
+## SRMR  = .029
+## However, the p-value of chi square is significant, but this could be due to the large N. 
+
+# Statistics (sample means and covariance matrix)
+inspect(fit_w4, "sampstat")
+
+## Unstandardized model matrices
+est_fit <- inspect(fit_w4, "est")
+est_fit$lambda # unstandardised loadings
+est_fit$psi # covariance matrix
+
+## Standardized model matrices
+std_fit <- inspect(fit_w4, "std")
+std_fit$lambda # standardised loadings. All items load well on the latent factors, only EE1_UTAUT is doubtful (b=.54). So overall, convergent validity is ok. 
+std_fit$psi # latent variable correlation matrix shows that latent variables are not very highly correlated (< .85), so we can speak of discriminant validity.
+
+# Improve model (if needed, in this case I don't think it is)
+## By correlatoin matrix. From this table, no problematic residual correlations were identified (should be <.1). Only perceived severity and EE have residual correlations exceeding this treshold. 
+resid(fit_w4, type ="cor")
+
+## By looking at modification indices. 
+mod_ind <- modificationindices(fit_w4)
+head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
+
+# Compare models
+fits <- list()
+fits$fit1 <- fit_w4
+# Create a new model by adding an additional syntax to a model
+model2 <- paste0(model, "\n", "PE1_UTAUT ~~ FC1_UTAUT")
+fits$fit2 <- cfa(model2, data_wave4)
+round(sapply(fits, function(X) fitmeasures(X)), 3) #all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
+
+#Plotting (just to get a vizualisation of whether the model is correct)
+semPaths(fit_w4, "std")
+                 
+```
+
+
+# PART 3 REGRESSION MODELS HBM
+## 3.1. Regression model HBM WAVE 1
+
+```{r Regression model HBM Wave 1}
+
+model2_w1 <- ' 
+#Measurement model
+
+PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+
+#Regression model
+Behavior_UTAUT_r ~ PSus_HBM + PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+PSus_HBM ~~ PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+PSev_HBM ~~ HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+HBM_selfefficacy_CoronaMelder ~~ HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+HBM_barriers_CoronaMelder ~~ HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+HBM_perceivedbenefits_CoronaMelder ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+
+#SIMPLE EFFECTS voor interacties
+
+# Comparing different models http://www.talkstats.com/threads/sem-comparing-models-with-different-variables.38047/ 
+
+fit2_w1 <- sem(model2_w1, data = data_wave1, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit2_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
+## CFI   = .99
+## RMSEA = .06 (90% CI [.056, .078])
+## SRMR  = .058
+## The chi square is significant, but this could be due to the large N. 
+```
+
+
+## 3.2. Regression model HBM WAVE 4
+
+```{r Regression model HBM Wave 4}
+
+model2_w4 <- ' 
+#Measurement model
+
+PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+
+#Regression model
+Behavior_UTAUT_r ~ PSus_HBM + PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+PSus_HBM ~~ PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+PSev_HBM ~~ HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+HBM_selfefficacy_CoronaMelder ~~ HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+HBM_barriers_CoronaMelder ~~ HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+HBM_perceivedbenefits_CoronaMelder ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+
+#SIMPLE EFFECTS voor interacties
+
+# Comparing different models http://www.talkstats.com/threads/sem-comparing-models-with-different-variables.38047/ 
+
+fit2_w4 <- sem(model2_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit2_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
+## CFI   = .99
+## RMSEA = .06 (90% CI [.056, .078])
+## SRMR  = .058
+## The chi square is significant, but this could be due to the large N. 
+```
+
+
+
+# PART 4 REGRESSION MODELS COVID-RELATED VARIABLES
+## 4.1. Regression model COVID-RELATED VARIABLES Wave 1
+
+
+## 4.2. Regression model COVID-RELATED VARIABLES Wave 4
+
+
+
+# PART 5 REGRESSION MODELS ADHERENCE
+
+## 5.1. Regression model ADHERENCE Wave 1
+
+```{r Regression model Adherence Wave 1}
+
+model4_w1 <- ' 
+#Measurement model
+
+PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+
+#Regression model
+Behavior_UTAUT_r ~ PSus_HBM + PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+PSus_HBM ~~ PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+PSev_HBM ~~ HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+HBM_selfefficacy_CoronaMelder ~~ HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+HBM_barriers_CoronaMelder ~~ HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+HBM_perceivedbenefits_CoronaMelder ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+
+#SIMPLE EFFECTS voor interacties
+
+# Comparing different models http://www.talkstats.com/threads/sem-comparing-models-with-different-variables.38047/ 
+
+fit4_w1 <- sem(model4_w1, data = data_wave1, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit4_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
+## CFI   = .99
+## RMSEA = .06 (90% CI [.056, .078])
+## SRMR  = .058
+## The chi square is significant, but this could be due to the large N. 
+```
+
+
+
+
+## 5.2. Regression model ADHERENCE Wave 4
+
+
+
+
+
+
+### Jan z'n dingen
 
 ```{r prep}
 suffixes <- c("_w1", "_w2", "_w3")
