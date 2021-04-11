@@ -18,12 +18,11 @@ knitr::opts_chunk$set(warning = TRUE)
 # For importing SPSS files
 library(foreign)
 library(plyr)
-library(dplyr)
 library(car)
 library(lavaan)
-library(ggplot2)
+library(dplyr)
+library(naniar)
 library(semTools)# to calculate reliability
-library(semPlot) # visualising SEM
 library(psy) # to calculate alpha
 
 ##### Load dataset of all previous waves (not included on Github) and remove missing values
@@ -34,14 +33,14 @@ data_wave1_in <- read.spss('../L_CoronaMelder_wave1_3p.sav', to.data.frame=TRUE,
 data_wave1_filter <- data_wave1_in[!is.na(data_wave1_in$duur),]
 
 ##### Wave 2
-data_wave2_in <- read.spss('../L_Corona_app_wave2_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
+#data_wave2_in <- read.spss('../L_Corona_app_wave2_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
 # Filter out the respondents that did not complete the entire survey 
-data_wave2_filter <- data_wave2_in[!is.na(data_wave2_in$duur),]
+#data_wave2_filter <- data_wave2_in[!is.na(data_wave2_in$duur),]
 
 ##### Wave 3
-data_wave3_in <- read.spss('../L_Corona_app_wave3_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
+#data_wave3_in <- read.spss('../L_Corona_app_wave3_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
 # Filter out the respondents that did not complete the entire survey 
-data_wave3_filter <- data_wave3_in[!is.na(data_wave3_in$duur),]
+#data_wave3_filter <- data_wave3_in[!is.na(data_wave3_in$duur),]
 
 ##### Wave 4
 data_wave4_in <- read.spss('../L_Corona_app_wave4_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
@@ -49,16 +48,40 @@ data_wave4_in <- read.spss('../L_Corona_app_wave4_3p.sav', to.data.frame=TRUE, u
 data_wave4_filter <- data_wave4_in[!is.na(data_wave4_in$duur),]
 
 # New method of merging to add all suffixes correctly.
-data_tmp = merge(data_wave1, data_wave3, by = "nomem_encr", all = FALSE, suffix = c("_w1", "_w3")) 
-data_allwaves = merge(data_wave2_filter, data_wave3_filter, by = "nomem_encr", all = FALSE, suffix = c("_w2", "_w3"))
-data_allwaves <- cbind(data_allwaves, select(data_tmp, contains("_w1")))
-
+# data_tmp = merge(data_wave1, data_wave3, by = "nomem_encr", all = FALSE, suffix = c("_w1", "_w3")) 
+# data_allwaves = merge(data_wave2_filter, data_wave3_filter, by = "nomem_encr", all = FALSE, suffix = c("_w2", "_w3"))
+# data_allwaves <- cbind(data_allwaves, select(data_tmp, contains("_w1")))
 ```
 
 ```{r selecting data based on behavioural outcome}
 # Create a dataset with only the current users and never users for all analyses in which these groups are compared. 
 data_wave1 <- subset(data_wave1_filter, Behavior_UTAUT != 2)
 data_wave4 <- subset(data_wave4_filter, Behavior_UTAUT != 2)
+
+# We only want to analyse users for the adherence analyses
+data_wave1_adherence <- subset(data_wave1_filter, Behavior_UTAUT == 1)
+data_wave4_adherence <- subset(data_wave4_filter, Behavior_UTAUT == 1)
+
+#View(data_wave1_adherence[,c("Behavior_UTAUT","AdherenceNotificationMeasuresSymptoms_Test","AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
+#View(data_wave4_adherence[,c("Behavior_UTAUT","AdherenceNotificationMeasuresSymptoms_Test","AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
+
+# Create a seperate dataframe for the adherence analyses, from which those answering the question with 'I wouldn't use the CoronaMelder', are filtered out.
+data_wave1_adherenceS <- subset(data_wave1_adherence, AdherenceNotificationMeasuresSymptoms_Test != 8 & AdherenceNotificationMeasuresSymptoms_Quarantaine != 8 & AdherenceNotificationMeasuresSymptoms_Visits != 8 & AdherenceNotificationMeasuresSymptoms_CallGP != 8)
+
+#View(data_wave1_adherenceS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresSymptoms_Test","AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
+
+data_wave1_adherenceNS <- subset(data_wave1_adherence, AdherenceNotificationMeasuresNosymptoms_Test != 8 | AdherenceNotificationMeasuresNosymptoms_Quarantaine != 8 | AdherenceNotificationMeasuresNoSymptoms_Visits != 8 | AdherenceNotificationMeasuresNosymptoms_CallGP != 8)
+
+#View(data_wave1_adherenceNS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresNosymptoms_Test","AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
+
+data_wave4_adherenceS <- subset(data_wave4_adherence, AdherenceNotificationMeasuresSymptoms_Test != 8 | AdherenceNotificationMeasuresSymptoms_Quarantaine != 8 | AdherenceNotificationMeasuresSymptoms_Visits != 8 | AdherenceNotificationMeasuresSymptoms_CallGP != 8)
+
+#View(data_wave4_adherenceS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresSymptoms_Test","AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
+
+data_wave4_adherenceNS <- subset(data_wave4_adherence, AdherenceNotificationMeasuresNosymptoms_Test != 8 | AdherenceNotificationMeasuresNosymptoms_Quarantaine != 8 | AdherenceNotificationMeasuresNoSymptoms_Visits != 8 | AdherenceNotificationMeasuresNosymptoms_CallGP != 8)
+
+#View(data_wave4_adherenceNS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresNosymptoms_Test","AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
+
 ```
 
 
@@ -72,32 +95,27 @@ data_wave1$Behavior_UTAUT_r = car::recode(data_wave1$Behavior_UTAUT, '1=1; 3=0')
 #View(data_wave1[,c("Behavior_UTAUT_r","Behavior_UTAUT")])
 data_wave1$EE1a_UTAUT_r = car::recode(data_wave1$EE1a_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
 data_wave1$EE1b_UTAUT_r = car::recode(data_wave1$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
-data_wave1$Beliefs_datasafety_r = car::recode(data_wave1$Beliefs_datasafety, '1=0; 2=0; 3=1; 4=1; 99=0') #Value 0 = not true / don't know, value 1 = true that data is safe
-#View(data_wave1[,c("Beliefs_datasafety","Beliefs_datasafety_r")])
-data_wave1$HealthLiteracy1r = car::recode(data_wave1$HealthLiteracy1, '1=5; 2=4; 3=3; 4=2; 5=1')
-data_wave1$HealthLiteracy3r = car::recode(data_wave1$HealthLiteracy3, '1=5; 2=4; 3=3; 4=2; 5=1')
-data_wave1$Beliefs_voluntariness_dummy <- car::recode(data_wave1$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more voluntariness
-#View(data_wave1[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
-data_wave1$Beliefs_fear_dummy <- car::recode(data_wave1$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
-#View(data_wave1[,c("Beliefs_fear","Beliefs_fear_dummy")])
-data_wave1$Beliefs_notificationfear_dummy <- car::recode(data_wave1$Beliefs_notificationfear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
-#View(data_wave1[,c("Beliefs_notificationfear_dummy","Beliefs_notificationfear")])
-data_wave1$Beliefs_benefiteconomic_dummy <- car::recode(data_wave1$Beliefs_benefiteconomic, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values repesent more benefit
-#View(data_wave1[,c("Beliefs_benefiteconomic","Beliefs_benefiteconomic_dummy")])
-data_wave1$Beliefs_civicduty_dummy <- car::recode(data_wave1$Beliefs_civicduty, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent stronger civic duty
-#View(data_wave1[,c("Beliefs_civicduty_dummy","Beliefs_civicduty")])
-data_wave1$Beliefs_TrustGovernment_dummy <- car::recode(data_wave1$Beliefs_TrustGovernment, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more trust
-#View(data_wave1[,c("Beliefs_TrustGovernment_dummy","Beliefs_TrustGovernment")])
-data_wave1$Beliefs_Protectriskgroups_dummy <- car::recode(data_wave1$Beliefs_Protectriskgroups, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values respresent stronger effectiveness for people in risk groups
-#View(data_wave1[,c("Beliefs_Protectriskgroups_dummy","Beliefs_Protectriskgroups")])
+
+#Variabelen which will be entered as dummies in the logistic regression
 data_wave1$Beliefs_technologyperformance_dummy <- car::recode(data_wave1$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
 #View(data_wave1[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_dummy")])
 
+#Items are merged into one variable for the logistic regression. NOTE: only 4 answer categories. 
+data_wave1$Beliefs_falsesecurity1[data_wave1$Beliefs_falsesecurity1==99] <- NA
+data_wave1$Beliefs_falsesecurity2[data_wave1$Beliefs_falsesecurity2==99] <- NA
+data_wave1$Beliefs_falsesecurityx <- rowMeans(data_wave1[, c("Beliefs_falsesecurity1", "Beliefs_falsesecurity2")], na.rm = TRUE)
+#View(data_wave1[,c("Beliefs_falsesecurity1", "Beliefs_falsesecurity2", "Beliefs_falsesecurityx")])
 
-#data_wave1$oplcat_r <- car::recode(data_wave1$oplcat, '1=1; 2=1; 3=2; 4=2; 5=3; 6=3')
-#View(data_wave1[,c("oplcat","oplcat_r")])
-#data_wave1$lftdcat_r <- car::recode(data_wave1$lftdcat, '1=1; 2=1; 3=1; 4=2; 5=2; 6=3; 7=3')
-#View(data_wave1[,c("lftdcat","lftdcat_r")])
+data_wave1$Beliefs_Conspiracy1[data_wave1$Beliefs_Conspiracy1==99] <- NA
+data_wave1$Beliefs_Conspiracy2[data_wave1$Beliefs_Conspiracy2==99] <- NA
+data_wave1$Beliefs_Conspiracyx <- rowMeans(data_wave1[, c("Beliefs_Conspiracy1", "Beliefs_Conspiracy2")], na.rm = TRUE)
+#View(data_wave1[,c("Beliefs_Conspiracy1", "Beliefs_Conspiracy2", "Beliefs_Conspiracyx")])
+
+data_wave1$Beliefs_locationmonitoring[data_wave1$Beliefs_locationmonitoring==99] <- NA
+data_wave1$Beliefs_identitymonitoring[data_wave1$Beliefs_identitymonitoring==99] <- NA
+data_wave1$Beliefs_datasafety[data_wave1$Beliefs_datasafety==99] <- NA
+data_wave1$Beliefs_monitoringx <- rowMeans(data_wave1[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety")], na.rm = TRUE)
+#View(data_wave1[,c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety", "Beliefs_monitoringx")])
 ``` 
 
 ```{r Merge two UTAUT Effort Expectancy items for users and non-users}
@@ -108,24 +126,20 @@ data_wave1$EE2_UTAUT <- rowMeans(data_wave1[, c("EE2a_UTAUT","EE2b_UTAUT")], na.
 
 ```{r Create new variables for adherence to measures}
 
-data_wave1$AdherenceNS_w1 <- rowMeans(data_wave1[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")], na.rm = TRUE)
-cronbach(data_wave1[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
+data_wave1_adherenceNS$AdherenceNS_w1 <- rowMeans(data_wave1_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")], na.rm = TRUE)
+cronbach(data_wave1_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
 
-data_wave1$AdherenceS_w1 <- rowMeans(data_wave1[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")], na.rm = TRUE)
-cronbach(data_wave1[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
+data_wave1_adherenceS$AdherenceS_w1 <- rowMeans(data_wave1_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")], na.rm = TRUE)
+cronbach(data_wave1_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
 
-data_wave1$AdherenceSelfEfficacy_w1 <- rowMeans(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
-cronbach(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
+data_wave1_adherence$AdherenceSelfEfficacy_w1 <- rowMeans(data_wave1_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
+cronbach(data_wave1_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
 
-data_wave1$AdherenceBenefits_w1 <- rowMeans(data_wave1[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
-cronbach(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
+data_wave1_adherence$AdherenceBenefits_w1 <- rowMeans(data_wave1_adherence[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
+cronbach(data_wave1_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
 
-data_wave1$AdherenceBarriers_w1 <- rowMeans(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")], na.rm = TRUE)
-cronbach(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")])
-
-data_wave1_adherence <- subset(data_wave1, Behavior_UTAUT != 8)
-data_wave4_adherence <- subset(data_wave4, Behavior_UTAUT != 8)
-
+data_wave1_adherence$AdherenceBarriers_w1 <- rowMeans(data_wave1_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")], na.rm = TRUE)
+cronbach(data_wave1_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")])
 
 ```
 
@@ -153,7 +167,7 @@ hist(data_wave1$Beliefs_falsesecurityx)
 data_wave1$Beliefs_Conspiracyx <- rowMeans(data_wave1[, c("Beliefs_Conspiracy1", "Beliefs_Conspiracy2")], na.rm = TRUE)
 hist(data_wave1$Beliefs_Conspiracyx)
 # Based on the histogram the distribution is normal.
-data_wave1$Beliefs_monitoringx <- rowMeans(data_wave1[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_r")], na.rm = TRUE)
+data_wave1$Beliefs_monitoringx <- rowMeans(data_wave1[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety")], na.rm = TRUE)
 hist(data_wave1$Beliefs_monitoringx)
 # Based on the histogram the distribution is fairly normal.
 data_wave1$HBM_PSus_selfx <- rowMeans(data_wave1[, c("HBM_PSus_self1", "HBM_PSus_self2")], na.rm = TRUE)
@@ -178,29 +192,27 @@ data_wave4$Behavior_UTAUT_r = car::recode(data_wave4$Behavior_UTAUT, '1=1; 3=0')
 #View(data_wave4[,c("Behavior_UTAUT_r","Behavior_UTAUT")])
 data_wave4$EE1a_UTAUT_r = car::recode(data_wave4$EE1a_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
 data_wave4$EE1b_UTAUT_r = car::recode(data_wave4$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
-data_wave4$Beliefs_datasafety_r = car::recode(data_wave4$Beliefs_datasafety, '1=0; 2=0; 3=1; 4=1; 99=0') #Value 0 = not true / don't know, value 1 = true that data is safe
-#View(data_wave4[,c("Beliefs_datasafety","Beliefs_datasafety_r")])
-data_wave4$Beliefs_voluntariness_dummy <- car::recode(data_wave4$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more voluntariness
-#View(data_wave4[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
-data_wave4$Beliefs_fear_dummy <- car::recode(data_wave4$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
-#View(data_wave4[,c("Beliefs_fear","Beliefs_fear_dummy")])
-data_wave4$Beliefs_notificationfear_dummy <- car::recode(data_wave4$Beliefs_notificationfear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
-#View(data_wave4[,c("Beliefs_notificationfear_dummy","Beliefs_notificationfear")])
-data_wave4$Beliefs_benefiteconomic_dummy <- car::recode(data_wave4$Beliefs_benefiteconomic, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values repesent more benefit
-#View(data_wave4[,c("Beliefs_benefiteconomic","Beliefs_benefiteconomic_dummy")])
-data_wave4$Beliefs_civicduty_dummy <- car::recode(data_wave4$Beliefs_civicduty, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent stronger civic duty
-#View(data_wave4[,c("Beliefs_civicduty_dummy","Beliefs_civicduty")])
-data_wave4$Beliefs_TrustGovernment_dummy <- car::recode(data_wave4$Beliefs_TrustGovernment, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more trust
-#View(data_wave4[,c("Beliefs_TrustGovernment_dummy","Beliefs_TrustGovernment")])
-data_wave4$Beliefs_Protectriskgroups_dummy <- car::recode(data_wave4$Beliefs_Protectriskgroups, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values respresent stronger effectiveness for people in risk groups
-#View(data_wave4[,c("Beliefs_Protectriskgroups_dummy","Beliefs_Protectriskgroups")])
+
+#Variabelen which will be entered as dummies in the logistic regression
 data_wave4$Beliefs_technologyperformance_dummy <- car::recode(data_wave4$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
 #View(data_wave4[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_dummy")])
 
-#data_wave4$oplcat_r <- car::recode(data_wave4$oplcat, '1=1; 2=1; 3=2; 4=2; 5=3; 6=3')
-#View(data_wave4[,c("oplcat","oplcat_r")])
-#data_wave4$lftdcat_r <- car::recode(data_wave4$lftdcat, '1=1; 2=1; 3=1; 4=2; 5=2; 6=3; 7=3')
-#View(data_wave4[,c("lftdcat","lftdcat_r")])
+#Items are merged into one variable for the logistic regression. NOTE: only 4 answer categories. 
+data_wave4$Beliefs_falsesecurity1[data_wave4$Beliefs_falsesecurity1==99] <- NA
+data_wave4$Beliefs_falsesecurity2[data_wave4$Beliefs_falsesecurity2==99] <- NA
+data_wave4$Beliefs_falsesecurityx <- rowMeans(data_wave4[, c("Beliefs_falsesecurity1", "Beliefs_falsesecurity2")], na.rm = TRUE)
+#View(data_wave4[,c("Beliefs_falsesecurity1", "Beliefs_falsesecurity2", "Beliefs_falsesecurityx")])
+
+data_wave4$Beliefs_Conspiracy1[data_wave4$Beliefs_Conspiracy1==99] <- NA
+data_wave4$Beliefs_Conspiracy2[data_wave4$Beliefs_Conspiracy2==99] <- NA
+data_wave4$Beliefs_Conspiracyx <- rowMeans(data_wave4[, c("Beliefs_Conspiracy1", "Beliefs_Conspiracy2")], na.rm = TRUE)
+#View(data_wave4[,c("Beliefs_Conspiracy1", "Beliefs_Conspiracy2", "Beliefs_Conspiracyx")])
+
+data_wave4$Beliefs_locationmonitoring[data_wave4$Beliefs_locationmonitoring==99] <- NA
+data_wave4$Beliefs_identitymonitoring[data_wave4$Beliefs_identitymonitoring==99] <- NA
+data_wave4$Beliefs_datasafety[data_wave4$Beliefs_datasafety==99] <- NA
+data_wave4$Beliefs_monitoringx <- rowMeans(data_wave4[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety")], na.rm = TRUE)
+#View(data_wave4[,c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety", "Beliefs_monitoringx")])
 ``` 
 
 ```{r Merge two UTAUT Effort Expectancy items for users and non-users}
@@ -211,20 +223,20 @@ data_wave4$EE2_UTAUT <- rowMeans(data_wave4[, c("EE2a_UTAUT","EE2b_UTAUT")], na.
 
 ```{r Create new variable for adherence to measures}
 
-data_wave4$AdherenceNS <- rowMeans(data_wave4[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")], na.rm = TRUE)
-cronbach(data_wave4[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
+data_wave4_adherenceNS$AdherenceNS_w4 <- rowMeans(data_wave4_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")], na.rm = TRUE)
+cronbach(data_wave4_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
 
-data_wave4$AdherenceS <- rowMeans(data_wave4[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")], na.rm = TRUE)
-cronbach(data_wave4[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
+data_wave4_adherenceS$AdherenceS_w4 <- rowMeans(data_wave4_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")], na.rm = TRUE)
+cronbach(data_wave4_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
 
-data_wave4$AdherenceSelfEfficacy <- rowMeans(data_wave4[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
-cronbach(data_wave4[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
+data_wave4_adherence$AdherenceSelfEfficacy_w4 <- rowMeans(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
+cronbach(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
 
-data_wave4$AdherenceBenefits <- rowMeans(data_wave4[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
-cronbach(data_wave4[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
+data_wave4_adherence$AdherenceBenefits_w4 <- rowMeans(data_wave4_adherence[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
+cronbach(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
 
-data_wave4$AdherenceBarriers <- rowMeans(data_wave4[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")], na.rm = TRUE)
-cronbach(data_wave4[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")])
+data_wave4_adherence$AdherenceBarriers_w4 <- rowMeans(data_wave4_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")], na.rm = TRUE)
+cronbach(data_wave4_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")])
 
 ```
 
@@ -295,7 +307,7 @@ Beliefs_voluntariness_dummy ~~ lftdcat + geslacht
 lftdcat ~~ geslacht'
 
 fit_w1 <- sem(model_w1, data = data_wave1, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
-summary(fit1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+summary(fit_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 reliability(fit_w1) # PE_UTAUT: alpha = .92
                  # SI_UTAUT: alpha = .78
@@ -338,7 +350,7 @@ head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modi
 fits <- list()
 fits$fit1 <- fit_w1
 # Create a new model by adding an additional syntax to a model
-model2 <- paste0(model, "\n", "PE1_UTAUT ~~ FC1_UTAUT")
+model2 <- paste0(model_w1, "\n", "PE1_UTAUT ~~ FC1_UTAUT")
 fits$fit2 <- cfa(model2, data_wave1)
 round(sapply(fits, function(X) fitmeasures(X)), 3) #all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
 
@@ -504,8 +516,68 @@ summary(fit2_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 # PART 4 REGRESSION MODELS COVID-RELATED VARIABLES
 ## 4.1. Regression model COVID-RELATED VARIABLES Wave 1
 
+```{r Logistic regression model COVID-related factors Wave 1}
+
+#Logistic regression including:
+## All the 7-answer option scales as interval variables
+## Computed scales for false security, conspiracy and monitoring (a scale variable computed from 2 items. These variables only have 4 answer categories)
+## A dummy independent variable for beliefs_technologyperformance.
+mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_voluntariness + Beliefs_fear + Beliefs_notificationfear + Beliefs_benefiteconomic + Beliefs_civicduty + Beliefs_TrustGovernment + Beliefs_Protectriskgroups + Beliefs_falsesecurityx + Beliefs_Conspiracyx + Beliefs_monitoringx + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave1, family=binomial)
+
+summary(mylogit)
+
+confint(mylogit)
+
+# For interpretation see https://stats.idre.ucla.edu/r/dae/logit-regression/ nog checken
+with(mylogit, null.deviance - deviance)
+with(mylogit, df.null - df.residual)
+with(mylogit, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
+logLik(mylogit)
+
+```
+
+## 4.1. Regression model COVID-RELATED VARIABLES Wave 4
+
+```{r Logistic regression model COVID-related factors Wave 4}
+
+#Logistic regression including:
+## All the 7-answer option scales as interval variables
+## Computed scales for false security, conspiracy and monitoring (a scale variable computed from 2 items. These variables only have 4 answer categories)
+## A dummy independent variable for beliefs_technologyperformance.
+mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_voluntariness + Beliefs_fear + Beliefs_notificationfear + Beliefs_benefiteconomic + Beliefs_civicduty + Beliefs_TrustGovernment + Beliefs_Protectriskgroups + Beliefs_falsesecurityx + Beliefs_Conspiracyx + Beliefs_monitoringx + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave4, family=binomial)
+
+summary(mylogit)
+
+confint(mylogit)
+
+# For interpretation see https://stats.idre.ucla.edu/r/dae/logit-regression/ nog checken
+with(mylogit, null.deviance - deviance)
+with(mylogit, df.null - df.residual)
+with(mylogit, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
+logLik(mylogit)
+```
+
 
 ## 4.2. Regression model COVID-RELATED VARIABLES Wave 4
+```{r Logistic regression model COVID-related factors Wave 4}
+
+#Logistic regression including:
+## All the 7-answer option scales as interval variables
+## Computed scales for false security, conspiracy and monitoring (a scale variable computed from 2 items. These variables only have 4 answer categories)
+## A dummy independent variable for beliefs_technologyperformance.
+mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_voluntariness + Beliefs_fear + Beliefs_notificationfear + Beliefs_benefiteconomic + Beliefs_civicduty + Beliefs_TrustGovernment + Beliefs_Protectriskgroups + Beliefs_falsesecurityx + Beliefs_Conspiracyx + Beliefs_monitoringx + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave4, family=binomial)
+
+summary(mylogit)
+
+confint(mylogit)
+
+# For interpretation see https://stats.idre.ucla.edu/r/dae/logit-regression/ nog checken
+with(mylogit, null.deviance - deviance)
+with(mylogit, df.null - df.residual)
+with(mylogit, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
+logLik(mylogit)
+```
+
 
 
 
@@ -513,8 +585,177 @@ summary(fit2_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 ## 5.1. Regression model ADHERENCE Wave 1
 
-```{r Regression model Adherence Wave 1}
+### 5.1.1. No symptoms 
 
+```{r Regression model Adherence No Symptoms Wave 1}
+
+model4_w1 <- '
+#Measurement model
+
+Adherence_Selfefficacy =~ HBM_selfefficacy_Test + HBM_selfefficacy_Quarantaine + HBM_selfefficacy_Visits + HBM_selfefficacy_GP
+Adherence_Benefits =~ HBM_perceivedbenefits_Test + HBM_perceivedbenefits_Quarantaine + HBM_perceivedbenefits_Visits + HBM_perceivedbenefits_GP
+Adherence_Barriers =~ HBM_barriers_Test + HBM_barriers_Quarantaine + HBM_barriers_Visits + HBM_barriers_GP
+PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+
+#Regression model
+AdherenceNS_w1 ~ Adherence_Selfefficacy + Adherence_Benefits + Adherence_Barriers + + PSus_HBM + PSev_HBM + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+Adherence_Selfefficacy ~~ Adherence_Benefits + Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Benefits ~~ Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Barriers ~~ PSus_HBM + PSev_HBM + lftdcat + geslacht
+PSus_HBM ~~ PSev_HBM + lftdcat + geslacht
+PSev_HBM ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+fit4_w1 <- sem(model4_w1, data = data_wave1_adherenceNS) #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit4_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
+## CFI   = .83
+## RMSEA = .12 (90% CI [.10, .11])
+## SRMR  = .065
+## The chi square is significant, but this could be due to the large N. 
+
+## Standardized model matrices
+std_fit <- inspect(fit4_w1, "std")
+std_fit$lambda # standardised loadings. All items load well on the latent factors: all > .61. So convergent validity is ok. 
+std_fit$psi # latent variable correlation matrix shows that latent variables are not very highly correlated (< .85), so we can speak of discriminant validity.
+
+
+# Improve model (In this case I think it is neeeded due to the high CFI and RMSEA)
+## By looking at modification indices. 
+mod_ind <- modificationindices(fit4_w1)
+head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
+
+# Compare models
+fits <- list()
+fits$fit1 <- fit4_w1
+# Create a new model by adding an additional syntax to a model
+model5_w1 <- paste0(model4_w1, "\n", "HBM_barriers_Test ~~ HBM_barriers_GP")
+fits$fit2 <- sem(model5_w1, data_wave1_adherenceNS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
+# Still the RMSEA and CFI are a bit high, so we add another residual correlation.
+model6_w1 <- paste0(model5_w1, "\n", "HBM_selfefficacy_GP ~~ HBM_perceivedbenefits_GP")
+fits$fit3 <- sem(model6_w1, data_wave1_adherenceNS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 3) 
+# We have the same problem with RMSEA and CFI (they are improving though). It seems that the self efficacy items are correlated with the perceived barriers and benefits items, which makes sense. So let's improve the model only by adding correlations between these variables.
+model7_w1 <- paste0(model6_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_perceivedbenefits_Quarantaine")
+fits$fit4 <- sem(model7_w1, data_wave1_adherenceNS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 4) 
+# One more correlation has to be added to reach a fitting model.
+model8_w1 <- paste0(model7_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_barriers_Quarantaine")
+fits$fit5 <- sem(model8_w1, data_wave1_adherenceNS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 5) 
+
+# The correlations that are finally added to reach model fit are: 
+## Barriers Test --> Barriers GP
+## Self-efficacy GP --> Benefits GP
+## Self-efficacy Quarantaine --> Benefits Quarantaine
+## Self-efficacy Quarantaine --> Barriers Quarantaine
+
+## CFI   = .91
+## RMSEA = .08 (90% CI [.07, .09])
+## SRMR  = .06
+## The chi square is significant, but this could be due to the large N. 
+summary(fits$fit5, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+inspect(fits$fit5, 'r2')
+
+```
+
+### 5.1.2. Symptoms
+
+```{r Regression model Adherence Symptoms Wave 1}
+
+model4_w1 <- ' 
+#Measurement model
+
+Adherence_Selfefficacy =~ HBM_selfefficacy_Test + HBM_selfefficacy_Quarantaine + HBM_selfefficacy_Visits + HBM_selfefficacy_GP
+Adherence_Benefits =~ HBM_perceivedbenefits_Test + HBM_perceivedbenefits_Quarantaine + HBM_perceivedbenefits_Visits + HBM_perceivedbenefits_GP
+Adherence_Barriers =~ HBM_barriers_Test + HBM_barriers_Quarantaine + HBM_barriers_Visits + HBM_barriers_GP
+PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+
+#Regression model
+AdherenceS_w1 ~ Adherence_Selfefficacy + Adherence_Benefits + Adherence_Barriers + + PSus_HBM + PSev_HBM + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+Adherence_Selfefficacy ~~ Adherence_Benefits + Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Benefits ~~ Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Barriers ~~ PSus_HBM + PSev_HBM + lftdcat + geslacht
+PSus_HBM ~~ PSev_HBM + lftdcat + geslacht
+PSev_HBM ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+fit4_w1 <- sem(model4_w1, data = data_wave1_adherenceS, estimator = "MLM") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit6_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
+## CFI   = .83
+## RMSEA = .11 (90% CI [.10, .12])
+## SRMR  = .065
+## The chi square is significant, but this could be due to the large N. 
+
+# Improve model (In this case I think it is neeeded due to the high CFI and RMSEA)
+## By looking at modification indices. 
+mod_ind <- modificationindices(fit4_w1)
+head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
+
+# Compare models --> we improve the model the same way as the no-symptoms model
+fits <- list()
+fits$fit1 <- fit4_w1
+# Create a new model by adding an additional syntax to a model
+model5_w1 <- paste0(model4_w1, "\n", "HBM_barriers_Test ~~ HBM_barriers_GP")
+fits$fit2 <- sem(model5_w1, data_wave1_adherenceS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
+# Still the RMSEA and CFI are a bit high, so we add another residual correlation.
+model6_w1 <- paste0(model5_w1, "\n", "HBM_selfefficacy_GP ~~ HBM_perceivedbenefits_GP")
+fits$fit3 <- sem(model6_w1, data_wave1_adherenceS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 3) 
+# We have the same problem with RMSEA and CFI (they are improving though). It seems that the self efficacy items are correlated with the perceived barriers and benefits items, which makes sense. So let's improve the model only by adding correlations between these variables.
+model7_w1 <- paste0(model6_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_perceivedbenefits_Quarantaine")
+fits$fit4 <- sem(model7_w1, data_wave1_adherenceS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 4) 
+# Another correlation will be added.
+model8_w1 <- paste0(model7_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_barriers_Quarantaine")
+fits$fit5 <- sem(model8_w1, data_wave1_adherenceS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 5) 
+# One more correlation will be added to reach a fitting model. 
+model9_w1 <- paste0(model8_w1, "\n", "HBM_perceivedbenefits_Visits ~~ HBM_barriers_Visits")
+fits$fit6 <- sem(model9_w1, data_wave1_adherenceS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 6) 
+
+
+# The correlations that are finally added to reach model fit are: 
+## Barriers Test --> Barriers GP
+## Self-efficacy GP --> Benefits GP
+## Self-efficacy Quarantaine --> Benefits Quarantaine
+## Self-efficacy Quarantaine --> Barriers Quarantaine
+## Benefits visits --> Barriers visits
+
+## CFI   = .91
+## RMSEA = .08 (90% CI [.07, .09])
+## SRMR  = .06
+## The chi square is significant, but this could be due to the large N. 
+summary(fits$fit6, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+```
+
+## 5.2. Regression model ADHERENCE Wave 4
+
+### 5.1.1. No symptoms 
+
+### 5.1.2. Symptoms
+
+
+
+### Overig 
+
+```{r}
 data_wave1$AdherenceSelfEfficacy <- rowMeans(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
 cronbach(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
 
@@ -523,44 +764,7 @@ cronbach(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine",
 
 data_wave1$AdherenceBarriers <- rowMeans(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")], na.rm = TRUE)
 cronbach(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")])
-
-
-model4_w1 <- ' 
-#Measurement model
-
-Adherence_Selfefficacy =~ HBM_selfefficacy_Test + HBM_selfefficacy_Quarantaine + HBM_selfefficacy_Visits + HBM_selfefficacy_GP
-Adherence_Benefits =~ HBM_perceivedbenefits_Test + HBM_perceivedbenefits_Quarantaine + HBM_perceivedbenefits_Visits + HBM_perceivedbenefits_GP
-Adherence_Barriers =~ HBM_barriers_Test + HBM_barriers_Quarantaine + HBM_barriers_Visits + HBM_barriers_GP
-
-#Regression model
-AdherenceS_w1 ~ Adherence_Selfefficacy + Adherence_Benefits + Adherence_Barriers + lftdcat + geslacht
-
-#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
-Adherence_Selfefficacy ~~ Adherence_Benefits + Adherence_Barriers + lftdcat + geslacht
-Adherence_Benefits ~~ Adherence_Barriers + lftdcat + geslacht
-Adherence_Barriers ~~ lftdcat + geslacht
-lftdcat ~~ geslacht'
-
-fit4_w1 <- sem(model4_w1, data = data_wave1, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
-summary(fit4_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
-
-
-# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
-## CFI   = .99
-## RMSEA = .06 (90% CI [.056, .078])
-## SRMR  = .058
-## The chi square is significant, but this could be due to the large N. 
 ```
-
-
-
-
-## 5.2. Regression model ADHERENCE Wave 4
-
-
-
-
-
 
 ### Jan z'n dingen
 
@@ -624,6 +828,42 @@ for (s in suffixes) {
   eval(parse(text=paste("data_allwaves$EE2_UTAUT", s, " <- rowMeans(data_allwaves[, c(\"EE2a_UTAUT",s,"\",\"EE2b_UTAUT",s,"\")], na.rm = TRUE)", sep="")))
 }
 ```
+
+
+```{r DUMMIES not needed with logistic regression}
+#List of recodings that must be performed before runnng SEM. The beliefs are recoded into dummy variables.
+data_wave1$Behavior_UTAUT_r = car::recode(data_wave1$Behavior_UTAUT, '1=1; 3=0')
+#View(data_wave1[,c("Behavior_UTAUT_r","Behavior_UTAUT")])
+data_wave1$EE1a_UTAUT_r = car::recode(data_wave1$EE1a_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
+data_wave1$EE1b_UTAUT_r = car::recode(data_wave1$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
+data_wave1$Beliefs_datasafety_r = car::recode(data_wave1$Beliefs_datasafety, '1=0; 2=0; 3=1; 4=1; 99=0') #Value 0 = not true / don't know, value 1 = true that data is safe
+#View(data_wave1[,c("Beliefs_datasafety","Beliefs_datasafety_r")])
+data_wave1$HealthLiteracy1r = car::recode(data_wave1$HealthLiteracy1, '1=5; 2=4; 3=3; 4=2; 5=1')
+data_wave1$HealthLiteracy3r = car::recode(data_wave1$HealthLiteracy3, '1=5; 2=4; 3=3; 4=2; 5=1')
+data_wave1$Beliefs_voluntariness_dummy <- car::recode(data_wave1$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more voluntariness
+#View(data_wave1[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
+data_wave1$Beliefs_fear_dummy <- car::recode(data_wave1$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+#View(data_wave1[,c("Beliefs_fear","Beliefs_fear_dummy")])
+data_wave1$Beliefs_notificationfear_dummy <- car::recode(data_wave1$Beliefs_notificationfear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+#View(data_wave1[,c("Beliefs_notificationfear_dummy","Beliefs_notificationfear")])
+data_wave1$Beliefs_benefiteconomic_dummy <- car::recode(data_wave1$Beliefs_benefiteconomic, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values repesent more benefit
+#View(data_wave1[,c("Beliefs_benefiteconomic","Beliefs_benefiteconomic_dummy")])
+data_wave1$Beliefs_civicduty_dummy <- car::recode(data_wave1$Beliefs_civicduty, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent stronger civic duty
+#View(data_wave1[,c("Beliefs_civicduty_dummy","Beliefs_civicduty")])
+data_wave1$Beliefs_TrustGovernment_dummy <- car::recode(data_wave1$Beliefs_TrustGovernment, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more trust
+#View(data_wave1[,c("Beliefs_TrustGovernment_dummy","Beliefs_TrustGovernment")])
+data_wave1$Beliefs_Protectriskgroups_dummy <- car::recode(data_wave1$Beliefs_Protectriskgroups, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values respresent stronger effectiveness for people in risk groups
+#View(data_wave1[,c("Beliefs_Protectriskgroups_dummy","Beliefs_Protectriskgroups")])
+data_wave1$Beliefs_technologyperformance_dummy <- car::recode(data_wave1$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
+#View(data_wave1[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_dummy")])
+
+
+#data_wave1$oplcat_r <- car::recode(data_wave1$oplcat, '1=1; 2=1; 3=2; 4=2; 5=3; 6=3')
+#View(data_wave1[,c("oplcat","oplcat_r")])
+#data_wave1$lftdcat_r <- car::recode(data_wave1$lftdcat, '1=1; 2=1; 3=1; 4=2; 5=2; 6=3; 7=3')
+#View(data_wave1[,c("lftdcat","lftdcat_r")])
+
+``` 
 
 
 ```{r growthmodel}
