@@ -99,6 +99,7 @@ data_wave1$EE1a_UTAUT_r = car::recode(data_wave1$EE1a_UTAUT, '1=7; 2=6; 3=5; 4=4
 data_wave1$EE1b_UTAUT_r = car::recode(data_wave1$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
 #data_wave1$HealthLiteracy1r = car::recode(data_wave1$HealthLiteracy1, '1=5; 2=4; 3=3; 4=2; 5=1')
 #data_wave1$HealthLiteracy3r = car::recode(data_wave1$HealthLiteracy3, '1=5; 2=4; 3=3; 4=2; 5=1')
+data_wave1$Beliefs_datasafety_r = car::recode(data_wave1$Beliefs_datasafety, '1=1; 2=1; 3=0; 4=0; 99=99') #Value 0 = true, value 1 = not true that data is safe
 data_wave1$Beliefs_voluntariness_dummy <- car::recode(data_wave1$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more voluntariness
 #View(data_wave1[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
 data_wave1$Beliefs_fear_dummy <- car::recode(data_wave1$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
@@ -129,9 +130,9 @@ data_wave1$Beliefs_Conspiracyx <- rowMeans(data_wave1[, c("Beliefs_Conspiracy1",
 
 data_wave1$Beliefs_locationmonitoring[data_wave1$Beliefs_locationmonitoring==99] <- NA
 data_wave1$Beliefs_identitymonitoring[data_wave1$Beliefs_identitymonitoring==99] <- NA
-data_wave1$Beliefs_datasafety[data_wave1$Beliefs_datasafety==99] <- NA
-data_wave1$Beliefs_monitoringx <- rowMeans(data_wave1[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety")], na.rm = TRUE)
-#View(data_wave1[,c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety", "Beliefs_monitoringx")])
+data_wave1$Beliefs_datasafety_r[data_wave1$Beliefs_datasafety_r==99] <- NA
+data_wave1$Beliefs_monitoringx <- rowMeans(data_wave1[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_r")], na.rm = TRUE)
+View(data_wave1[,c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_r", "Beliefs_monitoringx", "Beliefs_datasafety")])
 ``` 
 
 ```{r Merge two UTAUT Effort Expectancy items for users and non-users}
@@ -211,6 +212,7 @@ data_wave4$EE1b_UTAUT_r = car::recode(data_wave4$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4
 #data_wave4$HealthLiteracy1r = car::recode(data_wave4$HealthLiteracy1, '1=5; 2=4; 3=3; 4=2; 5=1')
 #data_wave4$HealthLiteracy3r = car::recode(data_wave4$HealthLiteracy3, '1=5; 2=4; 3=3; 4=2; 5=1')
 data_wave4$Beliefs_voluntariness_dummy <- car::recode(data_wave4$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more voluntariness
+data_wave4$Beliefs_datasafety_r = car::recode(data_wave4$Beliefs_datasafety, '1=1; 2=1; 3=0; 4=0; 99=99') #Value 0 = true, value 1 = not true that data is safe
 #View(data_wave4[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
 data_wave4$Beliefs_fear_dummy <- car::recode(data_wave4$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
 #View(data_wave4[,c("Beliefs_fear","Beliefs_fear_dummy")])
@@ -240,9 +242,9 @@ data_wave4$Beliefs_Conspiracyx <- rowMeans(data_wave4[, c("Beliefs_Conspiracy1",
 
 data_wave4$Beliefs_locationmonitoring[data_wave4$Beliefs_locationmonitoring==99] <- NA
 data_wave4$Beliefs_identitymonitoring[data_wave4$Beliefs_identitymonitoring==99] <- NA
-data_wave4$Beliefs_datasafety[data_wave4$Beliefs_datasafety==99] <- NA
-data_wave4$Beliefs_monitoringx <- rowMeans(data_wave4[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety")], na.rm = TRUE)
-#View(data_wave4[,c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety", "Beliefs_monitoringx")])
+data_wave4$Beliefs_datasafety_r[data_wave4$Beliefs_datasafety_r==99] <- NA
+data_wave4$Beliefs_monitoringx <- rowMeans(data_wave4[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_r")], na.rm = TRUE)
+View(data_wave4[,c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_r", "Beliefs_datasafety", "Beliefs_monitoringx")])
 ``` 
 
 ```{r Merge two UTAUT Effort Expectancy items for users and non-users}
@@ -552,17 +554,12 @@ summary(fit2_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 ## All the 7-answer option scales as interval variables
 ## Computed scales for false security, conspiracy and monitoring (a scale variable computed from 2 items. These variables only have 4 answer categories)
 ## A dummy independent variable for beliefs_technologyperformance.
-mylogit1 <- glm(Behavior_UTAUT_r ~ Beliefs_voluntariness + Beliefs_fear + Beliefs_notificationfear + Beliefs_benefiteconomic + Beliefs_civicduty + Beliefs_TrustGovernment + Beliefs_Protectriskgroups + Beliefs_falsesecurityx + Beliefs_Conspiracyx + Beliefs_monitoringx + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave1, family=binomial)
-
-
-#Likelihood ratio test
-lrtest(mylogit1)
-
-
-
+mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_voluntariness_dummy + Beliefs_fear_dummy + Beliefs_notificationfear_dummy + Beliefs_benefiteconomic_dummy + Beliefs_civicduty_dummy + Beliefs_TrustGovernment_dummy + Beliefs_Protectriskgroups_dummy + Beliefs_falsesecurityx + Beliefs_Conspiracyx + Beliefs_monitoringx + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave1, family=binomial)
 summary(mylogit)
 
-confint(mylogit)
+#Likelihood ratio test
+lrtest(mylogit)
+
 
 # For interpretation see https://stats.idre.ucla.edu/r/dae/logit-regression/ nog checken
 with(mylogit, null.deviance - deviance)
@@ -584,9 +581,6 @@ car::vif(lm)
 cormatrix <- data_wave1[,c("Behavior_UTAUT_r", "Beliefs_voluntariness_dummy", "Beliefs_fear_dummy", "Beliefs_notificationfear_dummy", "Beliefs_benefiteconomic_dummy", "Beliefs_civicduty_dummy", "Beliefs_TrustGovernment_dummy", "Beliefs_Protectriskgroups_dummy", "Beliefs_falsesecurityx", "Beliefs_Conspiracyx", "Beliefs_monitoringx", "Beliefs_technologyperformance_dummy", "lftdcat", "geslacht")]
 cor(cormatrix, method = c("pearson"))  
 
-(data_wave1_adherenceS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresSymptoms_Test","AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
-
-  
 #Logistic regression including:
 ## Computed scales for false security, conspiracy and monitoring (a scale variable computed from 2 items. These variables only have 4 answer categories)
 ## A dummy independent variable for beliefs_technologyperformance.
