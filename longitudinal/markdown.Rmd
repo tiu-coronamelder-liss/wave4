@@ -24,6 +24,8 @@ library(dplyr)
 library(naniar)
 library(semTools)# to calculate reliability
 library(psy) # to calculate alpha
+library(lmtest) # for logistic regression
+library(pscl)
 
 ##### Load dataset of all previous waves (not included on Github) and remove missing values
 
@@ -89,14 +91,28 @@ data_wave4_adherenceNS <- subset(data_wave4_adherence, AdherenceNotificationMeas
 
 ## 1.1. Data preparation WAVE 1
 
-```{r recodings}
+```{r recodings dummy}
 #List of recodings that must be performed before runnng SEM. The beliefs are recoded into dummy variables.
 data_wave1$Behavior_UTAUT_r = car::recode(data_wave1$Behavior_UTAUT, '1=1; 3=0')
 #View(data_wave1[,c("Behavior_UTAUT_r","Behavior_UTAUT")])
 data_wave1$EE1a_UTAUT_r = car::recode(data_wave1$EE1a_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
 data_wave1$EE1b_UTAUT_r = car::recode(data_wave1$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
-
-#Variabelen which will be entered as dummies in the logistic regression
+#data_wave1$HealthLiteracy1r = car::recode(data_wave1$HealthLiteracy1, '1=5; 2=4; 3=3; 4=2; 5=1')
+#data_wave1$HealthLiteracy3r = car::recode(data_wave1$HealthLiteracy3, '1=5; 2=4; 3=3; 4=2; 5=1')
+data_wave1$Beliefs_voluntariness_dummy <- car::recode(data_wave1$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more voluntariness
+#View(data_wave1[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
+data_wave1$Beliefs_fear_dummy <- car::recode(data_wave1$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+#View(data_wave1[,c("Beliefs_fear","Beliefs_fear_dummy")])
+data_wave1$Beliefs_notificationfear_dummy <- car::recode(data_wave1$Beliefs_notificationfear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+#View(data_wave1[,c("Beliefs_notificationfear_dummy","Beliefs_notificationfear")])
+data_wave1$Beliefs_benefiteconomic_dummy <- car::recode(data_wave1$Beliefs_benefiteconomic, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values repesent more benefit
+#View(data_wave1[,c("Beliefs_benefiteconomic","Beliefs_benefiteconomic_dummy")])
+data_wave1$Beliefs_civicduty_dummy <- car::recode(data_wave1$Beliefs_civicduty, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent stronger civic duty
+#View(data_wave1[,c("Beliefs_civicduty_dummy","Beliefs_civicduty")])
+data_wave1$Beliefs_TrustGovernment_dummy <- car::recode(data_wave1$Beliefs_TrustGovernment, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more trust
+#View(data_wave1[,c("Beliefs_TrustGovernment_dummy","Beliefs_TrustGovernment")])
+data_wave1$Beliefs_Protectriskgroups_dummy <- car::recode(data_wave1$Beliefs_Protectriskgroups, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values respresent stronger effectiveness for people in risk groups
+#View(data_wave1[,c("Beliefs_Protectriskgroups_dummy","Beliefs_Protectriskgroups")])
 data_wave1$Beliefs_technologyperformance_dummy <- car::recode(data_wave1$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
 #View(data_wave1[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_dummy")])
 
@@ -186,14 +202,28 @@ hist(data_wave1$HealthLiteracyx)
 ```
 
 ## 1.1. Data preparation WAVE 4
-```{r recodings}
+```{r recodings dummies}
 #List of recodings that must be performed before runnng SEM. The beliefs are recoded into dummy variables.
 data_wave4$Behavior_UTAUT_r = car::recode(data_wave4$Behavior_UTAUT, '1=1; 3=0')
 #View(data_wave4[,c("Behavior_UTAUT_r","Behavior_UTAUT")])
 data_wave4$EE1a_UTAUT_r = car::recode(data_wave4$EE1a_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
 data_wave4$EE1b_UTAUT_r = car::recode(data_wave4$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
-
-#Variabelen which will be entered as dummies in the logistic regression
+#data_wave4$HealthLiteracy1r = car::recode(data_wave4$HealthLiteracy1, '1=5; 2=4; 3=3; 4=2; 5=1')
+#data_wave4$HealthLiteracy3r = car::recode(data_wave4$HealthLiteracy3, '1=5; 2=4; 3=3; 4=2; 5=1')
+data_wave4$Beliefs_voluntariness_dummy <- car::recode(data_wave4$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more voluntariness
+#View(data_wave4[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
+data_wave4$Beliefs_fear_dummy <- car::recode(data_wave4$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+#View(data_wave4[,c("Beliefs_fear","Beliefs_fear_dummy")])
+data_wave4$Beliefs_notificationfear_dummy <- car::recode(data_wave4$Beliefs_notificationfear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+#View(data_wave4[,c("Beliefs_notificationfear_dummy","Beliefs_notificationfear")])
+data_wave4$Beliefs_benefiteconomic_dummy <- car::recode(data_wave4$Beliefs_benefiteconomic, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values repesent more benefit
+#View(data_wave4[,c("Beliefs_benefiteconomic","Beliefs_benefiteconomic_dummy")])
+data_wave4$Beliefs_civicduty_dummy <- car::recode(data_wave4$Beliefs_civicduty, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent stronger civic duty
+#View(data_wave4[,c("Beliefs_civicduty_dummy","Beliefs_civicduty")])
+data_wave4$Beliefs_TrustGovernment_dummy <- car::recode(data_wave4$Beliefs_TrustGovernment, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more trust
+#View(data_wave4[,c("Beliefs_TrustGovernment_dummy","Beliefs_TrustGovernment")])
+data_wave4$Beliefs_Protectriskgroups_dummy <- car::recode(data_wave4$Beliefs_Protectriskgroups, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values respresent stronger effectiveness for people in risk groups
+#View(data_wave4[,c("Beliefs_Protectriskgroups_dummy","Beliefs_Protectriskgroups")])
 data_wave4$Beliefs_technologyperformance_dummy <- car::recode(data_wave4$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
 #View(data_wave4[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_dummy")])
 
@@ -522,7 +552,13 @@ summary(fit2_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 ## All the 7-answer option scales as interval variables
 ## Computed scales for false security, conspiracy and monitoring (a scale variable computed from 2 items. These variables only have 4 answer categories)
 ## A dummy independent variable for beliefs_technologyperformance.
-mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_voluntariness + Beliefs_fear + Beliefs_notificationfear + Beliefs_benefiteconomic + Beliefs_civicduty + Beliefs_TrustGovernment + Beliefs_Protectriskgroups + Beliefs_falsesecurityx + Beliefs_Conspiracyx + Beliefs_monitoringx + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave1, family=binomial)
+mylogit1 <- glm(Behavior_UTAUT_r ~ Beliefs_voluntariness + Beliefs_fear + Beliefs_notificationfear + Beliefs_benefiteconomic + Beliefs_civicduty + Beliefs_TrustGovernment + Beliefs_Protectriskgroups + Beliefs_falsesecurityx + Beliefs_Conspiracyx + Beliefs_monitoringx + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave1, family=binomial)
+
+
+#Likelihood ratio test
+lrtest(mylogit1)
+
+
 
 summary(mylogit)
 
@@ -540,11 +576,21 @@ logLik(mylogit)
 
 ```{r Logistic regression model COVID-related factors Wave 4}
 
+#Test of multicollinearity
+lm <- lm(Behavior_UTAUT_r ~ Beliefs_voluntariness_dummy + Beliefs_fear_dummy + Beliefs_notificationfear_dummy + Beliefs_benefiteconomic_dummy + Beliefs_civicduty_dummy + Beliefs_TrustGovernment_dummy + Beliefs_Protectriskgroups_dummy + Beliefs_falsesecurityx + Beliefs_Conspiracyx + Beliefs_monitoringx + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave1)
+
+car::vif(lm)
+
+cormatrix <- data_wave1[,c("Behavior_UTAUT_r", "Beliefs_voluntariness_dummy", "Beliefs_fear_dummy", "Beliefs_notificationfear_dummy", "Beliefs_benefiteconomic_dummy", "Beliefs_civicduty_dummy", "Beliefs_TrustGovernment_dummy", "Beliefs_Protectriskgroups_dummy", "Beliefs_falsesecurityx", "Beliefs_Conspiracyx", "Beliefs_monitoringx", "Beliefs_technologyperformance_dummy", "lftdcat", "geslacht")]
+cor(cormatrix, method = c("pearson"))  
+
+(data_wave1_adherenceS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresSymptoms_Test","AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
+
+  
 #Logistic regression including:
-## All the 7-answer option scales as interval variables
 ## Computed scales for false security, conspiracy and monitoring (a scale variable computed from 2 items. These variables only have 4 answer categories)
 ## A dummy independent variable for beliefs_technologyperformance.
-mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_voluntariness + Beliefs_fear + Beliefs_notificationfear + Beliefs_benefiteconomic + Beliefs_civicduty + Beliefs_TrustGovernment + Beliefs_Protectriskgroups + Beliefs_falsesecurityx + Beliefs_Conspiracyx + Beliefs_monitoringx + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave4, family=binomial)
+mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_voluntariness_dummy + Beliefs_fear_dummy + Beliefs_notificationfear_dummy + Beliefs_benefiteconomic_dummy + Beliefs_civicduty_dummy + Beliefs_TrustGovernment_dummy + Beliefs_Protectriskgroups_dummy + Beliefs_falsesecurityx + Beliefs_Conspiracyx + Beliefs_monitoringx + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave1, family=binomial)
 
 summary(mylogit)
 
@@ -565,7 +611,7 @@ logLik(mylogit)
 ## All the 7-answer option scales as interval variables
 ## Computed scales for false security, conspiracy and monitoring (a scale variable computed from 2 items. These variables only have 4 answer categories)
 ## A dummy independent variable for beliefs_technologyperformance.
-mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_voluntariness + Beliefs_fear + Beliefs_notificationfear + Beliefs_benefiteconomic + Beliefs_civicduty + Beliefs_TrustGovernment + Beliefs_Protectriskgroups + Beliefs_falsesecurityx + Beliefs_Conspiracyx + Beliefs_monitoringx + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave4, family=binomial)
+mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_voluntariness_dummy + Beliefs_fear_dummy + Beliefs_notificationfear_dummy + Beliefs_benefiteconomic_dummy + Beliefs_civicduty_dummy + Beliefs_TrustGovernment_dummy + Beliefs_Protectriskgroups_dummy + Beliefs_falsesecurityx + Beliefs_Conspiracyx + Beliefs_monitoringx + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave4, family=binomial)
 
 summary(mylogit)
 
@@ -577,7 +623,6 @@ with(mylogit, df.null - df.residual)
 with(mylogit, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
 logLik(mylogit)
 ```
-
 
 
 
@@ -915,3 +960,20 @@ model <- '
 fit <- growth(model, data = data_allwaves)
 summary(fit, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 ```
+
+
+```{r}
+
+#List of recodings that must be performed before runnng SEM. The beliefs are recoded into dummy variables.
+data_wave1$Behavior_UTAUT_r = car::recode(data_wave1$Behavior_UTAUT, '1=1; 3=0')
+#View(data_wave1[,c("Behavior_UTAUT_r","Behavior_UTAUT")])
+data_wave1$EE1a_UTAUT_r = car::recode(data_wave1$EE1a_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
+data_wave1$EE1b_UTAUT_r = car::recode(data_wave1$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
+
+#Variabelen which will be entered as dummies in the logistic regression
+data_wave1$Beliefs_technologyperformance_dummy <- car::recode(data_wave1$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
+#View(data_wave1[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_dummy")])
+
+
+```
+ 
