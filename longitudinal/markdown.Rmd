@@ -23,9 +23,16 @@ library(lavaan)
 library(dplyr)
 library(naniar)
 library(semTools)# to calculate reliability
+library(semPlot)
 library(psy) # to calculate alpha
 library(lmtest) # for logistic regression
 library(pscl)
+
+# For tables
+library(flextable)
+library(arsenal)
+library(data.table)
+
 
 ##### Load dataset of all previous waves (not included on Github) and remove missing values
 
@@ -84,6 +91,8 @@ data_wave4_adherenceNS <- subset(data_wave4_adherence, AdherenceNotificationMeas
 
 #View(data_wave4_adherenceNS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresNosymptoms_Test","AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
 
+# Lookup table for variable names to map them into descriptions (for the table)
+var_lookup <- data.frame(variable = c('PE_UTAUT', 'SI_UTAUT', 'FC_UTAUT', 'EE_UTAUT', 'Beliefs_voluntariness_dummy', 'lftdcat', 'geslacht', 'PSus_HBM', 'PSev_HBM', 'HBM_selfefficacy_CoronaMelder', 'HBM_barriers_CoronaMelder', 'HBM_perceivedbenefits_CoronaMelder', 'Adherence_Selfefficacy', 'Adherence_Benefits', 'Adherence_Barriers', 'Beliefs_voluntariness', 'Beliefs_fear', 'Beliefs_notificationfear', 'Beliefs_benefiteconomic', 'Beliefs_civicduty', 'Beliefs_TrustGovernment', 'Beliefs_Protectriskgroups', 'Beliefs_falsesecurityx', 'Beliefs_Conspiracyx', 'Beliefs_monitoringx', 'Beliefs_technologyperformance_dummy', 'Beliefs_fear_dummy', 'Beliefs_notificationfear_dummy', 'Beliefs_benefiteconomic_dummy', 'Beliefs_civicduty_dummy', 'Beliefs_TrustGovernment_dummy', 'Beliefs_Protectriskgroups_dummy'), vardesc = c('Verwachte effectiviteit', 'Sociale invloeden', 'Faciliterende omstandigheden', 'Inspanningsverwachting', 'Verplichting tot gebruik', 'Leeftijd', 'Geslacht', 'Waargenomen vatbaarheid', 'Waargenomen ernst', 'Zelfeffectiviteit', 'Barrières voor gebruik', 'Persoonlijke voor- en nadelen', 'Zelfeffectiviteit (opvolging)', 'Persoonlijke voor- en nadelen (opvolging)', 'Barrières (opvolging)', 'Verplichting tot gebruik', 'Angst voor CoronaMelder', 'Angst voor meldingen', 'Maatschappelijke gevolgen', 'Goede burger', 'Vertrouwen in de overheid', 'Risicogroepen beschermen', 'Schijnveiligheid', 'Complottheorieën', 'Surveillance', 'Adequaatheid techniek', 'Angst voor CoronaMelder', 'Angst voor meldingen', 'Maatschappelijke gevolgen', 'Goede burger', 'Vertrouwen in de overheid', 'Risicogroepen beschermen'))
 ```
 
 
@@ -134,13 +143,13 @@ data_wave1$Beliefs_monitoringx <- rowMeans(data_wave1[, c("Beliefs_locationmonit
 #View(data_wave1[,c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety", "Beliefs_monitoringx")])
 ``` 
 
-```{r Merge two UTAUT Effort Expectancy items for users and non-users}
+```{r Merge two UTAUT Effort Expectancy items for users and non-users1}
 # We need to merge effort expectancy for users and non-users, to ensure that we don't enter any missing cases in the model.
 data_wave1$EE1_UTAUT <- rowMeans(data_wave1[, c("EE1a_UTAUT_r","EE1b_UTAUT_r")], na.rm = TRUE)
 data_wave1$EE2_UTAUT <- rowMeans(data_wave1[, c("EE2a_UTAUT","EE2b_UTAUT")], na.rm = TRUE)
 ```
 
-```{r Create new variables for adherence to measures}
+```{r Create new variables for adherence to measures1}
 
 data_wave1_adherenceNS$AdherenceNS_w1 <- rowMeans(data_wave1_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")], na.rm = TRUE)
 cronbach(data_wave1_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
@@ -161,7 +170,7 @@ cronbach(data_wave1_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine
 
 
 ## 1.2. Data inspection WAVE 1
-```{r Histograms per variable}
+```{r Histograms per variable1}
 # Based on the histogram the distribution is fairly normal.
 data_wave1$PE_UTAUTx <- rowMeans(data_wave1[, c("PE1_UTAUT", "PE2_UTAUT")], na.rm = TRUE)
 hist(data_wave1$PE_UTAUTx)
@@ -245,13 +254,13 @@ data_wave4$Beliefs_monitoringx <- rowMeans(data_wave4[, c("Beliefs_locationmonit
 #View(data_wave4[,c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety", "Beliefs_monitoringx")])
 ``` 
 
-```{r Merge two UTAUT Effort Expectancy items for users and non-users}
+```{r Merge two UTAUT Effort Expectancy items for users and non-users4}
 # We need to merge effort expectancy for users and non-users, to ensure that we don't enter any missing cases in the model.
 data_wave4$EE1_UTAUT <- rowMeans(data_wave4[, c("EE1a_UTAUT_r","EE1b_UTAUT_r")], na.rm = TRUE)
 data_wave4$EE2_UTAUT <- rowMeans(data_wave4[, c("EE2a_UTAUT","EE2b_UTAUT")], na.rm = TRUE)
 ```
 
-```{r Create new variable for adherence to measures}
+```{r Create new variable for adherence to measures4}
 
 data_wave4_adherenceNS$AdherenceNS_w4 <- rowMeans(data_wave4_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")], na.rm = TRUE)
 cronbach(data_wave4_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
@@ -272,7 +281,7 @@ cronbach(data_wave4_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine
 
 
 ## 1.2. Data inspection WAVE 4
-```{r Histograms per variable}
+```{r Histograms per variable4}
 # Based on the histogram the distribution is fairly normal.
 data_wave4$PE_UTAUTx <- rowMeans(data_wave4[, c("PE1_UTAUT", "PE2_UTAUT")], na.rm = TRUE)
 hist(data_wave4$PE_UTAUTx)
@@ -339,7 +348,7 @@ lftdcat ~~ geslacht'
 fit_w1 <- sem(model_w1, data = data_wave1, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
 summary(fit_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
-reliability(fit_w1) # PE_UTAUT: alpha = .92
+#reliability(fit_w1) # PE_UTAUT: alpha = .92
                  # SI_UTAUT: alpha = .78
                  # FC_UTAUT: alpha = .78
                  # EE_UTAUT: alpha = .64
@@ -348,6 +357,14 @@ reliability(fit_w1) # PE_UTAUT: alpha = .92
 
 parameterestimates(fit_w1) #unstandardized parameters
 standardizedsolution(fit_w1) #standardized parameters
+
+# Create results table
+w1_utaut <- standardizedsolution(fit_w1) %>% filter(lhs == 'Behavior_UTAUT_r' & op == '~') %>% select(rhs, est.std, pvalue)
+names(w1_utaut)[names(w1_utaut) == "rhs"] <- "variable"
+w1_utaut = join(w1_utaut, var_lookup)
+
+# Reorder
+w1_utaut <- w1_utaut[, c("variable", "vardesc", "est.std", "pvalue")]
 
 # Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, the model already has a good fit: 
 ## CFI   = .98
@@ -414,7 +431,7 @@ lftdcat ~~ geslacht'
 fit_w4 <- sem(model_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
 summary(fit_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
-reliability(fit_w4) # PE_UTAUT: alpha = .93
+#reliability(fit_w4) # PE_UTAUT: alpha = .93
                     # SI_UTAUT: alpha = .82
                     # FC_UTAUT: alpha = .80
                     # EE_UTAUT: alpha = .63
@@ -423,6 +440,14 @@ reliability(fit_w4) # PE_UTAUT: alpha = .93
 
 parameterestimates(fit_w4) #unstandardized parameters
 standardizedsolution(fit_w4) #standardized parameters
+
+# Create results table
+w4_utaut <- standardizedsolution(fit_w4) %>% filter(lhs == 'Behavior_UTAUT_r' & op == '~') %>% select(rhs, est.std, pvalue)
+names(w4_utaut)[names(w4_utaut) == "rhs"] <- "variable"
+w4_utaut = join(w4_utaut, var_lookup)
+
+# Reorder
+w4_utaut <- w4_utaut[, c("variable", "vardesc", "est.std", "pvalue")]
 
 # Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, the model already has a good fit: 
 ## CFI   = 1.00
@@ -495,6 +520,14 @@ lftdcat ~~ geslacht'
 fit2_w1 <- sem(model2_w1, data = data_wave1, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
 summary(fit2_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
+# Create results table
+w1_hbm <- standardizedsolution(fit2_w1) %>% filter(lhs == 'Behavior_UTAUT_r' & op == '~') %>% select(rhs, est.std, pvalue)
+names(w1_hbm)[names(w1_hbm) == "rhs"] <- "variable"
+w1_hbm = join(w1_hbm, var_lookup)
+
+# Reorder
+w1_hbm <- w1_hbm[, c("variable", "vardesc", "est.std", "pvalue")]
+
 
 # RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
 ## CFI   = .99
@@ -533,6 +566,14 @@ lftdcat ~~ geslacht'
 fit2_w4 <- sem(model2_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
 summary(fit2_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
+# Create results table
+w4_hbm <- standardizedsolution(fit2_w4) %>% filter(lhs == 'Behavior_UTAUT_r' & op == '~') %>% select(rhs, est.std, pvalue)
+names(w4_hbm)[names(w4_hbm) == "rhs"] <- "variable"
+w4_hbm = join(w4_hbm, var_lookup)
+
+# Reorder
+w4_hbm <- w4_hbm[, c("variable", "vardesc", "est.std", "pvalue")]
+
 
 # RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
 ## CFI   = .99
@@ -560,15 +601,24 @@ lrtest(mylogit1)
 
 
 
-summary(mylogit)
+summary(mylogit1)
 
-confint(mylogit)
+confint(mylogit1)
+
+# Create results table
+w1_covid <- data.frame(estimates = coef(summary(mylogit1))[-1,'Estimate'], pvalue = coef(summary(mylogit1))[-1,'Pr(>|z|)'])
+setDT(w1_covid, keep.rownames = "variable")[]
+w1_covid = join(w1_covid, var_lookup)
+
+# Reorder
+w1_covid <- w1_covid[, c("variable", "vardesc", "estimates", "pvalue")]
+
 
 # For interpretation see https://stats.idre.ucla.edu/r/dae/logit-regression/ nog checken
-with(mylogit, null.deviance - deviance)
-with(mylogit, df.null - df.residual)
-with(mylogit, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
-logLik(mylogit)
+with(mylogit1, null.deviance - deviance)
+with(mylogit1, df.null - df.residual)
+with(mylogit1, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
+logLik(mylogit1)
 
 ```
 
@@ -617,6 +667,15 @@ summary(mylogit)
 
 confint(mylogit)
 
+# Create results table
+w4_covid <- data.frame(estimates = coef(summary(mylogit))[-1,'Estimate'], pvalue = coef(summary(mylogit))[-1,'Pr(>|z|)'])
+setDT(w4_covid, keep.rownames = "variable")[]
+w4_covid = join(w4_covid, var_lookup)
+
+# Reorder
+w4_covid <- w4_covid[, c("variable", "vardesc", "estimates", "pvalue")]
+
+
 # For interpretation see https://stats.idre.ucla.edu/r/dae/logit-regression/ nog checken
 with(mylogit, null.deviance - deviance)
 with(mylogit, df.null - df.residual)
@@ -656,6 +715,14 @@ lftdcat ~~ geslacht'
 
 fit4_w1 <- sem(model4_w1, data = data_wave1_adherenceNS) #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
 summary(fit4_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+# Create results table
+w1ns_adh <- standardizedsolution(fit4_w1) %>% filter(lhs == "AdherenceNS_w1" & op == '~') %>% select(rhs, est.std, pvalue)
+names(w1ns_adh)[names(w1ns_adh) == "rhs"] <- "variable"
+w1ns_adh = join(w1ns_adh, var_lookup)
+
+# Reorder
+w1ns_adh <- w1ns_adh[, c("variable", "vardesc", "est.std", "pvalue")]
 
 
 # RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
@@ -736,7 +803,15 @@ PSev_HBM ~~ lftdcat + geslacht
 lftdcat ~~ geslacht'
 
 fit4_w1 <- sem(model4_w1, data = data_wave1_adherenceS, estimator = "MLM") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
-summary(fit6_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+summary(fit4_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+# Create results table
+w1s_adh <- standardizedsolution(fit4_w1) %>% filter(lhs == "AdherenceS_w1" & op == '~') %>% select(rhs, est.std, pvalue)
+names(w1s_adh)[names(w1s_adh) == "rhs"] <- "variable"
+w1s_adh = join(w1s_adh, var_lookup)
+
+# Reorder
+w1s_adh <- w1s_adh[, c("variable", "vardesc", "est.std", "pvalue")]
 
 
 # RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
@@ -976,4 +1051,300 @@ data_wave1$Beliefs_technologyperformance_dummy <- car::recode(data_wave1$Beliefs
 
 
 ```
+
+## Tabel: UTAUT adoptie wave 1
+```{r}
+data_table <- w1_utaut[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
  
+## Tabel: UTAUT adoptie wave 4
+```{r}
+data_table <- w4_utaut[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
+
+## Tabel: HBM adoptie wave 1
+```{r}
+data_table <- w1_hbm[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
+
+## Tabel: HBM adoptie wave 4
+```{r}
+data_table <- w4_hbm[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
+
+## Tabel: COVID variabelen wave 1
+```{r}
+data_table <- w1_covid[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "estimates" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
+
+
+## Tabel: COVID variabelen wave 4
+```{r}
+data_table <- w4_covid[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "estimates" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
+
+## Tabel: Opvolging adviezen wave 1 (geen symptomen)
+```{r}
+data_table <- w1ns_adh[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
+
+## Tabel: Opvolging adviezen wave 1 (symptomen)
+```{r}
+data_table <- w1s_adh[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
