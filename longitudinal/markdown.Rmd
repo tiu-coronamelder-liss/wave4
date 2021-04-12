@@ -75,7 +75,7 @@ data_wave4_adherence <- subset(data_wave4_filter, Behavior_UTAUT == 1)
 #View(data_wave1_adherence[,c("Behavior_UTAUT","AdherenceNotificationMeasuresSymptoms_Test","AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
 #View(data_wave4_adherence[,c("Behavior_UTAUT","AdherenceNotificationMeasuresSymptoms_Test","AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
 
-# Create a seperate dataframe for the adherence analyses, from which those answering the question with 'I wouldn't use the CoronaMelder', are filtered out.
+# Create a seperate dataframe for the adherence analyses, from which those answering the question with 'I wouldn't use the CoronaMelder', are filtered out. Wave 1
 data_wave1_adherenceS <- subset(data_wave1_adherence, AdherenceNotificationMeasuresSymptoms_Test != 8 & AdherenceNotificationMeasuresSymptoms_Quarantaine != 8 & AdherenceNotificationMeasuresSymptoms_Visits != 8 & AdherenceNotificationMeasuresSymptoms_CallGP != 8)
 
 #View(data_wave1_adherenceS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresSymptoms_Test","AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
@@ -84,6 +84,12 @@ data_wave1_adherenceNS <- subset(data_wave1_adherence, AdherenceNotificationMeas
 
 #View(data_wave1_adherenceNS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresNosymptoms_Test","AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
 
+## Wave 1 no GP
+# Create a seperate dataframe for the adherence analyses, from which those answering the question with 'I wouldn't use the CoronaMelder', are filtered out.
+data_wave1_adherenceSNoGP <- subset(data_wave1_adherence, AdherenceNotificationMeasuresSymptoms_Test != 8 & AdherenceNotificationMeasuresSymptoms_Quarantaine != 8 & AdherenceNotificationMeasuresSymptoms_Visits != 8)
+
+
+## Wave 4
 data_wave4_adherenceS <- subset(data_wave4_adherence, AdherenceNotificationMeasuresSymptoms_Test != 8 | AdherenceNotificationMeasuresSymptoms_Quarantaine != 8 | AdherenceNotificationMeasuresSymptoms_Visits != 8 | AdherenceNotificationMeasuresSymptoms_CallGP != 8)
 
 #View(data_wave4_adherenceS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresSymptoms_Test","AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
@@ -142,7 +148,7 @@ data_wave1$Beliefs_locationmonitoring[data_wave1$Beliefs_locationmonitoring==99]
 data_wave1$Beliefs_identitymonitoring[data_wave1$Beliefs_identitymonitoring==99] <- NA
 data_wave1$Beliefs_datasafety_r[data_wave1$Beliefs_datasafety_r==99] <- NA
 data_wave1$Beliefs_monitoringx <- rowMeans(data_wave1[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_r")], na.rm = TRUE)
-#View(data_wave1[,c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_r", "Beliefs_monitoringx", "Beliefs_datasafety")])
+View(data_wave1[,c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_r", "Beliefs_monitoringx", "Beliefs_datasafety")])
 ``` 
 
 ```{r Merge two UTAUT Effort Expectancy items for users and non-users1}
@@ -158,6 +164,9 @@ cronbach(data_wave1_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Tes
 
 data_wave1_adherenceS$AdherenceS_w1 <- rowMeans(data_wave1_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")], na.rm = TRUE)
 cronbach(data_wave1_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
+
+data_wave1_adherenceSNoGP$AdherenceS_w1_NoGP <- rowMeans(data_wave1_adherenceSNoGP[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits")], na.rm = TRUE)
+cronbach(data_wave1_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits")])
 
 data_wave1_adherence$AdherenceSelfEfficacy_w1 <- rowMeans(data_wave1_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
 cronbach(data_wave1_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
@@ -207,7 +216,7 @@ data_wave1$DS_Mobilex <- rowMeans(data_wave1[, c("DS_Mobile1", "DS_Mobile2")], n
 hist(data_wave1$DS_Mobilex)
 # Based on the histogram the distribution is highly skewed; no further analysis of this variable will be done. 
 #data_wave1$HealthLiteracyx <- rowMeans(data_wave1[, c("HealthLiteracy1r", "HealthLiteracy2", "HealthLiteracy3r")], na.rm = TRUE)
-#hist(data_wave1$HealthLiteracyx)
+# hist(data_wave1$HealthLiteracyx)
 # Data splitsen hoge vs. midden. vs lage health literacy
 #data$CatHL <- cut(data$HealthLiteracy, breaks = c(0,1.333333,3.66666,5), labels = c("Laag", "Midden", "Hoog"))
 ```
@@ -402,7 +411,7 @@ fits$fit1 <- fit_w1
 # Create a new model by adding an additional syntax to a model
 model2 <- paste0(model_w1, "\n", "PE1_UTAUT ~~ FC1_UTAUT")
 fits$fit2 <- cfa(model2, data_wave1)
-#round(sapply(fits, function(X) fitmeasures(X)), 3) #all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
+round(sapply(fits, function(X) fitmeasures(X)), 3) #all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
 
 #Plotting (just to get a vizualisation of whether the model is correct)
 semPaths(fit_w1, "std")
@@ -485,7 +494,7 @@ fits$fit1 <- fit_w4
 # Create a new model by adding an additional syntax to a model
 model2 <- paste0(model, "\n", "PE1_UTAUT ~~ FC1_UTAUT")
 fits$fit2 <- cfa(model2, data_wave4)
-#round(sapply(fits, function(X) fitmeasures(X)), 3) #all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
+round(sapply(fits, function(X) fitmeasures(X)), 3) #all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
 
 #Plotting (just to get a vizualisation of whether the model is correct)
 semPaths(fit_w4, "std")
@@ -710,19 +719,19 @@ fits$fit1 <- fit4_w1
 # Create a new model by adding an additional syntax to a model
 model5_w1 <- paste0(model4_w1, "\n", "HBM_barriers_Test ~~ HBM_barriers_GP")
 fits$fit2 <- sem(model5_w1, data_wave1_adherenceNS)
-#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
 # Still the RMSEA and CFI are a bit high, so we add another residual correlation.
 model6_w1 <- paste0(model5_w1, "\n", "HBM_selfefficacy_GP ~~ HBM_perceivedbenefits_GP")
 fits$fit3 <- sem(model6_w1, data_wave1_adherenceNS)
-#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 3) 
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 3) 
 # We have the same problem with RMSEA and CFI (they are improving though). It seems that the self efficacy items are correlated with the perceived barriers and benefits items, which makes sense. So let's improve the model only by adding correlations between these variables.
 model7_w1 <- paste0(model6_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_perceivedbenefits_Quarantaine")
 fits$fit4 <- sem(model7_w1, data_wave1_adherenceNS)
-#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 4) 
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 4) 
 # One more correlation has to be added to reach a fitting model.
 model8_w1 <- paste0(model7_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_barriers_Quarantaine")
 fits$fit5 <- sem(model8_w1, data_wave1_adherenceNS)
-#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 5) 
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 5) 
 
 # The correlations that are finally added to reach model fit are: 
 ## Barriers Test --> Barriers GP
@@ -793,23 +802,23 @@ fits$fit1 <- fit4_w1
 # Create a new model by adding an additional syntax to a model
 model5_w1 <- paste0(model4_w1, "\n", "HBM_barriers_Test ~~ HBM_barriers_GP")
 fits$fit2 <- sem(model5_w1, data_wave1_adherenceS)
-#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
 # Still the RMSEA and CFI are a bit high, so we add another residual correlation.
 model6_w1 <- paste0(model5_w1, "\n", "HBM_selfefficacy_GP ~~ HBM_perceivedbenefits_GP")
 fits$fit3 <- sem(model6_w1, data_wave1_adherenceS)
-#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 3) 
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 3) 
 # We have the same problem with RMSEA and CFI (they are improving though). It seems that the self efficacy items are correlated with the perceived barriers and benefits items, which makes sense. So let's improve the model only by adding correlations between these variables.
 model7_w1 <- paste0(model6_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_perceivedbenefits_Quarantaine")
 fits$fit4 <- sem(model7_w1, data_wave1_adherenceS)
-#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 4) 
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 4) 
 # Another correlation will be added.
 model8_w1 <- paste0(model7_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_barriers_Quarantaine")
 fits$fit5 <- sem(model8_w1, data_wave1_adherenceS)
-#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 5) 
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 5) 
 # One more correlation will be added to reach a fitting model. 
 model9_w1 <- paste0(model8_w1, "\n", "HBM_perceivedbenefits_Visits ~~ HBM_barriers_Visits")
 fits$fit6 <- sem(model9_w1, data_wave1_adherenceS)
-#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 6) 
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 6) 
 
 
 # The correlations that are finally added to reach model fit are: 
@@ -826,6 +835,83 @@ fits$fit6 <- sem(model9_w1, data_wave1_adherenceS)
 summary(fits$fit6, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 ```
+
+```{r Regression model Adherence Symptoms Wave 1 No GP}
+
+model4_w1 <- ' 
+#Measurement model
+
+Adherence_Selfefficacy =~ HBM_selfefficacy_Test + HBM_selfefficacy_Quarantaine + HBM_selfefficacy_Visits 
+Adherence_Benefits =~ HBM_perceivedbenefits_Test + HBM_perceivedbenefits_Quarantaine + HBM_perceivedbenefits_Visits
+Adherence_Barriers =~ HBM_barriers_Test + HBM_barriers_Quarantaine + HBM_barriers_Visits
+PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+
+#Regression model
+AdherenceS_w1_NoGP ~ Adherence_Selfefficacy + Adherence_Benefits + Adherence_Barriers + + PSus_HBM + PSev_HBM + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+Adherence_Selfefficacy ~~ Adherence_Benefits + Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Benefits ~~ Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Barriers ~~ PSus_HBM + PSev_HBM + lftdcat + geslacht
+PSus_HBM ~~ PSev_HBM + lftdcat + geslacht
+PSev_HBM ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+fit4_w1 <- sem(model4_w1, data = data_wave1_adherenceSNoGP, estimator = "MLM") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit4_w1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+# Create results table
+w1s_adh <- standardizedsolution(fit4_w1) %>% filter(lhs == "AdherenceS_w1" & op == '~') %>% select(rhs, est.std, pvalue)
+names(w1s_adh)[names(w1s_adh) == "rhs"] <- "variable"
+w1s_adh = join(w1s_adh, var_lookup)
+
+# Reorder
+w1s_adh <- w1s_adh[, c("variable", "vardesc", "est.std", "pvalue")]
+
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
+## CFI   = .83
+## RMSEA = .11 (90% CI [.10, .12])
+## SRMR  = .065
+## The chi square is significant, but this could be due to the large N. 
+
+# Improve model (In this case I think it is neeeded due to the high CFI and RMSEA)
+## By looking at modification indices. 
+mod_ind <- modificationindices(fit4_w1)
+head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
+
+# Compare models --> we improve the model the same way as the no-symptoms model
+fits <- list()
+fits$fit1 <- fit4_w1
+# Create a new model by adding an additional syntax to a model
+model5_w1 <- paste0(model4_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_perceivedbenefits_Quarantaine")
+fits$fit2 <- sem(model5_w1, data_wave1_adherenceSNoGP)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
+# Still the RMSEA and CFI are a bit high, so we add another residual correlation.
+model6_w1 <- paste0(model5_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_barriers_Quarantaine")
+fits$fit3 <- sem(model6_w1, data_wave1_adherenceSNoGP)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 3) 
+# We have the same problem with RMSEA and CFI (they are improving though).
+model7_w1 <- paste0(model6_w1, "\n", "HBM_barriers_Visits ~~ HBM_perceivedbenefits_Visits")
+fits$fit4 <- sem(model7_w1, data_wave1_adherenceSNoGP)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 4) 
+
+# The correlations that are finally added to reach model fit are: 
+## Barriers Test --> Barriers GP
+## Self-efficacy GP --> Benefits GP
+## Self-efficacy Quarantaine --> Benefits Quarantaine
+## Self-efficacy Quarantaine --> Barriers Quarantaine
+## Benefits visits --> Barriers visits
+
+## CFI   = .91
+## RMSEA = .08 (90% CI [.07, .09])
+## SRMR  = .06
+## The chi square is significant, but this could be due to the large N. 
+summary(fits$fit4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+```
+
 
 ## 5.2. Regression model ADHERENCE Wave 4
 
