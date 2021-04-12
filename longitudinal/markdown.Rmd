@@ -27,6 +27,7 @@ library(semPlot)
 library(psy) # to calculate alpha
 library(lmtest) # for logistic regression
 library(pscl)
+library(ggplot2)
 
 # For tables
 library(flextable)
@@ -205,8 +206,8 @@ hist(data_wave1$HBM_PSev_selfx)
 data_wave1$DS_Mobilex <- rowMeans(data_wave1[, c("DS_Mobile1", "DS_Mobile2")], na.rm = TRUE)
 hist(data_wave1$DS_Mobilex)
 # Based on the histogram the distribution is highly skewed; no further analysis of this variable will be done. 
-data_wave1$HealthLiteracyx <- rowMeans(data_wave1[, c("HealthLiteracy1r", "HealthLiteracy2", "HealthLiteracy3r")], na.rm = TRUE)
-hist(data_wave1$HealthLiteracyx)
+#data_wave1$HealthLiteracyx <- rowMeans(data_wave1[, c("HealthLiteracy1r", "HealthLiteracy2", "HealthLiteracy3r")], na.rm = TRUE)
+#hist(data_wave1$HealthLiteracyx)
 # Data splitsen hoge vs. midden. vs lage health literacy
 #data$CatHL <- cut(data$HealthLiteracy, breaks = c(0,1.333333,3.66666,5), labels = c("Laag", "Midden", "Hoog"))
 ```
@@ -401,7 +402,7 @@ fits$fit1 <- fit_w1
 # Create a new model by adding an additional syntax to a model
 model2 <- paste0(model_w1, "\n", "PE1_UTAUT ~~ FC1_UTAUT")
 fits$fit2 <- cfa(model2, data_wave1)
-round(sapply(fits, function(X) fitmeasures(X)), 3) #all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
+#round(sapply(fits, function(X) fitmeasures(X)), 3) #all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
 
 #Plotting (just to get a vizualisation of whether the model is correct)
 semPaths(fit_w1, "std")
@@ -484,7 +485,7 @@ fits$fit1 <- fit_w4
 # Create a new model by adding an additional syntax to a model
 model2 <- paste0(model, "\n", "PE1_UTAUT ~~ FC1_UTAUT")
 fits$fit2 <- cfa(model2, data_wave4)
-round(sapply(fits, function(X) fitmeasures(X)), 3) #all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
+#round(sapply(fits, function(X) fitmeasures(X)), 3) #all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
 
 #Plotting (just to get a vizualisation of whether the model is correct)
 semPaths(fit_w4, "std")
@@ -709,19 +710,19 @@ fits$fit1 <- fit4_w1
 # Create a new model by adding an additional syntax to a model
 model5_w1 <- paste0(model4_w1, "\n", "HBM_barriers_Test ~~ HBM_barriers_GP")
 fits$fit2 <- sem(model5_w1, data_wave1_adherenceNS)
-round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
+#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
 # Still the RMSEA and CFI are a bit high, so we add another residual correlation.
 model6_w1 <- paste0(model5_w1, "\n", "HBM_selfefficacy_GP ~~ HBM_perceivedbenefits_GP")
 fits$fit3 <- sem(model6_w1, data_wave1_adherenceNS)
-round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 3) 
+#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 3) 
 # We have the same problem with RMSEA and CFI (they are improving though). It seems that the self efficacy items are correlated with the perceived barriers and benefits items, which makes sense. So let's improve the model only by adding correlations between these variables.
 model7_w1 <- paste0(model6_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_perceivedbenefits_Quarantaine")
 fits$fit4 <- sem(model7_w1, data_wave1_adherenceNS)
-round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 4) 
+#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 4) 
 # One more correlation has to be added to reach a fitting model.
 model8_w1 <- paste0(model7_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_barriers_Quarantaine")
 fits$fit5 <- sem(model8_w1, data_wave1_adherenceNS)
-round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 5) 
+#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 5) 
 
 # The correlations that are finally added to reach model fit are: 
 ## Barriers Test --> Barriers GP
@@ -792,23 +793,23 @@ fits$fit1 <- fit4_w1
 # Create a new model by adding an additional syntax to a model
 model5_w1 <- paste0(model4_w1, "\n", "HBM_barriers_Test ~~ HBM_barriers_GP")
 fits$fit2 <- sem(model5_w1, data_wave1_adherenceS)
-round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
+#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
 # Still the RMSEA and CFI are a bit high, so we add another residual correlation.
 model6_w1 <- paste0(model5_w1, "\n", "HBM_selfefficacy_GP ~~ HBM_perceivedbenefits_GP")
 fits$fit3 <- sem(model6_w1, data_wave1_adherenceS)
-round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 3) 
+#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 3) 
 # We have the same problem with RMSEA and CFI (they are improving though). It seems that the self efficacy items are correlated with the perceived barriers and benefits items, which makes sense. So let's improve the model only by adding correlations between these variables.
 model7_w1 <- paste0(model6_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_perceivedbenefits_Quarantaine")
 fits$fit4 <- sem(model7_w1, data_wave1_adherenceS)
-round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 4) 
+#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 4) 
 # Another correlation will be added.
 model8_w1 <- paste0(model7_w1, "\n", "HBM_selfefficacy_Quarantaine ~~ HBM_barriers_Quarantaine")
 fits$fit5 <- sem(model8_w1, data_wave1_adherenceS)
-round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 5) 
+#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 5) 
 # One more correlation will be added to reach a fitting model. 
 model9_w1 <- paste0(model8_w1, "\n", "HBM_perceivedbenefits_Visits ~~ HBM_barriers_Visits")
 fits$fit6 <- sem(model9_w1, data_wave1_adherenceS)
-round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 6) 
+#round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 6) 
 
 
 # The correlations that are finally added to reach model fit are: 
