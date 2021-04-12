@@ -248,23 +248,19 @@ data_allwaves <- cbind(data_allwaves, select(data_tmp2, contains("_w2")))
 De CoronaMelder app is ontwikkeld door het ministerie van Volksgezondheid, Welzijn en Sport en wordt nu landelijk gebruikt in de strijd tegen het coronavirus. Het doel van dit onderzoek is om de adoptie van de CoronaMelder app en de (intentie tot) opvolging van de in de app gegeven adviezen te onderzoeken en te verklaren.  
 
 ## Methode {.unlisted .unnumbered}
-In het kader van de evaluatie van de CoronaMelder wordt er een longitudinaal vragenlijstonderzoek uitgevoerd via het LISS panel. De datacollectie (wave 3) van deze rapportage vond plaats tussen 18 januari en 31 januari 2021, 3 maanden na de landelijke lancering op 10 oktober 2020. Aan dit onderzoek hebben `r nrow(data)` respondenten deelgenomen (gemiddelde leeftijd in jaren: `r round(mean(data$leeftijd), digits = 1)`, standaarddeviatie: `r round(sd(data$leeftijd), digits = 1)`; `r round((nrow(filter(data, geslacht == 'Vrouw'))/nrow(data))*100, digits = 1)`% vrouw).   
+In het kader van de evaluatie van de CoronaMelder wordt er een longitudinaal vragenlijstonderzoek uitgevoerd via het LISS panel. De datacollectie (wave 4) van deze rapportage vond plaats tussen 15 maart 2021 en 28 maart 2021, 5 maanden na de landelijke lancering op 10 oktober 2020. Aan dit onderzoek hebben `r nrow(data)` respondenten deelgenomen (gemiddelde leeftijd in jaren: `r round(mean(data$leeftijd), digits = 1)`, standaarddeviatie: `r round(sd(data$leeftijd), digits = 1)`; `r round((nrow(filter(data, geslacht == 'Vrouw'))/nrow(data))*100, digits = 1)`% vrouw).   
 
 ## Resultaten en aanbevelingen{.unlisted .unnumbered}  
 
-**Adoptie** Iets meer dan 3 op de 10 van de deelnemers gebruiken de CoronaMelder, dat is net als bij de vorige wave iets hoger dan wat op basis van de downloadcijfers in de periode van datacollectie zou worden verwacht. Van de huidige gebruikers heeft nog steeds het overgrote merendeel de intentie om de CoronaMelder de komende 2 maanden te blijven gebruiken. Rond 1 op de 20 respondenten die de CoronaMelder nog niet gebruiken, had de intentie om de CoronaMelder te gaan gebruiken en 16% staat hier nog neutraal in. Er waren verschillen in gebruikersstatus op basis van demografie: zo gebruiken lager opgeleiden de CoronaMelder minder vaak.   
+**Adoptie**    
 
 **Verklarende factoren voor adoptie**
-Verschillende persoonlijke, sociale en omgevingsfactoren die samenhangen met het gebruik van de CoronaMelder zijn geïdentificeerd. De *risicoperceptie* lijkt net als in de vorige metingen een rol te spelen: mensen die de CoronaMelder niet gebruiken schatten de ernst en de vatbaarheid voor het coronavirus lager in dan degenen die hem al wel gebruiken. Vergeleken met de vorige wave wordt het risico op een besmetting nu iets hoger ingeschat. Een mogelijke verklaring hiervoor zouden de berichten in de media over de besmettelijkere Britse variant kunnen zijn. De *gebruiksvriendelijkheid* is over het algemeen goed: van de gebruikers geeft het overgrote deel aan dat de CoronaMelder makkelijk te gebruiken is en dat gebruik weinig tijd en energie kost. Bij niet gebruikers is deze verwachting echter iets minder positief; dit blijft een aandachtspunt. Wel was er een lichte verbetering te zien met betrekking tot de *technologie gerelateerde belemmeringen*: het aandeel respondenten dat aangeeft een telefoon tot de beschikking te hebben waarmee de CoronaMelder kan worden gebruikt is licht toegenomen alsmede het aandeel dat aangeeft genoeg technische kennis te hebben om de CoronaMelder te gebruiken. Over het algemeen is het vertrouwen in de *adequaatheid van de techniek* (bluetooth) om aan te duiden wie er in de buurt is geweest hoog in de hele sample. De niet gebruikers hebben echter nog steeds een lagere verwachting van de *effectiviteit* van de CoronaMelder in de bijdrage aan het bestrijden van het coronavirus. Na een afname in het vorige tijdvak, is er nu weer een lichte toename in de verwachte bijdrage van de CoronaMelder aan de bestrijding van het coronavirus. Nog steeds denkt de grootste groep dat een adoptie van meer dan 50% nodig is voor de CoronaMelder om effectief te zijn. De mate waarin men denkt dat de CoronaMelder de Nederlandse economie helpt is stabiel gebleven. Met betrekking tot *privacy* is een opvallende bevinding dat nog steeds een substantieel deel van de gebruikers en (in ernstiger mate) de niet gebruikers (onterecht) denkt dat de CoronaMelder de locatie en persoonsgegevens bijhoudt. Wel denkt een grote meerderheid nog steeds dat de informatie uit de app vertrouwelijk wordt behandeld, hoewel dit percentage wel weer lager is bij de niet gebruikers. Gezien de substantiële rol van zorgen over privacy in technologie adoptie is het corrigeren van deze mispercepties nog steeds een belangrijk aandachtspunt. Opvallend is ook nog steeds dat niet gebruikers vaker aangeven dat door het gebruik van de CoronaMelder technologische bedrijven meer macht krijgen en dat de overheid meer controle over de bevolking krijgt. Dit laatste is iets afgenomen sinds de vorige meting. Ook is nog steeds duidelijk dat niet gebruikers vaker *algemene mispercepties* hebben met betrekking tot het coronavirus, bijvoorbeeld dat het een biologisch wapen is of samenhangt met 5G. Over de hele groep was het percentage dat gelooft dat het coronavirus een biologisch wapen is dat in een laboratorium gemaakt is licht afgenomen. Nog een opvallende bevinding is dat bijna een op de vijf van de niet gebruikers *angstig* staat tegenover de CoronaMelder, terwijl dit bij de gebruikers een zeer klein percentage is. De afname in angst tegenover de CoronaMelder in de hele groep, die in de vorige meting werd gezien, heeft zich wel verder doorgezet tot slechts een op de acht respondenten. Niet gebruikers hebben over het algemeen nog steeds een lager *vertrouwen in de overheidsaanpak* tegen het coronavirus. De *sociale invloeden* omtrent het gebruik van de CoronaMelder zijn nog steeds niet erg gunstig. Hoewel men nog steeds een redelijk correct (licht overschat) beeld heeft van het percentage gebruikers in de Nederlandse bevolking (obv. de downloadcijfers), denkt slechts een relatief laag percentage dat mensen in hun directe omgeving de CoronaMelder gebruiken of gebruik op prijs zouden stellen. Een substantieel deel staat hier nog steeds neutraal in. Een verklaring hiervoor is dat het gebruik van de CoronaMelder redelijk onzichtbaar is vergeleken met andere preventieve gedragingen en de bevindingen zouden ook kunnen suggereren dat de CoronaMelder in de sociale interacties simpelweg niet besproken wordt. *Media* Drie op de vier respondenten geven aan de CoronaMelder in de media voorbij te hebben zien komen in de afgelopen maand. Dit is minder dan in de vorige meting toen dit nog vier op de vijf was. Wel beoordeelden vier op de tien de toon van de berichtgeving overwegend positief en slechts 7.5% als overwegend negatief; de rest wist het niet of vond de toon neutraal. *Verplichting tot gebruik* Nog steeds geven ongeveer zes op de tien mensen die de CoronaMelder op dit moment gebruiken aan het in meer of mindere mate eens te zijn met de stelling dat men zich verplicht voelt hem te gebruiken. Van de mensen die de CoronaMelder niet gebruiken is dat slechts 6.4%. De niet gebruikers geven vaker aan dat het aandringen op het gebruik van de CoronaMelder leidt tot boosheid or irritatie. Voor de hele groep zijn deze gevoelens wel licht afgenomen ten opzichte van de vorige meting. Meer dan acht op de tien respondenten die aangeven zich verplicht te voelen tot gebruik van de CoronaMelder geeft aan dat het gebruiken van de CoronaMelder wordt gezien als maatschappelijke verplichting. Een lager percentage geeft aan het in meer of mindere mate eens te zijn dat de werkgever/opdrachtgever (7.3%), de school/opleiding (8.4%) of de overheid (10.7%) de respondent verplicht om de CoronaMelder te gebruiken.     
 
-**Intentie tot adherentie aan gedragsadviezen in de melding** Vanwege het lage aantal ontvangen meldingen in de meetperiode is er niets te zeggen over de daadwerkelijke opvolging van de gedragsadviezen. Over het algemeen zijn de intenties van de gebruikers voor het opvolgen van de in de melding voorgestelde adviezen echter nog steeds goed, met name indien de gebruiker daarnaast ook (hypothetisch) symptomen heeft die bij het coronavirus passen. Er zijn kleine verschuivingen te zien, zo is bij gebruikers de intentie om thuis te blijven na een melding als men geen symptomen heeft toegenomen. Daarnaast is bij gebruikers de intentie om na een melding een test aan te vragen in geval van symptomen passend bij het coronavirus iets toegenomen. Er was een lichte stijging in het percentage respondenten dat aan geeft zich verplicht te voelen om het advies uit de melding op te volgen.
+**Intentie tot adherentie aan gedragsadviezen in de melding** 
 
-Na een afname in de vorige wave, is in deze wave het percentage respondenten dat persoonlijke voordelen ziet in het opvolgen van de adviezen (testen, thuisblijven, geen bezoek ontvangen) weer iets toegenomen. Ook is de zelfeffectiviteit voor deze adviezen licht gestegen. De persoonlijke nadelen van thuisblijven en geen bezoek ontvangen zijn iets afgenomen. 
+**Doorgeven GGD-sleutel bij positieve test** 
 
-**Doorgeven GGD-sleutel bij positieve test** Een overgroot deel van de gebruikers van de CoronaMelder gaf nog steeds aan de GGD sleutel door te gaan geven als men positief getest wordt op het coronavirus. Voor de effectiviteit van de CoronaMelder is het wel van belang dat deze intentie omgezet wordt in daadwerkelijk gedrag.
-
-**Onbeoogde effecten: schijnveiligheid** De overgrote meerderheid gelooft niet dat de andere maatregelen niet meer in acht hoeven te worden genomen wanneer men CoronaMelder geïnstalleerd heeft. Wel geeft meer dan een kwart van de sample aan dat de stelling *Als ik de CoronaMelder gebruik, verlaag ik mijn risico op een besmetting met het coronavirus*, misschien waar of zeker waar is. Tegelijkertijd zijn er nog steeds geen aanwijzingen dat de gebruikers zich minder aan de algemene maatregelen houden. Zo verschillen gebruikers en niet gebruikers niet of marginaal in hun zelfgerapporteerde gedrag en hebben gebruikers juist vaker de intentie om zich aan de maatregelen te houden dan niet gebruikers. Wel blijft dit een belangrijk punt van aandacht. 
-
+**Onbeoogde effecten: schijnveiligheid** 
 
 
 ```{=openxml}
@@ -285,7 +281,7 @@ Onderzoeksvraag 1: Wat is de temporele dynamiek van de adoptie van digitale cont
   
 Onderzoeksvraag 2: Wat is de temporele dynamiek van de intentie om zich te houden aan de adviezen die worden gecommuniceerd in de digitale contacttracing app CoronaMelder en welke factoren (persoonlijk, sociaal, omgeving, app-gerelateerd) zijn hierop van invloed? 
 
-De huidige rapportage beslaat de data van de derde meting. Ook wordt een vergelijking met de tweede meting getoond. De datacollectie (wave 3) van deze rapportage vond plaats tussen 18 januari en 31 januari 2021, 3 maanden na de landelijke lancering op 10 oktober 2020. De vierde en laatste meting vindt plaats op 5 maanden na lancering (15-03 t/m 29-03). 
+De huidige rapportage beslaat de data van de vierde meting. Ook wordt een vergelijking met de derde meting getoond. De datacollectie (wave 4) van deze rapportage vond plaats tussen 15 maart en 28 maart 2021, 5 maanden na de landelijke lancering op 10 oktober 2020.  
 
 De (8 minuten durende) vragenlijst bevat op elk meetmoment de volgende onderwerpen:   
 - Gebruiksgedrag van CoronaMelder  
@@ -296,35 +292,31 @@ De (8 minuten durende) vragenlijst bevat op elk meetmoment de volgende onderwerp
 - Persoonlijke, sociale en omgevingsfactoren   
 - Preventief gedrag / naleving van adviezen en factoren die zijn afgeleid van het Health Belief Model (HBM): preventief gedrag (afgelopen week en intentie), waargenomen ernst en vatbaarheid, persoonlijke voordelen en barrières, zelfredzaamheid  
 
-Sommige items zijn aan verandering onderhevig, bijvoorbeeld items over misvattingen over de app of het coronavirus zullen gebaseerd zijn op de meest recente ontwikkelingen en actuele gebeurtenissen in de media. In de bijlage kan de vragenlijst van wave 3 gevonden worden. 
+Sommige items zijn aan verandering onderhevig, bijvoorbeeld items over misvattingen over de app of het coronavirus zullen gebaseerd zijn op de meest recente ontwikkelingen en actuele gebeurtenissen in de media. In de bijlage kan de vragenlijst van wave 4 gevonden worden. 
 
 ## Beschrijving panel
 Het LISS panel is bij uitstek geschikt voor onderzoek waarbij een goede vertegenwoordiging van de Nederlandse bevolking van groot belang is. Het LISS panel is een probability-based (geen zelfselectie) panel dat iedere maand vragenlijsten invult via internet. De adressensteekproeven voor de werving en de bijwervingen zijn getrokken uit het populatieregister in samenwerking met het CBS. Indien een huishouden niet beschikt over een breedbandverbinding en/of computer, dan stelt CentERdata de benodigde apparatuur in bruikleen beschikbaar om alsnog mee te kunnen doen aan het panel. Hiermee onderscheidt het LISS panel zich van andere online panels, waar niet-internetters ontbreken en waar panelleden de gelegenheid hebben om zichzelf aan te melden.  
 
 Panelleden ontvangen € 7,50 voor een vragenlijst met een invultijd van dertig minuten. Omdat het veldwerk 2 weken duurt en men twee herinneringen krijgt, is iedereen (van oud tot jong, werkend of niet werkend en/of tijdelijk afwezig) in de gelegenheid de vragenlijsten in te vullen.
 
-## Huidige rapportage: Meting 3
+## Huidige rapportage: Meting 4
 
-**Datum van dataverzameling:** 18 - 31 januari 2021.
+**Datum van dataverzameling:** 15 - 28 maart 2021.
 
-**Deelnemers:** Voor de derde meting zijn alle deelnemers uit de tweede meting uitgenodigd die de vragenlijst van de tweede meting volledig hadden ingevuld. 
+**Deelnemers:** Voor de derde meting zijn alle deelnemers uit de tweede meting uitgenodigd die de vragenlijst van de derde meting hadden ingevuld. 
 
 **Ter achtergrondinformatie:** de steekproef van de eerste meting was een aselecte steekproef van LISS-panelleden van 16 jaar en ouder die ook de LISS-kernvragenlijst ‘Health’ (afgenomen in november en december 2019) en de vragenlijst over het coronavirus (afgenomen in het LISS panel maart 2020) hebben ingevuld.  
 
 
-Responsoverzicht wave 3| 
+Responsoverzicht wave 4| 
 ------------- | -------------
-Respondenten uitgenodigd voor deelname: | 1589 (100,0%)  
-Nonrespons | 129 (8.1%)  
-Respons | 1.460 (91.9%)  
-  Compleet | 1.370 (85.6%)  
-  Incompleet (1 missend item) | 77 (4.8%)  
-  Incompleet (vragenlijst niet afgemaakt) | 13 (0,8%)  
+Respondenten uitgenodigd voor deelname: | 1.446 (100,0%)  
+Nonrespons | 66 (4.6%)  
+Respons | 1.380 (95.4%)  
+  Compleet | 1.368 (94.6%)  
+  Incompleet | 12 (0.8%)  
 
-In de resultatensectie worden de uitkomsten getoond van de 1447 respondenten die de vragenlijst hebben afgemaakt. Ook wordt er een overzicht van de karakteristieken van de steekproef getoond. In de bijlage kan een vergelijking van de demografische samenstelling van de steekproef in vergelijking met die van de Nederlandse bevolking (op basis van gegevens van het CBS) gevonden worden. 
-
-Een deel van de respondenten heeft het item AdherenceNotificationMeasuresNoSymptoms_Visits later (maar binnen bovenstaande data collectieperiode) beantwoord omdat deze per ongeluk in de eerste vier dagen van de datacollectieperiode niet in de vragenlijst zat. Dit item is op 22 januari toegevoegd. Panelleden die toen de vragenlijst al hadden ingevuld hebben op 25 januari een aanvullende vragenlijst gekregen met daarin alleen de vraag AdherenceNotificationMeasuresNoSymptoms_Visits. Een deel van de respondenten (77) heeft deze extra vraag niet ingevuld. Deze respondenten missen (alleen) in de resultaten van dit betreffende item. 
-
+In de resultatensectie worden de uitkomsten getoond van de 1368 respondenten die de vragenlijst hebben afgemaakt. Ook wordt er een overzicht van de karakteristieken van de steekproef getoond. In de bijlage kan een vergelijking van de demografische samenstelling van de steekproef in vergelijking met die van de Nederlandse bevolking (op basis van gegevens van het CBS) gevonden worden. 
 
 ## Vergelijkingen naar gebruikersstatus en over de tijd
 
