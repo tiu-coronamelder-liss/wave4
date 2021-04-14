@@ -1081,7 +1081,7 @@ ft <- flextable(
 ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
 
 # Round numbers
-ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
 
 # Change layout of table
 ft <- fontsize(ft, size = 10, part = "all")
@@ -1118,7 +1118,7 @@ ft <- flextable(
 ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
 
 # Round numbers
-ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
 
 # Change layout of table
 ft <- fontsize(ft, size = 10, part = "all")
@@ -1155,7 +1155,7 @@ ft <- flextable(
 ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
 
 # Round numbers
-ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
 
 # Change layout of table
 ft <- fontsize(ft, size = 10, part = "all")
@@ -1192,7 +1192,7 @@ ft <- flextable(
 ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
 
 # Round numbers
-ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
 
 # Change layout of table
 ft <- fontsize(ft, size = 10, part = "all")
@@ -1229,7 +1229,7 @@ ft <- flextable(
 ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "estimates" = "Β", "pvalue" = "p"))
 
 # Round numbers
-ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
 
 # Change layout of table
 ft <- fontsize(ft, size = 10, part = "all")
@@ -1267,7 +1267,7 @@ ft <- flextable(
 ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "estimates" = "Β", "pvalue" = "p"))
 
 # Round numbers
-ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
 
 # Change layout of table
 ft <- fontsize(ft, size = 10, part = "all")
@@ -1304,7 +1304,7 @@ ft <- flextable(
 ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
 
 # Round numbers
-ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
 
 # Change layout of table
 ft <- fontsize(ft, size = 10, part = "all")
@@ -1341,7 +1341,7 @@ ft <- flextable(
 ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
 
 # Round numbers
-ft <- colformat_num(x = ft, big.mark = ".", decimal.mark = ",", digits = 3)
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
 
 # Change layout of table
 ft <- fontsize(ft, size = 10, part = "all")
