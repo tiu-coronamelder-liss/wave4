@@ -2,7 +2,7 @@
 * This script produces output to check the data and outcomes in the report. 
 * Open data.
 GET
-  FILE='L_Corona_app_wave3_3p.sav'.
+  FILE='L_Corona_app_wave4_3p.sav'.
 DATASET NAME DataSet2 WINDOW=FRONT.
 
 * Remove the participants for which data was not complete.1608 rows in the dataset. 14 had missings. 1594 completes. 

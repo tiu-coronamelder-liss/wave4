@@ -303,7 +303,7 @@ Panelleden ontvangen € 7,50 voor een vragenlijst met een invultijd van dertig 
 
 **Datum van dataverzameling:** 15 - 28 maart 2021.
 
-**Deelnemers:** Voor de derde meting zijn alle deelnemers uit de tweede meting uitgenodigd die de vragenlijst van de derde meting hadden ingevuld. 
+**Deelnemers:** Voor de vierde meting zijn alle deelnemers uit de derde meting uitgenodigd die de vragenlijst van de derde meting hadden ingevuld. 
 
 **Ter achtergrondinformatie:** de steekproef van de eerste meting was een aselecte steekproef van LISS-panelleden van 16 jaar en ouder die ook de LISS-kernvragenlijst ‘Health’ (afgenomen in november en december 2019) en de vragenlijst over het coronavirus (afgenomen in het LISS panel maart 2020) hebben ingevuld.  
 
@@ -1505,7 +1505,7 @@ ggdraw(theplot)
 ```
 
 #### Vertrouwen in aanpak van de overheid
-Respondenten zijn verdeeld wat betreft het vertrouwen in de overheid met betrekking tot de aanpak van de coronacrisis (zie figuur \@ref(fig:trustgovernment)). Iets meer dan de helft is het eens met de stelling 'Ik heb vertrouwen in de manier waarop de Nederlandse overheid probeert het coronavirus onder controle te houden' (`r round((nrow(filter(data, (Beliefs_TrustGovernment == 'Helemaal mee eens'| Beliefs_TrustGovernment == 'Mee eens'| Beliefs_TrustGovernment == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%).
+Respondenten zijn verdeeld wat betreft het vertrouwen in de overheid met betrekking tot de aanpak van de coronacrisis (zie figuur \@ref(fig:trustgovernment)). Meer dan de helft is het eens met de stelling 'Ik heb vertrouwen in de manier waarop de Nederlandse overheid probeert het coronavirus onder controle te houden' (`r round((nrow(filter(data, (Beliefs_TrustGovernment == 'Helemaal mee eens'| Beliefs_TrustGovernment == 'Mee eens'| Beliefs_TrustGovernment == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%).
 
 ```{r trustgovernment, echo=FALSE, fig.width=7, fig.height=2, fig.cap="Vertrouwen in de Nederlandse overheid", tab.cap="Vertrouwen in de Nederlandse overheid"}
 
@@ -1851,9 +1851,9 @@ library(wordcloud)
 ```
 
 ## Intentie tot (blijvend) gebruik CoronaMelder
-Er werd gevraagd of de respondenten de intentie hadden om de CoronaMelder de komende twee maanden te (blijven) gebruiken. Van de respondenten die de CoronaMelder app nooit hebben gebruikt, gaf `r round((nrow(filter(data, (BI1a_UTAUT == 'Helemaal mee eens'| BI1a_UTAUT == 'Mee eens'| BI1a_UTAUT == 'Een beetje mee eens') & Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')) /nrow(filter(data, Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')))*100, digits = 1)`% aan van plan te zijn om de CoronaMelder te gebruiken in de komende twee maanden (zie figuur \@ref(fig:intentiontousenonusers)). Nog `r round((nrow(filter(data, (BI1a_UTAUT == 'Neutraal') & Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')) /nrow(filter(data, Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')))*100, digits = 1)`% geeft aan hier neutraal in te staan. Bijna 4 op de 5 respondenten (`r round((nrow(filter(data, (BI1a_UTAUT == 'Helemaal mee oneens'| BI1a_UTAUT == 'Oneens'| BI1a_UTAUT == 'Een beetje oneens') & Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')) /nrow(filter(data, Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')))*100, digits = 1)`%) geeft aan niet van plan te zijn de CoronaMelder te gaan gebruiken.  
+Er werd gevraagd of de respondenten de intentie hadden om de CoronaMelder de komende twee maanden te (blijven) gebruiken. Van de respondenten die de CoronaMelder app nooit hebben gebruikt, gaf `r round((nrow(filter(data, (BI1a_UTAUT == 'Helemaal mee eens'| BI1a_UTAUT == 'Mee eens'| BI1a_UTAUT == 'Een beetje mee eens') & Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')) /nrow(filter(data, Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')))*100, digits = 1)`% aan van plan te zijn om de CoronaMelder te gebruiken in de komende twee maanden (zie figuur \@ref(fig:intentiontousenonusers)). Nog `r round((nrow(filter(data, (BI1a_UTAUT == 'Neutraal') & Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')) /nrow(filter(data, Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')))*100, digits = 1)`% geeft aan hier neutraal in te staan. Het merendeel (`r round((nrow(filter(data, (BI1a_UTAUT == 'Helemaal mee oneens'| BI1a_UTAUT == 'Oneens'| BI1a_UTAUT == 'Een beetje oneens') & Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')) /nrow(filter(data, Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')))*100, digits = 1)`%) geeft aan niet van plan te zijn de CoronaMelder te gaan gebruiken.  
 
-```{r intentiontousenonusers, echo=FALSE, fig.width=7, fig.height=2, fig.cap="Intentie tot gebruik bij respondenten die de CoronaMelder op dit moment niet gebruiken", tab.cap="Intentie tot gebruik bij respondenten die de CoronaMelder op dit moment niet gebruiken"}
+```{r intentiontousenonusers, echo=FALSE, fig.width=7, fig.height=2, fig.cap="Intentie tot gebruik bij respondenten die de CoronaMelder nooit hebben gebruikt", tab.cap="Intentie tot gebruik bij respondenten die de CoronaMelder nooit hebben gebruikt"}
 
 # Order in which you would like to have the items appear (first = top, last = bottom) in the horizontal bar chart
 graph_variablenames = c("BI1a_UTAUT", 
