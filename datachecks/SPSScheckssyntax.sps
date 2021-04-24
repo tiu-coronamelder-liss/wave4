@@ -5,7 +5,7 @@ GET
   FILE='L_Corona_app_wave4_3p.sav'.
 DATASET NAME DataSet2 WINDOW=FRONT.
 
-* Remove the participants for which data was not complete.1608 rows in the dataset. 14 had missings. 1594 completes. 
+* Remove the participants for which data was not complete.
 USE ALL.
 COMPUTE filter_$=( ~ SYSMIS(duur)).
 VARIABLE LABELS filter_$ ' ~ SYSMIS(duur) (FILTER)'.
@@ -347,6 +347,11 @@ CROSSTABS
 * Notifications.
 FREQUENCIES VARIABLES=  notifications_1
  /ORDER=ANALYSIS.
+
+* Responses to notifications.
+FREQUENCIES VARIABLES=  Notification_behavior_quarantaine Notification_behavior_test Notification_fear Notification_symptoms Notification_justified
+ /ORDER=ANALYSIS.
+
 
 * Intention to adhere with and without symptoms.
 FREQUENCIES VARIABLES=  AdherenceNotificationMeasuresNosymptoms_Quarantaine AdherenceNotificationMeasuresNoSymptoms_Visits AdherenceNotificationMeasuresSymptoms_Quarantaine AdherenceNotificationMeasuresSymptoms_Visits 
