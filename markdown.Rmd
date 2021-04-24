@@ -8382,6 +8382,15 @@ ggdraw(theplot)
 
 ```
 
+## Verklarende modellen voor adoptie
+
+### Verklarend model adoptie op basis van het UTAUT
+
+### Verklarend model adoptie op basis van het HBM
+
+### Verklarend model adoptie op basis van contextspecifieke variabelen
+
+
 ## Effecten
 ### Meldingen en reacties op adviezen gegeven in de melding
 
@@ -10425,6 +10434,8 @@ ggdraw(theplot)
 
 ```
 
+
+#### Verklarend model voor opvolging adviezen gegeven in melding
 
 ### Intentie tot doorgeven GGD-sleutel na positieve test
 Als iemand positief is getest op het coronavirus kan men dit daarna via de app laten weten door de GGD-sleutel door te geven aan de GGD medewerker. Dan waarschuwt de app weer mensen bij wie de positief geteste persoon in de buurt is geweest. Van de respondenten heeft `r round((nrow(filter(data, (Intention_reportinfection == 'Helemaal mee eens'| Intention_reportinfection == 'Mee eens'| Intention_reportinfection == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%  de intentie om de GGD-sleutel door te geven. 
