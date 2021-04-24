@@ -203,6 +203,20 @@ data_wave_min1 <- data_wave_min1_in[!is.na(data_wave_min1_in$duur),]
 # Combine the dataset of the current wave (wave 2) with the previous wave (wave1). Only keep participants that completed both waves. 
 data_currentwave_wavemin1 = merge(data_wave_min1, data, by = "nomem_encr", all = FALSE, suffix = c("_wmin1", "_cw")) # all = FALSE to only include IDs present in both datasets.
 
+# Make variable for user status. Current wave.
+data_currentwave_wavemin1$user_status_intention_cw[data_currentwave_wavemin1$Behavior_UTAUT_cw == "Ik gebruik de CoronaMelder app op dit moment"] <- "Gebruiker_cw"
+data_currentwave_wavemin1$user_status_intention_cw[(data_currentwave_wavemin1$Behavior_UTAUT_cw == "Ik heb de CoronaMelder app nooit gebruikt") & (data_currentwave_wavemin1$BI1a_UTAUT_cw == 'Helemaal mee oneens'| data_currentwave_wavemin1$BI1a_UTAUT_cw == 'Oneens'| data_currentwave_wavemin1$BI1a_UTAUT_cw == 'Een beetje oneens')] <- "Nooit gebruikt en niet van plan_cw"
+data_currentwave_wavemin1$user_status_intention_cw[(data_currentwave_wavemin1$Behavior_UTAUT_cw == "Ik heb de CoronaMelder app nooit gebruikt") & (data_currentwave_wavemin1$BI1a_UTAUT_cw == 'Neutraal')] <- "Nooit gebruikt en neutraal_cw"
+data_currentwave_wavemin1$user_status_intention_cw[(data_currentwave_wavemin1$Behavior_UTAUT_cw == "Ik heb de CoronaMelder app nooit gebruikt") & (data_currentwave_wavemin1$BI1a_UTAUT_cw == 'Helemaal mee eens'| data_currentwave_wavemin1$BI1a_UTAUT_cw == 'Mee eens'| data_currentwave_wavemin1$BI1a_UTAUT_cw == 'Een beetje mee eens')] <- "Nooit gebruikt en wel van plan_cw"
+data_currentwave_wavemin1$user_status_intention_cw[data_currentwave_wavemin1$Behavior_UTAUT_cw == "Ik heb de CoronaMelder app in het verleden wel gebruikt maar op dit moment niet meer"] <- "Voormalig gebruiker_cw"
+
+# Previous wave
+data_currentwave_wavemin1$user_status_intention_wmin1[data_currentwave_wavemin1$Behavior_UTAUT_wmin1 == "Ik gebruik de CoronaMelder app op dit moment"] <- "Gebruiker_wmin1"
+data_currentwave_wavemin1$user_status_intention_wmin1[(data_currentwave_wavemin1$Behavior_UTAUT_wmin1 == "Ik heb de CoronaMelder app nooit gebruikt") & (data_currentwave_wavemin1$BI1a_UTAUT_wmin1 == 'Helemaal mee oneens'| data_currentwave_wavemin1$BI1a_UTAUT_wmin1 == 'Oneens'| data_currentwave_wavemin1$BI1a_UTAUT_wmin1 == 'Een beetje oneens')] <- "Nooit gebruikt en niet van plan_wmin1"
+data_currentwave_wavemin1$user_status_intention_wmin1[(data_currentwave_wavemin1$Behavior_UTAUT_wmin1 == "Ik heb de CoronaMelder app nooit gebruikt") & (data_currentwave_wavemin1$BI1a_UTAUT_wmin1 == 'Neutraal')] <- "Nooit gebruikt en neutraal_wmin1"
+data_currentwave_wavemin1$user_status_intention_wmin1[(data_currentwave_wavemin1$Behavior_UTAUT_wmin1 == "Ik heb de CoronaMelder app nooit gebruikt") & (data_currentwave_wavemin1$BI1a_UTAUT_wmin1 == 'Helemaal mee eens'| data_currentwave_wavemin1$BI1a_UTAUT_wmin1 == 'Mee eens'| data_currentwave_wavemin1$BI1a_UTAUT_wmin1 == 'Een beetje mee eens')] <- "Nooit gebruikt en wel van plan_wmin1"
+data_currentwave_wavemin1$user_status_intention_wmin1[data_currentwave_wavemin1$Behavior_UTAUT_wmin1 == "Ik heb de CoronaMelder app in het verleden wel gebruikt maar op dit moment niet meer"] <- "Voormalig gebruiker_wmin1"
+
 ##### Load dataset of all previous waves (not included on Github) and remove missing values
 ##### (Note: I am re-loading also what is above known as data and data_wave_min1 just to completely separate this process from the others)
 ##### (Note2: We have to see how easy it is to merge more than two dataframes for wave 3, for inspiration: https://stackoverflow.com/questions/15291613/merge-3-data-frames-by-column-names)
@@ -1847,6 +1861,22 @@ library(wordcloud)
 #wordcloud(words = head$term, freq = head$count, min.freq = 3,
 #  max.words=100, random.order=FALSE, rot.per=0.35, 
 #  colors=brewer.pal(8, "Dark2"))
+
+```
+
+### Gebruik CoronaMelder over de tijd
+In de tabel hieronder is het verloop in gebruikersstatus tussen de huidige en de vorige wave te zien. TODO: tabelopmaak en toelichting.
+
+
+```{r userstatustime, echo=FALSE, tab.cap="Verloop in gebruikersstatus"}
+
+table_userstatusintention_cw_wmin1 = table(data_currentwave_wavemin1$user_status_intention_cw, data_currentwave_wavemin1$user_status_intention_wmin1)
+df_userstatusintention_cw_wmin1 = as.data.frame.matrix(table_userstatusintention_cw_wmin1)
+#flextable(df_userstatusintention_cw_wmin1)
+#flextable(as.data.frame(table_userstatusintention_cw_wmin1))
+#flextable(data.frame(rbind(table_userstatusintention_cw_wmin1)))
+
+knitr::kable(df_userstatusintention_cw_wmin1, format="markdown")
 
 ```
 
@@ -4930,11 +4960,11 @@ ggdraw(theplot)
 
 Gebruiksvriendelijkheid, inspanningsverwachting en zelfeffectiviteit zijn factoren die belangrijk zijn in de adoptie van nieuwe technologie. Opvallend is dat van de mensen die de CoronaMelder nog *niet* gebruiken, 1 op de 5 mensen (`r round((nrow(filter(data, (EE1b_UTAUT == 'Helemaal mee eens'| EE1b_UTAUT == 'Mee eens'| EE1b_UTAUT == 'Een beetje mee eens') & Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')) /nrow(filter(data, Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')))*100, digits = 1)`%) denkt dat het veel tijd en energie kost om deze te gaan gebruiken en een aanzienlijk deel hier neutraal in staat (`r round((nrow(filter(data, (EE1b_UTAUT == 'Neutraal') & Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')) /nrow(filter(data, Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')))*100, digits = 1)`%). Ongeveer de helft (`r round((nrow(filter(data, (EE1b_UTAUT == 'Helemaal mee oneens'| EE1b_UTAUT == 'Oneens'| EE1b_UTAUT == 'Een beetje oneens') & Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')) /nrow(filter(data, Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')))*100, digits = 1)`%) is het hier mee oneens.
 
-Daar staat tegenover dat van de mensen die de CoronaMelder al *wel* gebruiken, slechts `r round((nrow(filter(data, (EE1a_UTAUT == 'Helemaal mee eens'| EE1a_UTAUT == 'Mee eens'| EE1a_UTAUT == 'Een beetje mee eens') & Behavior_UTAUT == 'Ik gebruik de CoronaMelder app op dit moment')) /nrow(filter(data, Behavior_UTAUT == 'Ik gebruik de CoronaMelder app op dit moment')))*100, digits = 1)`% aangaf dat het ze veel tijd en energie gekost had. Bijna 9 op de 10 (`r round((nrow(filter(data, (EE1a_UTAUT == 'Helemaal mee oneens'| EE1a_UTAUT == 'Oneens'| EE1a_UTAUT == 'Een beetje oneens') & Behavior_UTAUT == 'Ik gebruik de CoronaMelder app op dit moment')) /nrow(filter(data, Behavior_UTAUT == 'Ik gebruik de CoronaMelder app op dit moment')))*100, digits = 1)`%) respondenten gaven aan het niet eens te zijn met deze stelling. 
+Daar staat tegenover dat van de mensen die de CoronaMelder al *wel* gebruiken, slechts `r round((nrow(filter(data, (EE1a_UTAUT == 'Helemaal mee eens'| EE1a_UTAUT == 'Mee eens'| EE1a_UTAUT == 'Een beetje mee eens') & Behavior_UTAUT == 'Ik gebruik de CoronaMelder app op dit moment')) /nrow(filter(data, Behavior_UTAUT == 'Ik gebruik de CoronaMelder app op dit moment')))*100, digits = 1)`% aangaf dat het ze veel tijd en energie gekost had. Een overgrote meerderheid (`r round((nrow(filter(data, (EE1a_UTAUT == 'Helemaal mee oneens'| EE1a_UTAUT == 'Oneens'| EE1a_UTAUT == 'Een beetje oneens') & Behavior_UTAUT == 'Ik gebruik de CoronaMelder app op dit moment')) /nrow(filter(data, Behavior_UTAUT == 'Ik gebruik de CoronaMelder app op dit moment')))*100, digits = 1)`%) gaf aan het niet eens te zijn met deze stelling. 
 
 Hetzelfde patroon was te zien voor de vraag over gebruiksgemak: het merendeel (`r round((nrow(filter(data, (EE2a_UTAUT == 'Helemaal mee eens'| EE2a_UTAUT == 'Mee eens'| EE2a_UTAUT == 'Een beetje mee eens') & Behavior_UTAUT == 'Ik gebruik de CoronaMelder app op dit moment')) /nrow(filter(data, Behavior_UTAUT == 'Ik gebruik de CoronaMelder app op dit moment')))*100, digits = 1)`%) van de respondenten die de CoronaMelder op dit moment gebruiken was het eens met de stelling dat de CoronaMelder makkelijk te gebruiken is. Van degenen die de CoronaMelder nooit hebben gebruikt gaf `r round((nrow(filter(data, (EE2b_UTAUT == 'Helemaal mee eens'| EE2b_UTAUT == 'Mee eens'| EE2b_UTAUT == 'Een beetje mee eens') & Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')) /nrow(filter(data, Behavior_UTAUT == 'Ik heb de CoronaMelder app nooit gebruikt')))*100, digits = 1)`% aan dat hij/zij verwacht dat de CoronaMelder makkelijk te gebruiken is. 
 
-```{r effortexpectancynonusers, echo=FALSE, fig.width=7, fig.height=2, fig.cap="Gebruiksvriendelijkheid en inspanningsverwachting bij respondenten die de CoronaMelder op dit moment niet gebruiken", tab.cap="Gebruiksvriendelijkheid en inspanningsverwachting bij respondenten die de CoronaMelder op dit moment niet gebruiken"}
+```{r effortexpectancynonusers, echo=FALSE, fig.width=7, fig.height=2, fig.cap="Gebruiksvriendelijkheid en inspanningsverwachting bij respondenten die de CoronaMelder nooit gebruikt hebben", tab.cap="Gebruiksvriendelijkheid en inspanningsverwachting bij respondenten die de CoronaMelder nooit gebruikt hebben"}
 
 # Order in which you would like to have the items appear (first = top, last = bottom) in the horizontal bar chart
 graph_variablenames = c("EE1b_UTAUT", 
@@ -8361,15 +8391,17 @@ In totaal hebben `r nrow(filter(data, (Behavior_UTAUT == 'Ik gebruik de CoronaMe
 #### Intentie tot opvolgen adviezen gegeven in de melding
 Aan de respondenten is gevraagd in hoeverre zij de intentie hebben om, na ontvangen van een melding, zich te houden aan de adviezen die in een melding van de CoronaMelder worden gegeven. Om dit te onderzoeken werd proefpersonen twee situaties voorgelegd (situatie waarin men wel of geen symptomen had) en werd een screenshot van de melding getoond. 
 
-In figuur \@ref(fig:adherencenotificationsnosymp) is te zien dat respondenten over het algemeen de juiste intenties hebben wat betreft het opvolgen van geadviseerd gedrag wanneer men geen symptomen heeft. Zo zouden ongeveer drie op de vier thuisblijven zolang geadviseerd (`r round((nrow(filter(data, (AdherenceNotificationMeasuresNosymptoms_Quarantaine == 'Helemaal mee eens'| AdherenceNotificationMeasuresNosymptoms_Quarantaine == 'Mee eens'| AdherenceNotificationMeasuresNosymptoms_Quarantaine == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%), en geen bezoek ontvangen (`r round((nrow(filter(data, (AdherenceNotificationMeasuresNoSymptoms_Visits == 'Helemaal mee eens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Mee eens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Een beetje mee eens'))) /nrow(filter(data, (AdherenceNotificationMeasuresNoSymptoms_Visits == 'Helemaal mee oneens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Oneens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Een beetje oneens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Ik zou de CoronaMelder app niet gebruiken'|AdherenceNotificationMeasuresNoSymptoms_Visits == 'Helemaal mee eens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Mee eens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Een beetje mee eens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Neutraal'))))*100, digits = 1)`%). Bijna de helft geeft aan een coronatest aan te zullen vragen (`r round((nrow(filter(data, (AdherenceNotificationMeasuresNosymptoms_Test == 'Helemaal mee eens'| AdherenceNotificationMeasuresNosymptoms_Test == 'Mee eens'| AdherenceNotificationMeasuresNosymptoms_Test == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%) en iets meer dan een kwart gaf aan de huisarts te bellen (`r round((nrow(filter(data, (AdherenceNotificationMeasuresNosymptoms_CallGP == 'Helemaal mee eens'| AdherenceNotificationMeasuresNosymptoms_CallGP == 'Mee eens'| AdherenceNotificationMeasuresNosymptoms_CallGP == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%).
+In figuur \@ref(fig:adherencenotificationsnosymp) is te zien dat respondenten over het algemeen de juiste intenties hebben wat betreft het opvolgen van geadviseerd gedrag wanneer men geen symptomen heeft. Zo zouden ongeveer twee op de drie thuisblijven zolang geadviseerd (`r round((nrow(filter(data, (AdherenceNotificationMeasuresNosymptoms_Quarantaine == 'Helemaal mee eens'| AdherenceNotificationMeasuresNosymptoms_Quarantaine == 'Mee eens'| AdherenceNotificationMeasuresNosymptoms_Quarantaine == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%), en geen bezoek ontvangen (`r round((nrow(filter(data, (AdherenceNotificationMeasuresNoSymptoms_Visits == 'Helemaal mee eens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Mee eens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Een beetje mee eens'))) /nrow(filter(data, (AdherenceNotificationMeasuresNoSymptoms_Visits == 'Helemaal mee oneens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Oneens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Een beetje oneens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Ik zou de CoronaMelder app niet gebruiken'|AdherenceNotificationMeasuresNoSymptoms_Visits == 'Helemaal mee eens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Mee eens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Een beetje mee eens'| AdherenceNotificationMeasuresNoSymptoms_Visits == 'Neutraal'))))*100, digits = 1)`%). Ongeveer de helft geeft aan een coronatest aan te zullen vragen (`r round((nrow(filter(data, (AdherenceNotificationMeasuresNosymptoms_Test == 'Helemaal mee eens'| AdherenceNotificationMeasuresNosymptoms_Test == 'Mee eens'| AdherenceNotificationMeasuresNosymptoms_Test == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%) en rond een kwart gaf aan de huisarts te bellen (`r round((nrow(filter(data, (AdherenceNotificationMeasuresNosymptoms_CallGP == 'Helemaal mee eens'| AdherenceNotificationMeasuresNosymptoms_CallGP == 'Mee eens'| AdherenceNotificationMeasuresNosymptoms_CallGP == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%).
 
 ``` {r adherencenotificationsnosymp, echo=FALSE, fig.width=7, fig.height=2.5, fig.cap="Intentie tot opvolgen adviezen zonder symptomen", tab.cap="Intentie tot opvolgen adviezen zonder symptomen"}
 # Order in which you would like to have the items appear (first = top, last = bottom) in the horizontal bar chart
 graph_variablenames = c("AdherenceNotificationMeasuresNosymptoms_Test", 
-                        "AdherenceNotificationMeasuresNosymptoms_Quarantaine", 
+                        "AdherenceNotificationMeasuresNosymptoms_Quarantaine",
+                        "AdherenceNotificationMeasuresNoSymptoms_Visits",
                         "AdherenceNotificationMeasuresNosymptoms_CallGP")
 graph_questionlabels = c("Bellen om coronatest aan te vragen", 
                          "Thuisblijven zo lang de melding adviseert", 
+                         "Geen bezoek ontvangen", 
                          "De huisarts bellen"); 
 
 
@@ -8401,45 +8433,6 @@ aligned <- align_plots(baseplot, theplot, align="v")
 ggdraw(aligned[[2]])
 ```
 
-Omdat de vraag met betrekking tot bezoek ontvangen niet was uitgezet bij alle deelnemers (1370 van de 1447 in totaal) presenteren we de reacties op deze vraag in een losse grafiek:
-
-``` {r adherencenotificationsnosympvisit, echo=FALSE, fig.width=7, fig.height=2.5, fig.cap="Intentie tot opvolgen adviezen zonder symptomen", tab.cap="Intentie tot opvolgen adviezen zonder symptomen"}
-# Order in which you would like to have the items appear (first = top, last = bottom) in the horizontal bar chart
-graph_variablenames = c("AdherenceNotificationMeasuresNoSymptoms_Visits")
-graph_questionlabels = c("Geen bezoek ontvangen"); 
-
-
-# These questions have 8 answer categories: Helemaal mee eens - Helemaal mee oneens and no use. The following color palette should be used:
-color_palette = my_palette_nonuse
-# Order of the question categories: first = most green, last = most red
-graph_answercategories = c("Ik zou de CoronaMelder app niet gebruiken", "Helemaal mee eens", "Mee eens", "Een beetje mee eens", "Neutraal", "Een beetje oneens", "Oneens", "Helemaal mee oneens"); 
-
-# Create a dataframe for the plot
-#First only keep the variables you wish to keep. Note: nomem_enc is the participant id
-data_graph_wideformat = select(data, nomem_encr, all_of(graph_variablenames))
-
-#Convert it to long format
-data_graph_longformat = melt(data_graph_wideformat, id.vars = c('nomem_encr'), measure.vars = graph_variablenames)
-
-# Set the correct ordering of the questions (by default the first variable is placed on the bottom)
-data_graph_longformat$variable <- factor(data_graph_longformat$variable,levels = rev(graph_variablenames))
-
-# Also invert the order of the question labels (as default is that the first element of the vector is placed on the bottom)
-graph_questionlabels = rev(graph_questionlabels)
-
-# Set the correct ordering of the answer categories (by default on alphabetic order)
-data_graph_longformat$value <- factor(data_graph_longformat$value,levels = graph_answercategories)
-
-# Remove NA
-data_graph_longformat = na.omit(data_graph_longformat)
-
-# Create the plot
-theplot <- ggplot(data=data_graph_longformat, aes(fill=value, x=variable)) + theme_bw() + geom_bar(aes(y = (..count..)/sum(..count..)*length(graph_variablenames))) + scale_y_continuous(breaks=seq(0, 1, 0.1), labels=percent_format(accuracy = 1)) + coord_flip() + labs(x = "", y = "", fill = "") + scale_fill_manual(values=color_palette, drop=FALSE, labels=stringr::str_wrap(graph_answercategories, width = 10)) + scale_x_discrete(labels=stringr::str_wrap(graph_questionlabels, width = 30)) + theme(plot.margin = margin(0, 0, 0, 0), legend.text=element_text(size=8))
-
-aligned <- align_plots(baseplot, theplot, align="v")
-ggdraw(aligned[[2]])
-
-```
 
 ``` {r adherencenotificationsnosymptab, echo=FALSE, fig.width=7, fig.height=2.5, fig.cap="Intentie tot opvolgen adviezen zonder symptomen", tab.cap="Intentie tot opvolgen adviezen zonder symptomen"}
 # Order in which you would like to have the items appear (first = top, last = bottom) in the horizontal bar chart
@@ -8686,8 +8679,8 @@ if( sum(mcnemar.table) != nrow(data)) stop('mcnemar table does not sum up to 159
 ```
 Daarnaast liet de McNemar toets (X²(`r mcnemartest$parameter`) = `r round(mcnemartest$statistic, digits = 2)`, p `r ifelse(mcnemartest$p.value < 0.001, "<0.001", paste("=", round(mcnemartest$p.value, digits = 3)))`) zien dat er `r if(mcnemartest$p.value > 0.05){"g"}`een significant verschil was tussen de huidige meting (`r round((nrow(filter(data_currentwave_wavemin1, (AdherenceNotificationMeasuresNosymptoms_Quarantaine_agree_cw == 'Totaal eens_cw'))) /nrow(filter(data_currentwave_wavemin1)))*100, digits = 1)`%) en de vorige meting (`r round((nrow(filter(data_currentwave_wavemin1, (AdherenceNotificationMeasuresNosymptoms_Quarantaine_agree_wmin1 == 'Totaal eens_wmin1'))) /nrow(filter(data_currentwave_wavemin1)))*100, digits = 1)`%) in het percentage dat aangaf de intentie te hebben om thuis te blijven zo lang als de melding adviseert. 
 ```{r McNemaradherencenotificationsintentionvisitsovertimenosympt, echo=FALSE}
-# First select only cases that did not have a missing on this variable (see report - items was added later)
-data_currentwave_wavemin1_visitsnosymptcomplete = data_currentwave_wavemin1[!is.na(data_currentwave_wavemin1$AdherenceNotificationMeasuresNoSymptoms_Visits_cw),]
+# First select only cases that did not have a missing on this variable in w3 (see report - items was added later)
+data_currentwave_wavemin1_visitsnosymptcomplete = data_currentwave_wavemin1[!is.na(data_currentwave_wavemin1$AdherenceNotificationMeasuresNoSymptoms_Visits_wmin1),]
 # First calculate a proportion for the variable for the current wave. 
 data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_agree_cw[(data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Helemaal mee eens'| data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Mee eens'| data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Een beetje mee eens')] <- "Totaal eens_cw"
 data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_agree_cw[(data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Neutraal'| data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Een beetje oneens'| data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Oneens'| data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Helemaal mee oneens'| data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Ik zou de CoronaMelder app niet gebruiken')] <- "Neutraal, niet mee eens_cw"
@@ -8700,10 +8693,10 @@ data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoS
 mcnemar.table = table(data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_agree_cw, data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_agree_wmin1)
 mcnemartest = mcnemar.test(mcnemar.table)
 
-# NOTE: missing values in wmin1 because this question was not included for the entire duration of wave3
-# if( sum(mcnemar.table) != nrow(data_currentwave_wavemin1_visitsnosymptcomplete)) stop('mcnemar table does not sum up to 1594')
+# NOTE: missing values in wmin1 because this question was not included for the entire duration of wave3. Therefore, sums up to 1301 instead of 1368. 
+# if( sum(mcnemar.table) != nrow(data_currentwave_wavemin1_visitsnosymptcomplete)) stop('mcnemar table does not sum up to nrow')
 ```
-De McNemar toets (X²(`r mcnemartest$parameter`) = `r round(mcnemartest$statistic, digits = 2)`, p `r ifelse(mcnemartest$p.value < 0.001, "<0.001", paste("=", round(mcnemartest$p.value, digits = 3)))`) liet ook zien dat er `r if(mcnemartest$p.value > 0.05){"g"}`een significant verschil was tussen de huidige meting (`r round((nrow(filter(data_currentwave_wavemin1_visitsnosymptcomplete, (AdherenceNotificationMeasuresNoSymptoms_Visits_agree_cw == 'Totaal eens_cw'))) /nrow(filter(data_currentwave_wavemin1_visitsnosymptcomplete)))*100, digits = 1)`%) en de vorige meting (`r round((nrow(filter(data_currentwave_wavemin1_visitsnosymptcomplete, (AdherenceNotificationMeasuresNoSymptoms_Visits_agree_wmin1 == 'Totaal eens_wmin1'))) /nrow(filter(data_currentwave_wavemin1_visitsnosymptcomplete)))*100, digits = 1)`%) in het percentage dat aangaf de intentie te hebben om geen bezoek te ontvangen.
+De McNemar toets (X²(`r mcnemartest$parameter`) = `r round(mcnemartest$statistic, digits = 2)`, p `r ifelse(mcnemartest$p.value < 0.001, "<0.001", paste("=", round(mcnemartest$p.value, digits = 3)))`) liet ook zien dat er `r if(mcnemartest$p.value > 0.05){"g"}`een significant verschil was tussen de huidige meting (`r round((nrow(filter(data_currentwave_wavemin1_visitsnosymptcomplete, (AdherenceNotificationMeasuresNoSymptoms_Visits_agree_cw == 'Totaal eens_cw'))) /nrow(filter(data_currentwave_wavemin1_visitsnosymptcomplete)))*100, digits = 1)`%) en de vorige meting (`r round((nrow(filter(data_currentwave_wavemin1_visitsnosymptcomplete, (AdherenceNotificationMeasuresNoSymptoms_Visits_agree_wmin1 == 'Totaal eens_wmin1'))) /nrow(filter(data_currentwave_wavemin1_visitsnosymptcomplete)))*100, digits = 1)`%) in het percentage dat aangaf de intentie te hebben om geen bezoek te ontvangen. Vanwege missende waarden op deze variabele in de vorige wave (3) is deze test met 1301 in plaats van 1368 waarnemingen gedaan. Om deze zelfde reden wijkt het percentage hier genoemd voor de huidige wave (71.9%) iets af van het percentage hierboven genoemd (71.7%).
 ```{r McNemarMcNemaradherencenotificationsintentiongpovertimenosympt, echo=FALSE}
 # First calculate a proportion for the variable for the current wave. 
 data_currentwave_wavemin1$AdherenceNotificationMeasuresNosymptoms_CallGP_agree_cw[(data_currentwave_wavemin1$AdherenceNotificationMeasuresNosymptoms_CallGP_cw == 'Helemaal mee eens'| data_currentwave_wavemin1$AdherenceNotificationMeasuresNosymptoms_CallGP_cw == 'Mee eens'| data_currentwave_wavemin1$AdherenceNotificationMeasuresNosymptoms_CallGP_cw == 'Een beetje mee eens')] <- "Totaal eens_cw"
@@ -8912,9 +8905,11 @@ Dezelfde bepalingen zijn ook gedaan in alleen de subsample (n = `r nrow(filter(d
 # Order in which you would like to have the items appear (first = top, last = bottom) in the horizontal bar chart
 graph_variablenames = c("AdherenceNotificationMeasuresNosymptoms_Test", 
                         "AdherenceNotificationMeasuresNosymptoms_Quarantaine", 
+                        "AdherenceNotificationMeasuresNoSymptoms_Visits", 
                         "AdherenceNotificationMeasuresNosymptoms_CallGP")
 graph_questionlabels = c("Bellen om coronatest aan te vragen", 
                          "Thuisblijven zo lang de melding adviseert", 
+                         "Geen bezoek ontvangen", 
                          "De huisarts bellen"); 
 
 # These questions have 8 answer categories: Helemaal mee eens - Helemaal mee oneens and no use. 
@@ -8950,48 +8945,6 @@ ggdraw(aligned[[2]])
 
 ```
 
-Omdat de vraag met betrekking tot bezoek ontvangen niet was uitgezet bij alle deelnemers (437 van de 463 gebruikers) presenteren we de reacties op deze vraag in een losse grafiek:
-
-``` {r adherencenotificationsnosympcurrentusersvisit, message=FALSE, echo=FALSE, fig.width=7, fig.height=2.2, fig.cap="Intentie tot opvolgen adviezen zonder symptomen - alleen huidige gebruikers", tab.cap="Intentie tot opvolgen adviezen zonder symptomen - alleen huidige gebruikers"}
-# Order in which you would like to have the items appear (first = top, last = bottom) in the horizontal bar chart
-graph_variablenames = c("AdherenceNotificationMeasuresNoSymptoms_Visits")
-graph_questionlabels = c("Geen bezoek ontvangen"); 
-
-# These questions have 8 answer categories: Helemaal mee eens - Helemaal mee oneens and no use. 
-# However, for without symptoms, nobody answered "Ik zou de CoronaMelder app niet gebruiken". Therefore, the following color palette should be used:
-color_palette = my_palette7
-# Order of the question categories: first = most green, last = most red
-graph_answercategories = c("Helemaal mee eens", "Mee eens", "Een beetje mee eens", "Neutraal", "Een beetje oneens", "Oneens", "Helemaal mee oneens"); 
-
-# Create a dataframe for the plot
-# Select only the current users
-data_selected = data[ which(data$Behavior_UTAUT=='Ik gebruik de CoronaMelder app op dit moment'
-), ]
-#First only keep the variables you wish to keep. Note: nomem_enc is the participant id
-data_graph_wideformat = select(data_selected, nomem_encr, all_of(graph_variablenames))
-
-#Convert it to long format
-data_graph_longformat = melt(data_graph_wideformat, id.vars = c('nomem_encr'), measure.vars = graph_variablenames)
-
-# Set the correct ordering of the questions (by default the first variable is placed on the bottom)
-data_graph_longformat$variable <- factor(data_graph_longformat$variable,levels = rev(graph_variablenames))
-
-# Also invert the order of the question labels (as default is that the first element of the vector is placed on the bottom)
-graph_questionlabels = rev(graph_questionlabels)
-
-# Set the correct ordering of the answer categories (by default on alphabetic order)
-data_graph_longformat$value <- factor(data_graph_longformat$value,levels = graph_answercategories)
-
-# Remove NAs
-data_graph_longformat = na.omit(data_graph_longformat)
-
-# Create the plot
-theplot <- ggplot(data=data_graph_longformat, aes(fill=value, x=variable)) + theme_bw() + geom_bar(aes(y = (..count..)/sum(..count..)*length(graph_variablenames))) + scale_y_continuous(breaks=seq(0, 1, 0.1), labels=percent_format(accuracy = 1)) + coord_flip() + labs(x = "", y = "", fill = "") + scale_fill_manual(values=color_palette, drop=FALSE, labels=stringr::str_wrap(graph_answercategories, width = 10)) + scale_x_discrete(labels=stringr::str_wrap(graph_questionlabels, width = 30)) + theme(plot.margin = margin(0, 0, 0, 0), legend.text=element_text(size=8))
-
-aligned <- align_plots(baseplot, theplot, align="v")
-ggdraw(aligned[[2]])
-
-```
 
 ``` {r adherencenotificationsnosympcurrentuserstable, message=FALSE, echo=FALSE, fig.width=7, fig.height=2.2, fig.cap="Intentie tot opvolgen adviezen zonder symptomen - alleen huidige gebruikers", tab.cap="Intentie tot opvolgen adviezen zonder symptomen - alleen huidige gebruikers"}
 # Order in which you would like to have the items appear (first = top, last = bottom) in the horizontal bar chart
@@ -9259,8 +9212,8 @@ chisqtest = chisq.test(chisq.table)
 ```
 Om te bepalen of de naleving van maatregelen, wanneer men geen symptomen heeft, bij de gebruikers verschilt tussen de huidige en de vorige wave is een chi kwadraat uitgevoerd. Een complexiteit in deze analyse is dat sommige deelnemers in de vorige wave gebruikers waren en in de huidige niet (meer), of andersom. Om deze reden is in deze test een vergelijking gemaakt waarin de gebruikersstatus in beide waves is meegenomen. De chi kwadraat toets (X²(`r chisqtest$parameter`) = `r round(chisqtest$statistic, digits = 2)`, p `r ifelse(chisqtest$p.value < 0.001, "<0.001", paste("=", round(chisqtest$p.value, digits = 3)))`) liet zien dat er `r if(chisqtest$p.value > 0.05){"g"}`een significant verschil was in het percentage gebruikers in de huidige wave (`r round((nrow(filter(data_selected_cw, AdherenceNotificationMeasuresNosymptoms_Quarantaine_agree_cw == 'Totaal eens_cw')) /nrow(data_selected_cw))*100, digits = 1)`%) dat aangaf het eens te zijn met de stelling dat hij/zij zonder symptomen in quarantaine zou blijven zo lang als de melding adviseert, vergeleken met het percentage gebruikers uit de vorige wave dat in de vorige wave aangaf het hiermee eens te zijn (`r round((nrow(filter(data_selected_wmin1, AdherenceNotificationMeasuresNosymptoms_Quarantaine_agree_wmin1 == 'Totaal eens_wmin1')) /nrow(data_selected_wmin1))*100, digits = 1)`%).
 ```{r Chisquareintentionadherencevisitsusersnosymptovertime, echo=FALSE}
-# First select only cases that did not have a missing on this variable (see report - items was added later)
-data_currentwave_wavemin1_visitsnosymptcomplete = data_currentwave_wavemin1[!is.na(data_currentwave_wavemin1$AdherenceNotificationMeasuresNoSymptoms_Visits_cw),]
+# First select only cases that did not have a missing on this variable for the previous wave (see report - items was added later)
+data_currentwave_wavemin1_visitsnosymptcomplete = data_currentwave_wavemin1[!is.na(data_currentwave_wavemin1$AdherenceNotificationMeasuresNoSymptoms_Visits_wmin1),]
 # First calculate a proportion for the variable for the current wave. 
 data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_agree_cw[(data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Helemaal mee eens'| data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Mee eens'| data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Een beetje mee eens')] <- "Totaal eens_cw"
 data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_agree_cw[(data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Neutraal'| data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Een beetje oneens'| data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Oneens'| data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Helemaal mee oneens'| data_currentwave_wavemin1_visitsnosymptcomplete$AdherenceNotificationMeasuresNoSymptoms_Visits_cw == 'Ik zou de CoronaMelder app niet gebruiken')] <- "Neutraal, niet mee eens_cw"
@@ -9281,7 +9234,7 @@ rownames(chisq.table) <- c('cw', 'wmin1')
 # Convert into a table that can be used for the chi square test
 chisqtest = chisq.test(chisq.table) 
 ```
-Om te bepalen of de naleving van maatregelen, wanneer men geen symptomen heeft, bij de gebruikers verschilt tussen de huidige en de vorige wave is een chi kwadraat uitgevoerd. Een complexiteit in deze analyse is dat sommige deelnemers in de vorige wave gebruikers waren en in de huidige niet (meer), of andersom. Om deze reden is in deze test een vergelijking gemaakt waarin de gebruikersstatus in beide waves is meegenomen. De chi kwadraat toets (X²(`r chisqtest$parameter`) = `r round(chisqtest$statistic, digits = 2)`, p `r ifelse(chisqtest$p.value < 0.001, "<0.001", paste("=", round(chisqtest$p.value, digits = 3)))`) liet zien dat er `r if(chisqtest$p.value > 0.05){"g"}`een significant verschil was in het percentage gebruikers in de huidige wave (`r round((nrow(filter(data_selected_cw, AdherenceNotificationMeasuresNoSymptoms_Visits_agree_cw == 'Totaal eens_cw')) /nrow(data_selected_cw))*100, digits = 1)`%) dat aangaf het eens te zijn met de stelling dat hij/zij zonder symptomen geen bezoek zou ontvangen vergeleken met het percentage gebruikers uit de vorige wave dat in de vorige wave aangaf het hiermee eens te zijn (`r round((nrow(filter(data_selected_wmin1, AdherenceNotificationMeasuresNoSymptoms_Visits_agree_wmin1 == 'Totaal eens_wmin1')) /nrow(data_selected_wmin1))*100, digits = 1)`%).
+Om te bepalen of de naleving van maatregelen, wanneer men geen symptomen heeft, bij de gebruikers verschilt tussen de huidige en de vorige wave is een chi kwadraat uitgevoerd. Een complexiteit in deze analyse is dat sommige deelnemers in de vorige wave gebruikers waren en in de huidige niet (meer), of andersom. Om deze reden is in deze test een vergelijking gemaakt waarin de gebruikersstatus in beide waves is meegenomen. De chi kwadraat toets (X²(`r chisqtest$parameter`) = `r round(chisqtest$statistic, digits = 2)`, p `r ifelse(chisqtest$p.value < 0.001, "<0.001", paste("=", round(chisqtest$p.value, digits = 3)))`) liet zien dat er `r if(chisqtest$p.value > 0.05){"g"}`een significant verschil was in het percentage gebruikers in de huidige wave (`r round((nrow(filter(data_selected_cw, AdherenceNotificationMeasuresNoSymptoms_Visits_agree_cw == 'Totaal eens_cw')) /nrow(data_selected_cw))*100, digits = 1)`%) dat aangaf het eens te zijn met de stelling dat hij/zij zonder symptomen geen bezoek zou ontvangen vergeleken met het percentage gebruikers uit de vorige wave dat in de vorige wave aangaf het hiermee eens te zijn (`r round((nrow(filter(data_selected_wmin1, AdherenceNotificationMeasuresNoSymptoms_Visits_agree_wmin1 == 'Totaal eens_wmin1')) /nrow(data_selected_wmin1))*100, digits = 1)`%). Vanwege missende waarden op deze variabele in de vorige wave (3) is deze test met een lager aantal waarnemingen (de deelnemers die deze vraag in wave 3 en 4 hebben ingevuld) gedaan. Om deze zelfde reden wijkt het percentage hier genoemd voor de huidige wave (91%) iets af van het percentage hierboven genoemd (90.5%).
 ```{r ChisquareintentionadherenceGPusersnosymptovertime, echo=FALSE}
 # First calculate a proportion for the variable for the current wave. 
 data_currentwave_wavemin1$AdherenceNotificationMeasuresNosymptoms_CallGP_agree_cw[(data_currentwave_wavemin1$AdherenceNotificationMeasuresNosymptoms_CallGP_cw == 'Helemaal mee eens'| data_currentwave_wavemin1$AdherenceNotificationMeasuresNosymptoms_CallGP_cw == 'Mee eens'| data_currentwave_wavemin1$AdherenceNotificationMeasuresNosymptoms_CallGP_cw == 'Een beetje mee eens')] <- "Totaal eens_cw"
@@ -11078,6 +11031,6 @@ pairwiseNominalIndependence(Matriz,
 
 # Bijlagen
 Als bijlage kunt u bij dit rapport vinden:  
-- Vragenlijst wave 3  
+- Vragenlijst wave 4  
 - Vergelijking demografie sample huidig onderzoek, LISS core panel en CBS  
 
