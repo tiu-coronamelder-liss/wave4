@@ -29,6 +29,7 @@ library(lmtest) # for logistic regression
 library(pscl)
 library(ggplot2)
 library(Hmisc)
+library(psych)
 
 # For tables
 library(flextable)
@@ -36,7 +37,7 @@ library(arsenal)
 library(data.table)
 
 
-##### Load dataset of all previous waves (not included on Github) and remove missing values
+##### Load dataset of wave 1 and wave 4 and remove missing values
 
 ##### Wave 1
 data_wave1_in <- read.spss('../L_CoronaMelder_wave1_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
@@ -100,7 +101,7 @@ data_wave4_adherenceNS <- subset(data_wave4_adherence, AdherenceNotificationMeas
 #View(data_wave4_adherenceNS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresNosymptoms_Test","AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
 
 # Lookup table for variable names to map them into descriptions (for the table)
-var_lookup <- data.frame(variable = c('PE_UTAUT', 'SI_UTAUT', 'FC_UTAUT', 'EE_UTAUT', 'Beliefs_voluntariness_dummy', 'lftdcat', 'geslacht', 'PSus_HBM', 'PSev_HBM', 'HBM_selfefficacy_CoronaMelder', 'HBM_barriers_CoronaMelder', 'HBM_perceivedbenefits_CoronaMelder', 'Adherence_Selfefficacy', 'Adherence_Benefits', 'Adherence_Barriers', 'Beliefs_voluntariness', 'Beliefs_fear', 'Beliefs_notificationfear', 'Beliefs_benefiteconomic', 'Beliefs_civicduty', 'Beliefs_TrustGovernment', 'Beliefs_Protectriskgroups', 'Beliefs_falsesecurityx', 'Beliefs_Conspiracyx', 'Beliefs_monitoringx', 'Beliefs_technologyperformance_dummy', 'Beliefs_fear_dummy', 'Beliefs_notificationfear_dummy', 'Beliefs_benefiteconomic_dummy', 'Beliefs_civicduty_dummy', 'Beliefs_TrustGovernment_dummy', 'Beliefs_Protectriskgroups_dummy', 'HBM_PSusother_dummy', 'HBM_PSevother_dummy'), vardesc = c('Verwachte effectiviteit', 'Sociale invloeden', 'Faciliterende omstandigheden', 'Inspanningsverwachting', 'Verplichting tot gebruik', 'Leeftijd', 'Geslacht', 'Waargenomen vatbaarheid', 'Waargenomen ernst', 'Zelfeffectiviteit', 'Barrières voor gebruik', 'Persoonlijke voor- en nadelen', 'Zelfeffectiviteit (opvolging)', 'Persoonlijke voor- en nadelen (opvolging)', 'Barrières (opvolging)', 'Verplichting tot gebruik', 'Angst voor CoronaMelder', 'Angst voor meldingen', 'Maatschappelijke gevolgen', 'Goede burger', 'Vertrouwen in de overheid', 'Risicogroepen beschermen', 'Schijnveiligheid', 'Complottheorieën', 'Surveillance', 'Adequaatheid techniek', 'Angst voor CoronaMelder', 'Angst voor meldingen', 'Maatschappelijke gevolgen', 'Goede burger', 'Vertrouwen in de overheid', 'Risicogroepen beschermen', 'Risico om anderen te besmetten', 'Ernst van anderen besmetten'))
+var_lookup <- data.frame(variable = c('PE_UTAUT', 'SI_UTAUT', 'FC_UTAUT', 'EE_UTAUT', 'Beliefs_voluntariness_dummy', 'lftdcat', 'geslacht', 'PSus_HBM', 'PSev_HBM', 'HBM_selfefficacy_CoronaMelder', 'HBM_barriers_CoronaMelder', 'HBM_perceivedbenefits_CoronaMelder', 'Adherence_Selfefficacy', 'Adherence_Benefits', 'Adherence_Barriers', 'Beliefs_voluntariness', 'Beliefs_fear', 'Beliefs_notificationfear', 'Beliefs_benefiteconomic', 'Beliefs_civicduty', 'Beliefs_TrustGovernment', 'Beliefs_Protectriskgroups', 'Beliefs_falsesecurityx', 'Beliefs_Conspiracyx', 'Beliefs_monitoringx', 'Beliefs_technologyperformance_dummy', 'Beliefs_fear_dummy', 'Beliefs_notificationfear_dummy', 'Beliefs_benefiteconomic_dummy', 'Beliefs_civicduty_dummy', 'Beliefs_TrustGovernment_dummy', 'Beliefs_Protectriskgroups_dummy', 'HBM_PSusother_dummy', 'HBM_PSevother_dummy', 'Media_dummy'), vardesc = c('Verwachte effectiviteit', 'Sociale invloeden', 'Faciliterende omstandigheden', 'Inspanningsverwachting', 'Verplichting tot gebruik', 'Leeftijd', 'Geslacht', 'Waargenomen vatbaarheid', 'Waargenomen ernst', 'Zelfeffectiviteit', 'Barrières voor gebruik', 'Persoonlijke voor- en nadelen', 'Zelfeffectiviteit (opvolging)', 'Persoonlijke voor- en nadelen (opvolging)', 'Barrières (opvolging)', 'Verplichting tot gebruik', 'Angst voor CoronaMelder', 'Angst voor meldingen', 'Maatschappelijke gevolgen', 'Goede burger', 'Vertrouwen in de overheid', 'Risicogroepen beschermen', 'Schijnveiligheid', 'Complottheorieën', 'Surveillance', 'Adequaatheid techniek', 'Angst voor CoronaMelder', 'Angst voor meldingen', 'Maatschappelijke gevolgen', 'Goede burger', 'Vertrouwen in de overheid', 'Risicogroepen beschermen', 'Risico om anderen te besmetten', 'Ernst van anderen besmetten', 'Media'))
 ```
 
 
@@ -257,6 +258,8 @@ data_wave4$HBM_PSusother_dummy <- car::recode(data_wave4$HBM_PSus_other2, '1=0; 
 #View(data_wave4[,c("HBM_PSus_other2","HBM_PSusother_dummy")])
 data_wave4$HBM_PSevother_dummy <- car::recode(data_wave4$HBM_PSev_other2, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent higher severity 
 #View(data_wave4[,c("HBM_PSev_other2","Beliefs_PSevother_dummy")])
+data_wave4$Media_dummy <- car::recode(data_wave4$Media, '1=0; 2=1; 3=1; 4=1; 99=0')
+#View(data_wave4[,c("Media","Media_dummy")])
 
 #Items are merged into one variable for the logistic regression. NOTE: only 4 answer categories. 
 data_wave4$Beliefs_falsesecurity1[data_wave4$Beliefs_falsesecurity1==99] <- NA
@@ -282,22 +285,22 @@ data_wave4$EE1_UTAUT <- rowMeans(data_wave4[, c("EE1a_UTAUT_r","EE1b_UTAUT_r")],
 data_wave4$EE2_UTAUT <- rowMeans(data_wave4[, c("EE2a_UTAUT","EE2b_UTAUT")], na.rm = TRUE)
 ```
 
-```{r Create new variable for adherence to measures4}
+```{r Create new variable for adherence to measures wave 4 without GP}
 
-data_wave4_adherenceNS$AdherenceNS_w4 <- rowMeans(data_wave4_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")], na.rm = TRUE)
-cronbach(data_wave4_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits", "AdherenceNotificationMeasuresNosymptoms_CallGP")])
+data_wave4_adherenceNS$AdherenceNS_w4 <- rowMeans(data_wave4_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits")], na.rm = TRUE)
+cronbach(data_wave4_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits")])
 
-data_wave4_adherenceS$AdherenceS_w4 <- rowMeans(data_wave4_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")], na.rm = TRUE)
-cronbach(data_wave4_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
+data_wave4_adherenceS$AdherenceS_w4 <- rowMeans(data_wave4_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits")], na.rm = TRUE)
+cronbach(data_wave4_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits")])
 
-data_wave4_adherence$AdherenceSelfEfficacy_w4 <- rowMeans(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
-cronbach(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
+data_wave4_adherence$AdherenceSelfEfficacy_w4 <- rowMeans(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits")], na.rm = TRUE)
+cronbach(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits")])
 
 data_wave4_adherence$AdherenceBenefits_w4 <- rowMeans(data_wave4_adherence[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
-cronbach(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
+cronbach(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits")])
 
-data_wave4_adherence$AdherenceBarriers_w4 <- rowMeans(data_wave4_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")], na.rm = TRUE)
-cronbach(data_wave4_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")])
+data_wave4_adherence$AdherenceBarriers_w4 <- rowMeans(data_wave4_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits")], na.rm = TRUE)
+cronbach(data_wave4_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits")])
 
 ```
 
@@ -559,10 +562,6 @@ w1_hbm = join(w1_hbm, var_lookup)
 # Reorder
 w1_hbm <- w1_hbm[, c("variable", "vardesc", "est.std", "pvalue")]
 
-
-                 
-
-
 # RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
 ## CFI   = .99
 ## RMSEA = .06 (90% CI [.056, .078])
@@ -578,19 +577,20 @@ w1_hbm <- w1_hbm[, c("variable", "vardesc", "est.std", "pvalue")]
 model2_w4 <- ' 
 #Measurement model
 
-PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
+PSus_HBM =~ HBM_PSus_self1 + HBM_PSus_self2
 PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
 
 #Regression model
-Behavior_UTAUT_r ~ PSus_HBM + PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
+Behavior_UTAUT_r ~ PSus_HBM + PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht + Media_dummy
 
 #Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
-PSus_HBM ~~ PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
-PSev_HBM ~~ HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
-HBM_selfefficacy_CoronaMelder ~~ HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
-HBM_barriers_CoronaMelder ~~ HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht
-HBM_perceivedbenefits_CoronaMelder ~~ lftdcat + geslacht
-lftdcat ~~ geslacht'
+PSus_HBM ~~ PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht + Media_dummy
+PSev_HBM ~~ HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht + Media_dummy
+HBM_selfefficacy_CoronaMelder ~~ HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht + Media_dummy
+HBM_barriers_CoronaMelder ~~ HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht + Media_dummy
+HBM_perceivedbenefits_CoronaMelder ~~ lftdcat + geslacht + Media_dummy
+lftdcat ~~ geslacht + Media_dummy
+geslacht ~~ Media_dummy'
 
 
 #SIMPLE EFFECTS voor interacties
@@ -602,6 +602,13 @@ summary(fit2_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 inspect(fit2_w4, 'r2')
 
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
+## CFI   = .99
+## RMSEA = .05 (90% CI [.042, .067])
+## SRMR  = .069
+## The chi square is significant, but this could be due to the large N. 
+
+
 # Create results table
 w4_hbm <- standardizedsolution(fit2_w4) %>% filter(lhs == 'Behavior_UTAUT_r' & op == '~') %>% select(rhs, est.std, pvalue)
 names(w4_hbm)[names(w4_hbm) == "rhs"] <- "variable"
@@ -611,17 +618,14 @@ w4_hbm = join(w4_hbm, var_lookup)
 w4_hbm <- w4_hbm[, c("variable", "vardesc", "est.std", "pvalue")]
 
 
-# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
-## CFI   = .99
-## RMSEA = .06 (90% CI [.056, .078])
-## SRMR  = .058
-## The chi square is significant, but this could be due to the large N. 
+
 ```
 
 
 
 # PART 4 REGRESSION MODELS COVID-RELATED VARIABLES
 ## 4.1. Regression model COVID-RELATED VARIABLES Wave 1
+
 
 ```{r Logistic regression model COVID-related factors Wave 1}
 #Test of multicollinearity
@@ -674,6 +678,24 @@ w1_covid <- w1_covid[, c("variable", "vardesc", "estimates", "pvalue")]
 ```
 
 ## 4.2. Regression model COVID-RELATED VARIABLES Wave 4
+
+```{r Factor analysis}
+
+COVIDfactors <- data.frame(data_wave4[,c("HBM_PSus_other2", "HBM_PSev_other2", "Beliefs_fear", "Beliefs_notificationfear", "Beliefs_benefiteconomic", "Beliefs_civicduty", "Beliefs_TrustGovernment", "Beliefs_Protectriskgroups", "Beliefs_falsesecurityx", "Beliefs_Conspiracyx", "Beliefs_monitoringx", "Beliefs_technologyperformance")])
+#View(COVIDfactors)
+
+#Remove rows with missing values and keep only complete cases
+COVIDfactors=COVIDfactors[complete.cases(COVIDfactors),]
+#Create the correlation matrix from bfi_data
+COVIDfactors_cor <- cor(COVIDfactors)
+#Factor analysis of the data
+factors_COVID <- fa(r = COVIDfactors, nfactors = 4)
+#Getting the factor loadings and model analysis
+factors_COVID
+
+```
+
+
 ```{r Logistic regression model COVID-related factors Wave 4}
 
 #Logistic regression
@@ -704,7 +726,7 @@ logLik(mylogit)
 
 ## 5.1. Regression model ADHERENCE Wave 1
 
-### 5.1.1. No symptoms 
+### 5.1.1. No symptoms (With GP)
 
 ```{r Regression model Adherence No Symptoms Wave 1}
 
@@ -797,7 +819,7 @@ w1ns_adh <- w1ns_adh[, c("variable", "vardesc", "est.std", "pvalue")]
 
 ### 5.1.2. Symptoms
 
-```{r Regression model Adherence Symptoms Wave 1}
+```{r Regression model Adherence Symptoms Wave 1 with GP}
 
 model4_w1 <- ' 
 #Measurement model
@@ -963,24 +985,136 @@ summary(fits$fit4, fit.measures = TRUE, standardized = TRUE, ci = TRUE, rsquare 
 
 ## 5.2. Regression model ADHERENCE Wave 4
 
-### 5.1.1. No symptoms 
+### 5.1.1. No symptoms (No GP) 
+```{r Regression model Adherence Symptoms Wave 4}
 
-### 5.1.2. Symptoms
+model4ns_w4 <- ' 
+#Measurement model
+
+Adherence_Selfefficacy =~ HBM_selfefficacy_Test + HBM_selfefficacy_Quarantaine + HBM_selfefficacy_Visits
+Adherence_Benefits =~ HBM_perceivedbenefits_Test + HBM_perceivedbenefits_Quarantaine + HBM_perceivedbenefits_Visits
+Adherence_Barriers =~ HBM_barriers_Test + HBM_barriers_Quarantaine + HBM_barriers_Visits
+PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+
+#Regression model
+AdherenceNS_w4 ~ Adherence_Selfefficacy + Adherence_Benefits + Adherence_Barriers + + PSus_HBM + PSev_HBM + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+Adherence_Selfefficacy ~~ Adherence_Benefits + Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Benefits ~~ Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Barriers ~~ PSus_HBM + PSev_HBM + lftdcat + geslacht
+PSus_HBM ~~ PSev_HBM + lftdcat + geslacht
+PSev_HBM ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+fit4_w4 <- sem(model4ns_w4, data = data_wave4_adherenceNS, estimator = "MLM") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit4_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
+## CFI   = .93
+## RMSEA = .08 (90% CI [.10, .12])
+## SRMR  = .05
+## The chi square is significant, but this could be due to the large N. 
+
+# Improve model (In this case I think it is neeeded due to the high CFI and RMSEA)
+## By looking at modification indices. 
+mod_ind <- modificationindices(fit4_w4)
+head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
+
+# Compare models --> we improve the model the same way as the no-symptoms model
+fits <- list()
+fits$fit1 <- fit4_w4
+# Create a new model by adding an additional syntax to a model
+model5ns_w4 <- paste0(model4ns_w4, "\n", "HBM_barriers_Test ~~ HBM_perceivedbenefits_Test")
+fits$fit2 <- sem(model5ns_w4, data_wave4_adherenceNS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
+# Model fit is good when a correlation is added between perceived benefits and perceived barriers of testing. This is the only correlation added
+
+## CFI   = .95
+## RMSEA = .07 (90% CI [.06, .08])
+## SRMR  = .05
+## The chi square is significant, but this could be due to the large N. 
+summary(fits$fit2, fit.measures = TRUE, standardized = TRUE, ci = TRUE, rsquare = TRUE)
 
 
+# Create results table
+w4ns_adh <- standardizedsolution(fits$fit2) %>% filter(lhs == "AdherenceNS_w4" & op == '~') %>% select(rhs, est.std, pvalue)
+names(w4s_adh)[names(w4ns_adh) == "rhs"] <- "variable"
+w4ns_adh = join(w4ns_adh, var_lookup)
 
-### Overig 
+# Reorder
+w4ns_adh <- w4ns_adh[, c("variable", "vardesc", "est.std", "pvalue")]
 
-```{r}
-data_wave1$AdherenceSelfEfficacy <- rowMeans(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")], na.rm = TRUE)
-cronbach(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
-
-data_wave1$AdherenceBenefits <- rowMeans(data_wave1[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
-cronbach(data_wave1[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits", "HBM_selfefficacy_GP")])
-
-data_wave1$AdherenceBarriers <- rowMeans(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")], na.rm = TRUE)
-cronbach(data_wave1[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits", "HBM_barriers_GP")])
 ```
+
+
+
+### 5.1.2. Symptoms (No GP)
+```{r Regression model Adherence Symptoms Wave 4}
+
+model4_w4 <- ' 
+#Measurement model
+
+Adherence_Selfefficacy =~ HBM_selfefficacy_Test + HBM_selfefficacy_Quarantaine + HBM_selfefficacy_Visits
+Adherence_Benefits =~ HBM_perceivedbenefits_Test + HBM_perceivedbenefits_Quarantaine + HBM_perceivedbenefits_Visits
+Adherence_Barriers =~ HBM_barriers_Test + HBM_barriers_Quarantaine + HBM_barriers_Visits
+PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+
+#Regression model
+AdherenceS_w4 ~ Adherence_Selfefficacy + Adherence_Benefits + Adherence_Barriers + + PSus_HBM + PSev_HBM + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+Adherence_Selfefficacy ~~ Adherence_Benefits + Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Benefits ~~ Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Barriers ~~ PSus_HBM + PSev_HBM + lftdcat + geslacht
+PSus_HBM ~~ PSev_HBM + lftdcat + geslacht
+PSev_HBM ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+fit4_w4 <- sem(model4_w4, data = data_wave4_adherenceS, estimator = "MLM") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit4_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
+## CFI   = .94
+## RMSEA = .08 (90% CI [.10, .12])
+## SRMR  = .05
+## The chi square is significant, but this could be due to the large N. 
+
+# Improve model (In this case I think it is neeeded due to the high CFI and RMSEA)
+## By looking at modification indices. 
+mod_ind <- modificationindices(fit4_w4)
+head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
+
+# Compare models --> we improve the model the same way as the no-symptoms model
+fits <- list()
+fits$fit1 <- fit4_w4
+# Create a new model by adding an additional syntax to a model
+model5_w4 <- paste0(model4_w4, "\n", "HBM_barriers_Test ~~ HBM_perceivedbenefits_Test")
+fits$fit2 <- sem(model5_w4, data_wave4_adherenceS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
+# Model fit is good when a correlation is added between perceived benefits and perceived barriers of testing. This is the only correlation added
+
+## CFI   = .95
+## RMSEA = .07 (90% CI [.06, .08])
+## SRMR  = .05
+## The chi square is significant, but this could be due to the large N. 
+summary(fits$fit2, fit.measures = TRUE, standardized = TRUE, ci = TRUE, rsquare = TRUE)
+
+
+# Create results table
+w4s_adh <- standardizedsolution(fits$fit2) %>% filter(lhs == "AdherenceS_w4" & op == '~') %>% select(rhs, est.std, pvalue)
+names(w4s_adh)[names(w4s_adh) == "rhs"] <- "variable"
+w4s_adh = join(w4s_adh, var_lookup)
+
+# Reorder
+w4s_adh <- w4s_adh[, c("variable", "vardesc", "est.std", "pvalue")]
+
+```
+
+
+
 
 ### Jan z'n dingen
 
@@ -1359,6 +1493,82 @@ ft_out
 ## Tabel: Opvolging adviezen wave 1 (symptomen)
 ```{r}
 data_table <- w1s_adh[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
+
+
+## Tabel: Opvolging adviezen wave 4 (symptomen)
+```{r}
+data_table <- w4s_adh[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
+
+
+## Tabel: Opvolging adviezen wave 4 (geen symptomen)
+```{r}
+data_table <- w4ns_adh[,-1]
 # Build the basic table
 ft <- flextable(
   head(data_table, n = nrow(data_table))
