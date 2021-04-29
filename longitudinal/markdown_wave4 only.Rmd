@@ -258,7 +258,8 @@ PE_UTAUT =~ PE1_UTAUT + PE2_UTAUT
 SI_UTAUT =~ SI1_UTAUT + SI2_UTAUT
 FC_UTAUT =~ FC1_UTAUT + FC2_UTAUT
 EE_UTAUT =~ EE1_UTAUT + EE2_UTAUT
-Voluntariness =~ 0*Beliefs_voluntariness
+Voluntariness =~ Beliefs_voluntariness
+Beliefs_voluntariness ~~ 0*Beliefs_voluntariness
 
 #Regression model
 Behavior_UTAUT_r ~ PE_UTAUT + SI_UTAUT + FC_UTAUT + EE_UTAUT + Voluntariness + lftdcat + geslacht
@@ -338,6 +339,56 @@ inspect(fit_UTAUT1, 'r2')
 
 
 ## 2.2. Regression model HBM
+
+```{r Regression model HBM TEST}
+
+HBM_w4 <- ' 
+#Measurement model
+
+PSus_HBM =~ HBM_PSus_self1 + HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+Selfefficacy =~ HBM_selfefficacy_CoronaMelder
+Barriers =~ HBM_barriers_CoronaMelder
+HBM_barriers_Coronamelder ~~ 0*HBM_barriers_CoronaMelder
+Benefits =~ HBM_perceivedbenefits_CoronaMelder
+HBM_perceivedbenefits_CoronaMelder ~~ 0*HBM_perceivedbenefits_CoronaMelder
+
+#Regression model
+Behavior_UTAUT_r ~ PSus_HBM + PSev_HBM + Selfefficacy + Barriers + Benefits + lftdcat + geslacht + Media_dummy
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+PSus_HBM ~~ PSev_HBM + Selfefficacy + Barriers + Benefits + lftdcat + geslacht + Media_dummy
+PSev_HBM ~~ Selfefficacy + Barriers + Benefits + lftdcat + geslacht + Media_dummy
+Selfefficacy ~~ Barriers + Benefits + lftdcat + geslacht + Media_dummy
+Barriers ~~ Benefits + lftdcat + geslacht + Media_dummy
+Benefits ~~ lftdcat + geslacht + Media_dummy
+lftdcat ~~ geslacht + Media_dummy
+geslacht ~~ Media_dummy'
+
+fit_HBM1 <- sem(HBM_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit_HBM1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
+## Chi square = 8730.77
+## CFI   = .993
+## RMSEA = .054 (90% CI [.042, .067])
+## SRMR  = .069
+## The chi square is significant, but this could be due to the large N. 
+
+# Create results table
+w4_hbm <- standardizedsolution(fit_HBM1) %>% filter(lhs == 'Behavior_UTAUT_r' & op == '~') %>% select(rhs, est.std, pvalue)
+names(w4_hbm)[names(w4_hbm) == "rhs"] <- "variable"
+w4_hbm = join(w4_hbm, var_lookup)
+
+# Reorder
+w4_hbm <- w4_hbm[, c("variable", "vardesc", "est.std", "pvalue")]
+
+#Print R squared
+inspect(fit_HBM1, 'r2')
+
+```
+
+
 
 ```{r Regression model HBM}
 
