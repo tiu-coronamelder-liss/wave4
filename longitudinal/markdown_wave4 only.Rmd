@@ -87,23 +87,10 @@ data_wave4$Beliefs_datasafety_r = car::recode(data_wave4$Beliefs_datasafety, '1=
 
 
 
-
-
 data_wave4$Beliefs_fear_dummy <- car::recode(data_wave4$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
 #View(data_wave4[,c("Beliefs_fear","Beliefs_fear_dummy")])
 data_wave4$Beliefs_notificationfear_dummy <- car::recode(data_wave4$Beliefs_notificationfear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
 #View(data_wave4[,c("Beliefs_notificationfear_dummy","Beliefs_notificationfear")])
-data_wave4$Beliefs_benefiteconomic_dummy <- car::recode(data_wave4$Beliefs_benefiteconomic, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values repesent more benefit
-#View(data_wave4[,c("Beliefs_benefiteconomic","Beliefs_benefiteconomic_dummy")])
-data_wave4$Beliefs_civicduty_dummy <- car::recode(data_wave4$Beliefs_civicduty, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent stronger civic duty
-#View(data_wave4[,c("Beliefs_civicduty_dummy","Beliefs_civicduty")])
-data_wave4$Beliefs_TrustGovernment_dummy <- car::recode(data_wave4$Beliefs_TrustGovernment, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more trust
-#View(data_wave4[,c("Beliefs_TrustGovernment_dummy","Beliefs_TrustGovernment")])
-data_wave4$Beliefs_Protectriskgroups_dummy <- car::recode(data_wave4$Beliefs_Protectriskgroups, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values respresent stronger effectiveness for people in risk groups
-#View(data_wave4[,c("Beliefs_Protectriskgroups_dummy","Beliefs_Protectriskgroups")])
-
-
-
 
 
 data_wave4$Beliefs_technologyperformance_dummy <- car::recode(data_wave4$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
@@ -386,28 +373,26 @@ Context_w4 <- '
 Context_society =~ Beliefs_benefiteconomic + Beliefs_civicduty + Beliefs_TrustGovernment + Beliefs_Protectriskgroups + Beliefs_datasafety_resc
 Context_monitoring =~ Beliefs_locationmonitoring_resc + Beliefs_identitymonitoring_resc
 Context_conspiracy =~ Beliefs_Conspiracy1_resc + Beliefs_Conspiracy2_resc 
-Context_fears =~ aa*Beliefs_fear + aa*Beliefs_notificationfear
 
 #Regression model
-Behavior_UTAUT_r ~ Context_society + Context_monitoring + Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Context_fears
+Behavior_UTAUT_r ~ Context_society + Context_monitoring + Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 
 #Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
 
-Context_society ~~ Context_monitoring + Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Context_fears
+Context_society ~~ Context_monitoring + Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 
-Context_monitoring ~~ Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Context_fears
+Context_monitoring ~~ Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 
-Context_conspiracy ~~ lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Context_fears
+Context_conspiracy ~~ lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 
-lftdcat ~~ geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Context_fears
+lftdcat ~~ geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
+of v
+geslacht ~~ Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 
-geslacht ~~ Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Context_fears
+Beliefs_technologyperformance_dummy ~~ HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
+HBM_PSevother_dummy ~~ HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 
-Beliefs_technologyperformance_dummy ~~ HBM_PSevother_dummy + HBM_PSusother_dummy + Context_fears
-
-HBM_PSevother_dummy ~~ HBM_PSusother_dummy + Context_fears
-
-HBM_PSusother_dummy ~~ Context_fears'
+HBM_PSusother_dummy ~~ Beliefs_notificationfear_dummy + Beliefs_fear_dummy'
 
 
 # Comparing different models http://www.talkstats.com/threads/sem-comparing-models-with-different-variables.38047/ 
@@ -439,9 +424,6 @@ Context_w4_2 <- paste0(Context_w4_1, "\n", "Context_society =~ Beliefs_fear")
 fits$fit_3 <- sem(Context_w4_2, data_wave4)
 round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
 
-
-
-
 # Create results table
 w4_hbm <- standardizedsolution(fit_Context1) %>% filter(lhs == 'Behavior_UTAUT_r' & op == '~') %>% select(rhs, est.std, pvalue)
 names(w4_hbm)[names(w4_hbm) == "rhs"] <- "variable"
@@ -456,12 +438,12 @@ inspect(fit_Context1, 'r2')
 ```
 
 
-## 2.4. Regression model ADHERENCE 
+## 2.4. Regression model Adherence 
 
 ### 2.4.1. No symptoms
 ```{r Regression model Adherence Symptoms}
 
-model4ns_w4 <- ' 
+AdhNS_w4 <- ' 
 #Measurement model
 
 Adherence_Selfefficacy =~ HBM_selfefficacy_Test + HBM_selfefficacy_Quarantaine + HBM_selfefficacy_Visits
@@ -481,8 +463,8 @@ PSus_HBM ~~ PSev_HBM + lftdcat + geslacht
 PSev_HBM ~~ lftdcat + geslacht
 lftdcat ~~ geslacht'
 
-fit4_w4 <- sem(model4ns_w4, data = data_wave4_adherenceNS, estimator = "MLM") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
-summary(fit4_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+fitadhNS_w4 <- sem(AdhNS_w4, data = data_wave4_adherenceNS, estimator = "MLM") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fitadhNS_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 # RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
 ## CFI   = .93
@@ -492,15 +474,15 @@ summary(fit4_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 # Improve model (In this case I think it is neeeded due to the high CFI and RMSEA)
 ## By looking at modification indices. 
-mod_ind <- modificationindices(fit4_w4)
+mod_ind <- modificationindices(fitadhNS_w4)
 head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
 
 # Compare models --> we improve the model the same way as the no-symptoms model
 fits <- list()
-fits$fit1 <- fit4_w4
+fits$fit1 <- fitadhNS_w4
 # Create a new model by adding an additional syntax to a model
-model5ns_w4 <- paste0(model4ns_w4, "\n", "HBM_barriers_Test ~~ HBM_perceivedbenefits_Test")
-fits$fit2 <- sem(model5ns_w4, data_wave4_adherenceNS)
+AdhNS1_w4 <- paste0(AdhNS_w4, "\n", "HBM_barriers_Test ~~ HBM_perceivedbenefits_Test")
+fits$fit2 <- sem(AdhNS1_w4, data_wave4_adherenceNS)
 round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
 # Model fit is good when a correlation is added between perceived benefits and perceived barriers of testing. This is the only correlation added
 
@@ -522,7 +504,7 @@ w4ns_adh <- w4ns_adh[, c("variable", "vardesc", "est.std", "pvalue")]
 ```
 
 
-### 2.4.2. Symptoms (No GP)
+### 2.4.2. Symptoms 
 ```{r Regression model Adherence Symptoms Wave 4}
 
 model4_w4 <- ' 
