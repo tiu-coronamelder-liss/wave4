@@ -258,16 +258,17 @@ PE_UTAUT =~ PE1_UTAUT + PE2_UTAUT
 SI_UTAUT =~ SI1_UTAUT + SI2_UTAUT
 FC_UTAUT =~ FC1_UTAUT + FC2_UTAUT
 EE_UTAUT =~ EE1_UTAUT + EE2_UTAUT
+Voluntariness =~ 0*Beliefs_voluntariness
 
 #Regression model
-Behavior_UTAUT_r ~ PE_UTAUT + SI_UTAUT + FC_UTAUT + EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+Behavior_UTAUT_r ~ PE_UTAUT + SI_UTAUT + FC_UTAUT + EE_UTAUT + Voluntariness + lftdcat + geslacht
 
 #Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
-PE_UTAUT ~~ SI_UTAUT + FC_UTAUT + EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
-SI_UTAUT ~~ FC_UTAUT + EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
-FC_UTAUT ~~ EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
-EE_UTAUT ~~ Beliefs_voluntariness_dummy + lftdcat + geslacht
-Beliefs_voluntariness_dummy ~~ lftdcat + geslacht
+PE_UTAUT ~~ SI_UTAUT + FC_UTAUT + EE_UTAUT + Voluntariness + lftdcat + geslacht
+SI_UTAUT ~~ FC_UTAUT + EE_UTAUT + Voluntariness + lftdcat + geslacht
+FC_UTAUT ~~ EE_UTAUT + Voluntariness + lftdcat + geslacht
+EE_UTAUT ~~ Voluntariness + lftdcat + geslacht
+Voluntariness ~~ lftdcat + geslacht
 lftdcat ~~ geslacht'
 
 fit_UTAUT1 <- sem(UTAUT_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
@@ -433,23 +434,26 @@ inspect(fit_HBM1, 'r2')
 
 ```{r Regression model context-specific variables}
 
-Context_w4 <- ' 
+Context_w4 <- '
 #Measurement model
 
 Context_society =~ Beliefs_benefiteconomic + Beliefs_civicduty + Beliefs_TrustGovernment + Beliefs_Protectriskgroups + Beliefs_datasafety_resc
 Context_monitoring =~ Beliefs_locationmonitoring_resc + Beliefs_identitymonitoring_resc
 Context_conspiracy =~ Beliefs_Conspiracy1_resc + Beliefs_Conspiracy2_resc 
+Context_fears =~ Beliefs_notificationfear + Beliefs_fear
 
 #Regression model
-Behavior_UTAUT_r ~ Context_society + Context_monitoring + Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-Context_society ~~ Context_monitoring + Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-Context_monitoring ~~ Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-Context_conspiracy ~~ lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-lftdcat ~~ geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-geslacht ~~ Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-Beliefs_technologyperformance_dummy ~~ HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-HBM_PSevother_dummy ~~ HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-HBM_PSusother_dummy ~~ Beliefs_notificationfear_dummy + Beliefs_fear_dummy'
+Behavior_UTAUT_r ~ Context_society + Context_monitoring + Context_conspiracy + Context_fears + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy
+
+#Covariances between independent vars
+Context_society ~~ Context_monitoring + Context_conspiracy + Context_fears + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + 
+Context_monitoring ~~ Context_conspiracy + Context_fears + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy
+Context_conspiracy ~~ Context_fears + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy
+Context_fears ~~ lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy
+lftdcat ~~ geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy
+geslacht ~~ Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy
+Beliefs_technologyperformance_dummy ~~ HBM_PSevother_dummy + HBM_PSusother_dummy
+HBM_PSevother_dummy ~~ HBM_PSusother_dummy'
 
 
 # Comparing different models http://www.talkstats.com/threads/sem-comparing-models-with-different-variables.38047/ 
@@ -510,7 +514,7 @@ PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
 PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
 
 #Regression model
-AdherenceNS_w4 ~ Adherence_Selfefficacy + Adherence_Benefits + Adherence_Barriers + + PSus_HBM + PSev_HBM + lftdcat + geslacht
+AdherenceNS_w4 ~ Adherence_Selfefficacy + Adherence_Benefits + Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
 
 #Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
 Adherence_Selfefficacy ~~ Adherence_Benefits + Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
@@ -548,6 +552,9 @@ round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "
 ## SRMR  = .05
 ## The chi square is significant, but this could be due to the large N. 
 summary(fits$fit2, fit.measures = TRUE, standardized = TRUE, ci = TRUE, rsquare = TRUE)
+
+semPaths(fits$fit2, "std")
+
 
 
 # Create results table
