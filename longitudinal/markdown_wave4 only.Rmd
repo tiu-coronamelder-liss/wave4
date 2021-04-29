@@ -258,18 +258,104 @@ PE_UTAUT =~ PE1_UTAUT + PE2_UTAUT
 SI_UTAUT =~ SI1_UTAUT + SI2_UTAUT
 FC_UTAUT =~ FC1_UTAUT + FC2_UTAUT
 EE_UTAUT =~ EE1_UTAUT + EE2_UTAUT
-Voluntariness =~ Beliefs_voluntariness
-Beliefs_voluntariness ~~ 0*Beliefs_voluntariness
 
 #Regression model
-Behavior_UTAUT_r ~ PE_UTAUT + SI_UTAUT + FC_UTAUT + EE_UTAUT + Voluntariness + lftdcat + geslacht
+Behavior_UTAUT_r ~ PE_UTAUT + SI_UTAUT + FC_UTAUT + EE_UTAUT + Beliefs_voluntariness + lftdcat + geslacht
 
 #Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
-PE_UTAUT ~~ SI_UTAUT + FC_UTAUT + EE_UTAUT + Voluntariness + lftdcat + geslacht
-SI_UTAUT ~~ FC_UTAUT + EE_UTAUT + Voluntariness + lftdcat + geslacht
-FC_UTAUT ~~ EE_UTAUT + Voluntariness + lftdcat + geslacht
-EE_UTAUT ~~ Voluntariness + lftdcat + geslacht
-Voluntariness ~~ lftdcat + geslacht
+PE_UTAUT ~~ SI_UTAUT + FC_UTAUT + EE_UTAUT + Beliefs_voluntariness + lftdcat + geslacht
+SI_UTAUT ~~ FC_UTAUT + EE_UTAUT + Beliefs_voluntariness + lftdcat + geslacht
+FC_UTAUT ~~ EE_UTAUT + Beliefs_voluntariness + lftdcat + geslacht
+EE_UTAUT ~~ Beliefs_voluntariness + lftdcat + geslacht
+Beliefs_voluntariness ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+fit_UTAUT1 <- sem(UTAUT_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit_UTAUT1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+#reliability(fit_UTAUT1) # PE_UTAUT: alpha = .93
+                    # SI_UTAUT: alpha = .82
+                    # FC_UTAUT: alpha = .80
+                    # EE_UTAUT: alpha = .63
+                    # PSus_HBM: alpha = .78
+                    # PSev_HBM: alpha = .73
+        
+
+parameterestimates(fit_UTAUT1) #unstandardized parameters
+standardizedsolution(fit_UTAUT1) #standardized parameters
+
+# Create results table
+w4_utaut <- standardizedsolution(fit_UTAUT1) %>% filter(lhs == 'Behavior_UTAUT_r' & op == '~') %>% select(rhs, est.std, pvalue)
+names(w4_utaut)[names(w4_utaut) == "rhs"] <- "variable"
+w4_utaut = join(w4_utaut, var_lookup)
+
+# Reorder
+w4_utaut <- w4_utaut[, c("variable", "vardesc", "est.std", "pvalue")]
+
+# Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, the model already has a good fit: 
+## X2 = 105.428
+## CFI   = .999
+## RMSEA = .044 (90% CI [.035, .054])
+## SRMR  = .029
+## R2 = .923
+## However, the p-value of chi square is significant, but this could be due to the large N. 
+
+# Statistics (sample means and covariance matrix)
+inspect(fit_UTAUT1, "sampstat")
+
+## Unstandardized model matrices
+est_fit <- inspect(fit_UTAUT1, "est")
+est_fit$lambda # unstandardised loadings
+est_fit$psi # covariance matrix
+
+## Standardized model matrices
+std_fit <- inspect(fit_UTAUT1, "std")
+std_fit$lambda # standardised loadings. All items load well on the latent factors, only EE1_UTAUT is doubtful (b=.54). So overall, convergent validity is ok. 
+std_fit$psi # latent variable correlation matrix shows that latent variables are not very highly correlated (< .85), so we can speak of discriminant validity.
+
+# Improve model (if needed, in this case I don't think it is)
+# By correlation matrix. From this table, no problematic residual correlations were identified (should be <.1). Only perceived severity and EE have residual correlations exceeding this treshold. 
+# resid(fit_UTAUT1, type ="cor")
+
+## By looking at modification indices. 
+# mod_ind <- modificationindices(fit_UTAUT1)
+# head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
+
+# Compare models
+#fits <- list()
+#fits$fit1 <- fit_UTAUT1
+# Create a new model by adding an additional syntax to a model
+#model2 <- paste0(model, "\n", "PE1_UTAUT ~~ FC1_UTAUT")
+#fits$fit2 <- cfa(model2, data_wave4)
+#round(sapply(fits, function(X) fitmeasures(X)), 3) all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
+
+#Plotting (just to get a vizualisation of whether the model is correct)
+semPaths(fit_UTAUT1, "std")
+
+#Print R squared
+inspect(fit_UTAUT1, 'r2')
+                 
+```
+
+
+```{r Regression model UTAUT DUMMIES}
+
+UTAUT_w4 <- ' 
+#Measurement model
+PE_UTAUT =~ PE1_UTAUT + PE2_UTAUT 
+SI_UTAUT =~ SI1_UTAUT + SI2_UTAUT
+FC_UTAUT =~ FC1_UTAUT + FC2_UTAUT
+EE_UTAUT =~ EE1_UTAUT + EE2_UTAUT
+
+#Regression model
+Behavior_UTAUT_r ~ PE_UTAUT + SI_UTAUT + FC_UTAUT + EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+PE_UTAUT ~~ SI_UTAUT + FC_UTAUT + EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+SI_UTAUT ~~ FC_UTAUT + EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+FC_UTAUT ~~ EE_UTAUT + Beliefs_voluntariness_dummy + lftdcat + geslacht
+EE_UTAUT ~~ Beliefs_voluntariness_dummy + lftdcat + geslacht
+Beliefs_voluntariness_dummy ~~ lftdcat + geslacht
 lftdcat ~~ geslacht'
 
 fit_UTAUT1 <- sem(UTAUT_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
@@ -340,53 +426,7 @@ inspect(fit_UTAUT1, 'r2')
 
 ## 2.2. Regression model HBM
 
-```{r Regression model HBM TEST}
 
-HBM_w4 <- ' 
-#Measurement model
-
-PSus_HBM =~ HBM_PSus_self1 + HBM_PSus_self2
-PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
-Selfefficacy =~ HBM_selfefficacy_CoronaMelder
-Barriers =~ HBM_barriers_CoronaMelder
-HBM_barriers_Coronamelder ~~ 0*HBM_barriers_CoronaMelder
-Benefits =~ HBM_perceivedbenefits_CoronaMelder
-HBM_perceivedbenefits_CoronaMelder ~~ 0*HBM_perceivedbenefits_CoronaMelder
-
-#Regression model
-Behavior_UTAUT_r ~ PSus_HBM + PSev_HBM + Selfefficacy + Barriers + Benefits + lftdcat + geslacht + Media_dummy
-
-#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
-PSus_HBM ~~ PSev_HBM + Selfefficacy + Barriers + Benefits + lftdcat + geslacht + Media_dummy
-PSev_HBM ~~ Selfefficacy + Barriers + Benefits + lftdcat + geslacht + Media_dummy
-Selfefficacy ~~ Barriers + Benefits + lftdcat + geslacht + Media_dummy
-Barriers ~~ Benefits + lftdcat + geslacht + Media_dummy
-Benefits ~~ lftdcat + geslacht + Media_dummy
-lftdcat ~~ geslacht + Media_dummy
-geslacht ~~ Media_dummy'
-
-fit_HBM1 <- sem(HBM_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
-summary(fit_HBM1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
-
-# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
-## Chi square = 8730.77
-## CFI   = .993
-## RMSEA = .054 (90% CI [.042, .067])
-## SRMR  = .069
-## The chi square is significant, but this could be due to the large N. 
-
-# Create results table
-w4_hbm <- standardizedsolution(fit_HBM1) %>% filter(lhs == 'Behavior_UTAUT_r' & op == '~') %>% select(rhs, est.std, pvalue)
-names(w4_hbm)[names(w4_hbm) == "rhs"] <- "variable"
-w4_hbm = join(w4_hbm, var_lookup)
-
-# Reorder
-w4_hbm <- w4_hbm[, c("variable", "vardesc", "est.std", "pvalue")]
-
-#Print R squared
-inspect(fit_HBM1, 'r2')
-
-```
 
 
 
@@ -414,10 +454,11 @@ fit_HBM1 <- sem(HBM_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") 
 summary(fit_HBM1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 # RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
-## Chi square = 8730.77
+## Chi square = 71.648
 ## CFI   = .993
 ## RMSEA = .054 (90% CI [.042, .067])
 ## SRMR  = .069
+## R2 = .487
 ## The chi square is significant, but this could be due to the large N. 
 
 # Create results table
@@ -436,7 +477,7 @@ inspect(fit_HBM1, 'r2')
 
 ##WITH DUMMIES
 
-```{r Regression model HBM}
+```{r Regression model HBM DUMMIES}
 
 HBM_w4 <- ' 
 #Measurement model
@@ -460,10 +501,10 @@ fit_HBM1 <- sem(HBM_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") 
 summary(fit_HBM1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 # RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
-## Chi square = 8730.77
-## CFI   = .993
-## RMSEA = .054 (90% CI [.042, .067])
-## SRMR  = .069
+## Chi square = 44.693
+## CFI   = .996
+## RMSEA = .039 (90% CI [.042, .067])
+## SRMR  = .088
 ## The chi square is significant, but this could be due to the large N. 
 
 # Create results table
@@ -483,7 +524,7 @@ inspect(fit_HBM1, 'r2')
 ## 2.3. Regression model context-specific variables 
 
 
-```{r Regression model context-specific variables}
+```{r Regression model context-specific variables WITHOUT FEAR}
 
 Context_w4 <- '
 #Measurement model
@@ -491,20 +532,18 @@ Context_w4 <- '
 Context_society =~ Beliefs_benefiteconomic + Beliefs_civicduty + Beliefs_TrustGovernment + Beliefs_Protectriskgroups + Beliefs_datasafety_resc
 Context_monitoring =~ Beliefs_locationmonitoring_resc + Beliefs_identitymonitoring_resc
 Context_conspiracy =~ Beliefs_Conspiracy1_resc + Beliefs_Conspiracy2_resc 
-Context_fears =~ Beliefs_notificationfear + Beliefs_fear
 
 #Regression model
-Behavior_UTAUT_r ~ Context_society + Context_monitoring + Context_conspiracy + Context_fears + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy
+Behavior_UTAUT_r ~ Context_society + Context_monitoring + Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_resc + HBM_PSev_other2 + HBM_PSus_other2
 
 #Covariances between independent vars
-Context_society ~~ Context_monitoring + Context_conspiracy + Context_fears + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + 
-Context_monitoring ~~ Context_conspiracy + Context_fears + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy
-Context_conspiracy ~~ Context_fears + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy
-Context_fears ~~ lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy
-lftdcat ~~ geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy
-geslacht ~~ Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy
-Beliefs_technologyperformance_dummy ~~ HBM_PSevother_dummy + HBM_PSusother_dummy
-HBM_PSevother_dummy ~~ HBM_PSusother_dummy'
+Context_society ~~ Context_monitoring + Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_resc + HBM_PSev_other2 + HBM_PSus_other2
+Context_monitoring ~~ Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_resc + HBM_PSev_other2 + HBM_PSus_other2
+Context_conspiracy ~~ lftdcat + geslacht + Beliefs_technologyperformance_resc + HBM_PSev_other2 + HBM_PSus_other2
+lftdcat ~~ geslacht + Beliefs_technologyperformance_resc + HBM_PSev_other2 + HBM_PSus_other2
+geslacht ~~ Beliefs_technologyperformance_resc + HBM_PSev_other2 + HBM_PSus_other2
+Beliefs_technologyperformance_resc ~~ HBM_PSev_other2 + HBM_PSus_other2
+HBM_PSev_other2 ~~ HBM_PSus_other2'
 
 
 # Comparing different models http://www.talkstats.com/threads/sem-comparing-models-with-different-variables.38047/ 
@@ -578,10 +617,11 @@ lftdcat ~~ geslacht'
 fitadhNS_w4 <- sem(AdhNS_w4, data = data_wave4_adherenceNS, estimator = "MLM") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
 summary(fitadhNS_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
-# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
-## CFI   = .93
-## RMSEA = .08 (90% CI [.10, .12])
-## SRMR  = .05
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is acceptable: 
+## Chisquare = 303.967
+## CFI   = .934
+## RMSEA = .080 (90% CI [.071, .090])
+## SRMR  = .052
 ## The chi square is significant, but this could be due to the large N. 
 
 # Improve model (In this case I think it is neeeded due to the high CFI and RMSEA)
@@ -589,7 +629,7 @@ summary(fitadhNS_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 mod_ind <- modificationindices(fitadhNS_w4)
 head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
 
-# Compare models --> we improve the model the same way as the no-symptoms model
+# Compare models --> we improve the model the same way as the symptoms model
 fits <- list()
 fits$fit1 <- fitadhNS_w4
 # Create a new model by adding an additional syntax to a model
@@ -647,10 +687,10 @@ summary(fitadhS_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 
 
-# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
-## CFI   = .94
-## RMSEA = .08 (90% CI [.10, .12])
-## SRMR  = .05
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is acceptable: 
+## CFI   = .935
+## RMSEA = .080 (90% CI [.071, .090])
+## SRMR  = .053
 ## The chi square is significant, but this could be due to the large N. 
 
 # Improve model (In this case I think it is neeeded due to the high CFI and RMSEA)
