@@ -74,58 +74,53 @@ var_lookup <- data.frame(variable = c('PE_UTAUT', 'SI_UTAUT', 'FC_UTAUT', 'EE_UT
 
 ## 1.1. Data preparation 
 ```{r Preparation}
-#List of recodings that must be performed before runnng the analysis. Some of the beliefs are recoded into dummy variables.
+#List of recodings that must be performed before runnng the analysis. Some variables need to be reverse coded.
 data_wave4$Behavior_UTAUT_r = car::recode(data_wave4$Behavior_UTAUT, '1=1; 3=0')
 #View(data_wave4[,c("Behavior_UTAUT_r","Behavior_UTAUT")])
 data_wave4$EE1a_UTAUT_r = car::recode(data_wave4$EE1a_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
 data_wave4$EE1b_UTAUT_r = car::recode(data_wave4$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
-#data_wave4$HealthLiteracy1r = car::recode(data_wave4$HealthLiteracy1, '1=5; 2=4; 3=3; 4=2; 5=1')
-#data_wave4$HealthLiteracy3r = car::recode(data_wave4$HealthLiteracy3, '1=5; 2=4; 3=3; 4=2; 5=1')
-data_wave4$Beliefs_voluntariness_dummy <- car::recode(data_wave4$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent less voluntariness
-data_wave4$Beliefs_datasafety_r = car::recode(data_wave4$Beliefs_datasafety, '1=1; 2=1; 3=0; 4=0; 99=99') #Value 0 = true, value 1 = not true that data is safe
-#View(data_wave4[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
-
-data_wave4$Beliefs_fear_dummy <- car::recode(data_wave4$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
-#View(data_wave4[,c("Beliefs_fear","Beliefs_fear_dummy")])
-data_wave4$Beliefs_notificationfear_dummy <- car::recode(data_wave4$Beliefs_notificationfear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
-#View(data_wave4[,c("Beliefs_notificationfear_dummy","Beliefs_notificationfear")])
-
-
-data_wave4$Beliefs_technologyperformance_dummy <- car::recode(data_wave4$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
-#View(data_wave4[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_dummy")])
-data_wave4$HBM_PSusother_dummy <- car::recode(data_wave4$HBM_PSus_other2, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent higher susceptiblity
-#View(data_wave4[,c("HBM_PSus_other2","HBM_PSusother_dummy")])
-data_wave4$HBM_PSevother_dummy <- car::recode(data_wave4$HBM_PSev_other2, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent higher severity 
-#View(data_wave4[,c("HBM_PSev_other2","Beliefs_PSevother_dummy")])
-data_wave4$Media_dummy <- car::recode(data_wave4$Media, '1=0; 2=1; 3=1; 4=1; 99=0')
-#View(data_wave4[,c("Media","Media_dummy")])
 
 # We need to merge effort expectancy for users and non-users, to ensure that we don't enter any missing cases in the model.
 data_wave4$EE1_UTAUT <- rowMeans(data_wave4[, c("EE1a_UTAUT_r","EE1b_UTAUT_r")], na.rm = TRUE)
 data_wave4$EE2_UTAUT <- rowMeans(data_wave4[, c("EE2a_UTAUT","EE2b_UTAUT")], na.rm = TRUE)
 
-# Some of the 99's ('I don't know') should be NA for the factor analysis
-data_wave4$Beliefs_technologyperformance[data_wave4$Beliefs_technologyperformance==99] <- NA
-data_wave4$Beliefs_falsesecurity1[data_wave4$Beliefs_falsesecurity1==99] <- NA
-data_wave4$Beliefs_falsesecurity2[data_wave4$Beliefs_falsesecurity2==99] <- NA
-data_wave4$Beliefs_Conspiracy1[data_wave4$Beliefs_Conspiracy1==99] <- NA
-data_wave4$Beliefs_Conspiracy2[data_wave4$Beliefs_Conspiracy2==99] <- NA
-data_wave4$Beliefs_locationmonitoring[data_wave4$Beliefs_locationmonitoring==99] <- NA
-data_wave4$Beliefs_identitymonitoring[data_wave4$Beliefs_identitymonitoring==99] <- NA
+# Some variables need to be dummy-coded.
+data_wave4$Beliefs_voluntariness_dummy <- car::recode(data_wave4$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent less voluntariness
+#View(data_wave4[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
+data_wave4$Media_dummy <- car::recode(data_wave4$Media, '1=0; 2=1; 3=1; 4=1; 99=0')
+#View(data_wave4[,c("Media","Media_dummy")])
 
-# Some variables must be rescaled (the ones measured on a 1 to 4 scale) for the factor analysis
-data_wave4$Beliefs_identitymonitoring_resc <- scales:::rescale(data_wave4$Beliefs_identitymonitoring, to = c(1, 7)) 
-#View(data_wave4[,c("Beliefs_identitymonitoring", "Beliefs_identitymonitoring_resc")])
-data_wave4$Beliefs_locationmonitoring_resc <- scales:::rescale(data_wave4$Beliefs_locationmonitoring, to = c(1, 7)) 
-#View(data_wave4[,c("Beliefs_locationmonitoring", "Beliefs_locationmonitoring_resc")])
-data_wave4$Beliefs_datasafety_resc <- scales:::rescale(data_wave4$Beliefs_datasafety, to = c(1, 7)) 
-#View(data_wave4[,c("Beliefs_datasafety", "Beliefs_datasafety_resc")])
-data_wave4$Beliefs_Conspiracy1_resc <- scales:::rescale(data_wave4$Beliefs_Conspiracy1, to = c(1, 7)) 
-#View(data_wave4[,c("Beliefs_Conspiracy1", "Beliefs_Conspiracy1_resc")])
-data_wave4$Beliefs_Conspiracy2_resc <- scales:::rescale(data_wave4$Beliefs_Conspiracy2, to = c(1, 7)) 
-#View(data_wave4[,c("Beliefs_Conspiracy2", "Beliefs_Conspiracy2_resc")])
-data_wave4$Beliefs_technologyperformance_resc <- scales:::rescale(data_wave4$Beliefs_technologyperformance, to = c(1, 7)) 
+#The variables measured from not true - true (5 point scales with 'I don't know as answer options) are recoded, so that 'I don't know' represents the middle value.
+data_wave4$Beliefs_technologyperformance_5p <- car::recode(data_wave4$Beliefs_technologyperformance, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_5p")])
+data_wave4$Beliefs_datasafety_5p <- car::recode(data_wave4$Beliefs_datasafety, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("Beliefs_datasafety","Beliefs_datasafety_5p")])
+data_wave4$Beliefs_Conspiracy1_5p <- car::recode(data_wave4$Beliefs_Conspiracy1, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("Conspiracy1","Conspiracy_5p")])
+data_wave4$Beliefs_Conspiracy2_5p <- car::recode(data_wave4$Beliefs_Conspiracy2, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("Conspiracy2","Conspiracy2_5p")])
+data_wave4$Beliefs_locationmonitoring_5p <- car::recode(data_wave4$Beliefs_locationmonitoring, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("locationmonitoring","locationmonitoring_5p")])
+data_wave4$Beliefs_identitymonitoring_5p <- car::recode(data_wave4$Beliefs_identitymonitoring, '1=1; 2=2; 3=4; 4=5; 99=3')
+#View(data_wave4[,c("Beliefs_identitymonitoring","Beliefs_identitymonitoring_5p")])
+data_wave4$Beliefs_falsesecurity1_5p <- car::recode(data_wave4$Beliefs_falsesecurity1, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("falsesecurity1","falsesecurity1_5p")])
+data_wave4$Beliefs_falsesecurity2_5p <- car::recode(data_wave4$Beliefs_falsesecurity2, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("falsesecurity2","falsesecurity2_5p")])
+
+# Some variables must be rescaled (the ones measured on a 1 to 5 scale) for the factor analysis
+data_wave4$Beliefs_technologyperformance_resc <- scales:::rescale(data_wave4$Beliefs_technologyperformance_5p, to = c(1, 7)) 
 #View(data_wave4[,c("Beliefs_technologyperformance", "Beliefs_technologyperformance_resc")])
+data_wave4$Beliefs_datasafety_resc <- scales:::rescale(data_wave4$Beliefs_datasafety_5p, to = c(1, 7)) 
+#View(data_wave4[,c("Beliefs_datasafety", "Beliefs_datasafety_resc")])
+data_wave4$Beliefs_Conspiracy1_resc <- scales:::rescale(data_wave4$Beliefs_Conspiracy1_5p, to = c(1, 7)) 
+#View(data_wave4[,c("Beliefs_Conspiracy1", "Beliefs_Conspiracy1_resc")])
+data_wave4$Beliefs_Conspiracy2_resc <- scales:::rescale(data_wave4$Beliefs_Conspiracy2_5p, to = c(1, 7)) 
+#View(data_wave4[,c("Beliefs_Conspiracy2", "Beliefs_Conspiracy2_resc")])
+data_wave4$Beliefs_locationmonitoring_resc <- scales:::rescale(data_wave4$Beliefs_locationmonitoring_5p, to = c(1, 7)) 
+#View(data_wave4[,c("Beliefs_locationmonitoring", "Beliefs_locationmonitoring_resc")])
+data_wave4$Beliefs_identitymonitoring_resc <- scales:::rescale(data_wave4$Beliefs_identitymonitoring_5p, to = c(1, 7)) 
+#View(data_wave4[,c("Beliefs_identitymonitoring", "Beliefs_identitymonitoring_resc")])
 
 # A factor analysis is performed to cluster the context-specific variables.
 COVIDfactors <- data.frame(data_wave4[,c("HBM_PSus_other2", "HBM_PSev_other2", "Beliefs_fear", "Beliefs_notificationfear", "Beliefs_benefiteconomic", "Beliefs_civicduty", "Beliefs_TrustGovernment", "Beliefs_Protectriskgroups", "Beliefs_locationmonitoring_resc", "Beliefs_identitymonitoring_resc", "Beliefs_datasafety_resc", "Beliefs_Conspiracy1_resc", "Beliefs_Conspiracy2_resc", "Beliefs_technologyperformance_resc")])
@@ -161,6 +156,38 @@ hist(data_wave4$Beliefs_conspiracy) # heavily skewed to the right
 data_wave4$Beliefs_fears <- rowMeans(data_wave4[, c("Beliefs_fear", "Beliefs_notificationfear")], na.rm = TRUE)
 cronbach(data_wave4[, c("Beliefs_fear", "Beliefs_notificationfear")])
 hist(data_wave4$Beliefs_fears) # also a bit skewed to the right
+
+# From the factor analysis it appears that some variables do not belong to a factor. These variables will be dummy-coded and used in the analysis as dummies.
+data_wave4$Beliefs_technologyperformance_dummy <- car::recode(data_wave4$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
+#View(data_wave4[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_dummy")])
+data_wave4$HBM_PSusother_dummy <- car::recode(data_wave4$HBM_PSus_other2, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent higher susceptiblity
+#View(data_wave4[,c("HBM_PSus_other2","HBM_PSusother_dummy")])
+data_wave4$HBM_PSevother_dummy <- car::recode(data_wave4$HBM_PSev_other2, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent higher severity 
+#View(data_wave4[,c("HBM_PSev_other2","Beliefs_PSevother_dummy")])
+
+
+
+
+
+
+
+
+
+###DUMMIES WE MIGHT NOT NEED!!
+
+data_wave4$Beliefs_fear_dummy <- car::recode(data_wave4$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+#View(data_wave4[,c("Beliefs_fear","Beliefs_fear_dummy")])
+data_wave4$Beliefs_notificationfear_dummy <- car::recode(data_wave4$Beliefs_notificationfear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent more fear
+#View(data_wave4[,c("Beliefs_notificationfear_dummy","Beliefs_notificationfear")])
+
+
+data_wave4$HBM_selfefficacy_CoronaMelder_dummy <- car::recode(data_wave4$HBM_selfefficacy_CoronaMelder, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') 
+data_wave4$HBM_barriers_CoronaMelder_dummy <- car::recode(data_wave4$HBM_barriers_CoronaMelder, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') 
+data_wave4$HBM_perceivedbenefits_CoronaMelder_dummy <- car::recode(data_wave4$HBM_perceivedbenefits_CoronaMelder, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1')
+
+
+
+
 
 ``` 
 
@@ -208,7 +235,7 @@ hist(data_wave4$Beliefs_falsesecurityx)
 data_wave4$Beliefs_Conspiracyx <- rowMeans(data_wave4[, c("Beliefs_Conspiracy1", "Beliefs_Conspiracy2")], na.rm = TRUE)
 hist(data_wave4$Beliefs_Conspiracyx)
 # Based on the histogram the distribution is normal.
-data_wave4$Beliefs_monitoringx <- rowMeans(data_wave4[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_r")], na.rm = TRUE)
+data_wave4$Beliefs_monitoringx <- rowMeans(data_wave4[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_resc")], na.rm = TRUE)
 hist(data_wave4$Beliefs_monitoringx)
 # Based on the histogram the distribution is fairly normal.
 data_wave4$HBM_PSus_selfx <- rowMeans(data_wave4[, c("HBM_PSus_self1", "HBM_PSus_self2")], na.rm = TRUE)
@@ -216,7 +243,6 @@ hist(data_wave4$HBM_PSus_selfx)
 # Based on the histogram the distribution is quite skewed (heavy in the right tail).
 data_wave4$HBM_PSev_selfx <- rowMeans(data_wave4[, c("HBM_PSev_self1", "HBM_PSev_self2")], na.rm = TRUE)
 hist(data_wave4$HBM_PSev_selfx)
-
 
 ```
 
@@ -356,8 +382,53 @@ inspect(fit_HBM1, 'r2')
 ```
 
 
+##WITH DUMMIES
 
-## 2.3. Regression model context-specific VARIABLES 
+```{r Regression model HBM}
+
+HBM_w4 <- ' 
+#Measurement model
+
+PSus_HBM =~ HBM_PSus_self1 + HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+
+#Regression model
+Behavior_UTAUT_r ~ PSus_HBM + PSev_HBM + HBM_selfefficacy_CoronaMelder_dummy + HBM_barriers_CoronaMelder_dummy + HBM_perceivedbenefits_CoronaMelder_dummy + lftdcat + geslacht + Media_dummy
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+PSus_HBM ~~ PSev_HBM + HBM_selfefficacy_CoronaMelder_dummy + HBM_barriers_CoronaMelder_dummy + HBM_perceivedbenefits_CoronaMelder_dummy + lftdcat + geslacht + Media_dummy
+PSev_HBM ~~ HBM_selfefficacy_CoronaMelder_dummy + HBM_barriers_CoronaMelder_dummy + HBM_perceivedbenefits_CoronaMelder_dummy + lftdcat + geslacht + Media_dummy
+HBM_selfefficacy_CoronaMelder_dummy ~~ HBM_barriers_CoronaMelder_dummy + HBM_perceivedbenefits_CoronaMelder_dummy + lftdcat + geslacht + Media_dummy
+HBM_barriers_CoronaMelder_dummy ~~ HBM_perceivedbenefits_CoronaMelder_dummy + lftdcat + geslacht + Media_dummy
+HBM_perceivedbenefits_CoronaMelder_dummy ~~ lftdcat + geslacht + Media_dummy
+lftdcat ~~ geslacht + Media_dummy
+geslacht ~~ Media_dummy'
+
+fit_HBM1 <- sem(HBM_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit_HBM1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
+## Chi square = 8730.77
+## CFI   = .993
+## RMSEA = .054 (90% CI [.042, .067])
+## SRMR  = .069
+## The chi square is significant, but this could be due to the large N. 
+
+# Create results table
+w4_hbm <- standardizedsolution(fit_HBM1) %>% filter(lhs == 'Behavior_UTAUT_r' & op == '~') %>% select(rhs, est.std, pvalue)
+names(w4_hbm)[names(w4_hbm) == "rhs"] <- "variable"
+w4_hbm = join(w4_hbm, var_lookup)
+
+# Reorder
+w4_hbm <- w4_hbm[, c("variable", "vardesc", "est.std", "pvalue")]
+
+#Print R squared
+inspect(fit_HBM1, 'r2')
+
+```
+
+
+## 2.3. Regression model context-specific variables 
 
 
 ```{r Regression model context-specific variables}
@@ -374,7 +445,7 @@ Behavior_UTAUT_r ~ Context_society + Context_monitoring + Context_conspiracy + l
 Context_society ~~ Context_monitoring + Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 Context_monitoring ~~ Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 Context_conspiracy ~~ lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-lftdcat ~~ geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_fear_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
+lftdcat ~~ geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 geslacht ~~ Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 Beliefs_technologyperformance_dummy ~~ HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 HBM_PSevother_dummy ~~ HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
