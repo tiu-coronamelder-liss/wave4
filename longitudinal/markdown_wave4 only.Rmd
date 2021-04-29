@@ -114,7 +114,6 @@ data_wave4$Beliefs_Conspiracy1[data_wave4$Beliefs_Conspiracy1==99] <- NA
 data_wave4$Beliefs_Conspiracy2[data_wave4$Beliefs_Conspiracy2==99] <- NA
 data_wave4$Beliefs_locationmonitoring[data_wave4$Beliefs_locationmonitoring==99] <- NA
 data_wave4$Beliefs_identitymonitoring[data_wave4$Beliefs_identitymonitoring==99] <- NA
-data_wave4$Beliefs_datasafety[data_wave4$Beliefs_datasafety==99] <- NA
 
 # Some variables must be rescaled (the ones measured on a 1 to 4 scale) for the factor analysis
 data_wave4$Beliefs_identitymonitoring_resc <- scales:::rescale(data_wave4$Beliefs_identitymonitoring, to = c(1, 7)) 
@@ -219,6 +218,7 @@ hist(data_wave4$HBM_PSus_selfx)
 # Based on the histogram the distribution is quite skewed (heavy in the right tail).
 data_wave4$HBM_PSev_selfx <- rowMeans(data_wave4[, c("HBM_PSev_self1", "HBM_PSev_self2")], na.rm = TRUE)
 hist(data_wave4$HBM_PSev_selfx)
+
 
 ```
 
@@ -333,11 +333,6 @@ HBM_perceivedbenefits_CoronaMelder ~~ lftdcat + geslacht + Media_dummy
 lftdcat ~~ geslacht + Media_dummy
 geslacht ~~ Media_dummy'
 
-
-#SIMPLE EFFECTS voor interacties
-
-# Comparing different models http://www.talkstats.com/threads/sem-comparing-models-with-different-variables.38047/ 
-
 fit_HBM1 <- sem(HBM_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
 summary(fit_HBM1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
@@ -376,22 +371,13 @@ Context_conspiracy =~ Beliefs_Conspiracy1_resc + Beliefs_Conspiracy2_resc
 
 #Regression model
 Behavior_UTAUT_r ~ Context_society + Context_monitoring + Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-
-#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
-
 Context_society ~~ Context_monitoring + Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-
 Context_monitoring ~~ Context_conspiracy + lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-
 Context_conspiracy ~~ lftdcat + geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-
-lftdcat ~~ geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-of v
+lftdcat ~~ geslacht + Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_fear_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 geslacht ~~ Beliefs_technologyperformance_dummy + HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-
 Beliefs_technologyperformance_dummy ~~ HBM_PSevother_dummy + HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
 HBM_PSevother_dummy ~~ HBM_PSusother_dummy + Beliefs_notificationfear_dummy + Beliefs_fear_dummy
-
 HBM_PSusother_dummy ~~ Beliefs_notificationfear_dummy + Beliefs_fear_dummy'
 
 
