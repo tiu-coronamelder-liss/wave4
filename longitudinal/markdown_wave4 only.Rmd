@@ -268,9 +268,10 @@ w4_utaut = join(w4_utaut, var_lookup)
 w4_utaut <- w4_utaut[, c("variable", "vardesc", "est.std", "pvalue")]
 
 # Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, the model already has a good fit: 
-## CFI   = 1.00
-## RMSEA = .043 (90% CI [.036, .050])
-## SRMR  = .029
+## X2 = 96.858
+## CFI   = .999
+## RMSEA = .042 (90% CI [.033, .051])
+## SRMR  = .030
 ## However, the p-value of chi square is significant, but this could be due to the large N. 
 
 # Statistics (sample means and covariance matrix)
@@ -337,8 +338,9 @@ fit_HBM1 <- sem(HBM_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") 
 summary(fit_HBM1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 # RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
-## CFI   = .99
-## RMSEA = .05 (90% CI [.042, .067])
+## Chi square = 8730.77
+## CFI   = .993
+## RMSEA = .054 (90% CI [.042, .067])
 ## SRMR  = .069
 ## The chi square is significant, but this could be due to the large N. 
 
@@ -427,7 +429,7 @@ inspect(fit_Context1, 'r2')
 ## 2.4. Regression model Adherence 
 
 ### 2.4.1. No symptoms
-```{r Regression model Adherence Symptoms}
+```{r Regression model Adherence No symptoms}
 
 AdhNS_w4 <- ' 
 #Measurement model
@@ -493,7 +495,7 @@ w4ns_adh <- w4ns_adh[, c("variable", "vardesc", "est.std", "pvalue")]
 ### 2.4.2. Symptoms 
 ```{r Regression model Adherence Symptoms Wave 4}
 
-model4_w4 <- ' 
+AdhS_w4 <- ' 
 #Measurement model
 
 Adherence_Selfefficacy =~ HBM_selfefficacy_Test + HBM_selfefficacy_Quarantaine + HBM_selfefficacy_Visits
@@ -513,8 +515,10 @@ PSus_HBM ~~ PSev_HBM + lftdcat + geslacht
 PSev_HBM ~~ lftdcat + geslacht
 lftdcat ~~ geslacht'
 
-fit4_w4 <- sem(model4_w4, data = data_wave4_adherenceS, estimator = "MLM") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
-summary(fit4_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+fitadhS_w4 <- sem(AdhS_w4, data = data_wave4_adherenceS, estimator = "MLM") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fitadhS_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+
 
 # RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
 ## CFI   = .94
@@ -524,15 +528,15 @@ summary(fit4_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
 # Improve model (In this case I think it is neeeded due to the high CFI and RMSEA)
 ## By looking at modification indices. 
-mod_ind <- modificationindices(fit4_w4)
+mod_ind <- modificationindices(fitadhS_w4)
 head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
 
 # Compare models --> we improve the model the same way as the no-symptoms model
 fits <- list()
-fits$fit1 <- fit4_w4
+fits$fit1 <- fitadhS_w4
 # Create a new model by adding an additional syntax to a model
-model5_w4 <- paste0(model4_w4, "\n", "HBM_barriers_Test ~~ HBM_perceivedbenefits_Test")
-fits$fit2 <- sem(model5_w4, data_wave4_adherenceS)
+AdhS1_w4 <- paste0(AdhS_w4, "\n", "HBM_barriers_Test ~~ HBM_perceivedbenefits_Test")
+fits$fit2 <- sem(AdhS1_w4, data_wave4_adherenceS)
 round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
 # Model fit is good when a correlation is added between perceived benefits and perceived barriers of testing. This is the only correlation added
 
@@ -555,7 +559,7 @@ w4s_adh <- w4s_adh[, c("variable", "vardesc", "est.std", "pvalue")]
 
 
 ## Tabel: UTAUT adoptie wave 4
-```{r}
+```{r UTAUT}
 data_table <- w4_utaut[,-1]
 # Build the basic table
 ft <- flextable(
@@ -589,6 +593,7 @@ ft_out <- width(ft_out, j = 1, width = 2)
 ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
 
 ft_out
+
 ```
 
 ## Tabel: HBM adoptie wave 4
@@ -738,4 +743,41 @@ ft_out <- width(ft_out, j = 1, width = 2)
 ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
 
 ft_out
+```
+
+```{r Model fit table}
+
+#Model fit UTAUT
+dftab <- data.frame(model = c("UTAUT", "HBM", "Context-specific", "Adherence NS", "Adherence S"), 'Chi Square' = c('96.858', '8730.766', 'x', 'x', 'x'), CFI = c('.999', '.993', 'x', 'x', 'x'), RMSEA = c('.042', '.054', 'x', 'x', 'x'), '90 percent CI' = c('[.033, .051]', '[.042, .067]', 'x', 'x', 'x'), SRMR = c('.030', '.069', 'x', 'x', 'x'))
+
+       
+
+# Build the basic table
+ft <- flextable(
+  head(dftab, n = nrow(dftab))
+)
+
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+
 ```
