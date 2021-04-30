@@ -7976,7 +7976,7 @@ ggdraw(theplot)
 
 ## Verklarende modellen voor adoptie
 
-Om te onderzoeken welke factoren samenhangen met het gebruik van de CoronaMelder zijn er drie verklarende modellen opgesteld met de variabelen uit deze vierde meting, namelijk 1) een model met algemene technologie adoptie variabelen op basis van de Unified Theory of Acceptance and Use of Technology (UTAUT), 2) een model met variabelen specifiek voor interventies gericht op gezondheid - op basis van het Health Belief Model (HBM), en 3) een model met variabelen specifiek voor de context van de huidige corona pandemie en speciek voor digitale contact tracing applicaties, zoals bijvoorbeeld vertrouwen in de overheidsaanpak, complottheorieën, en overtuigingen met betrekking tot de privacy. 
+Om te onderzoeken welke factoren samenhangen met het gebruik van de CoronaMelder zijn er drie verklarende modellen opgesteld met de variabelen uit deze vierde meting, namelijk 1) een model met algemene technologie adoptie variabelen op basis van de Unified Theory of Acceptance and Use of Technology (UTAUT), 2) een model met variabelen specifiek voor interventies gericht op gezondheid - op basis van het Health Belief Model (HBM), en 3) een model met variabelen specifiek voor de context van de huidige corona pandemie en speciek voor digitale contact tracing applicaties, zoals bijvoorbeeld vertrouwen in de overheidsaanpak, complottheorieën, en overtuigingen met betrekking tot de privacy. Een overzicht van alle predictievariabelen en model fit per model is te vinden in de Appendix (6.2 en 6.3).
 
 ### Verklarend model adoptie op basis van het UTAUT
 Om te onderzoeken welke technologie adoptie variabelen samenhangen met CoronaMelder gebruik, is er een analyse uitgevoerd met de UTAUT voorspellers als onafhankelijke variabelen en CoronaMelder adoptie als afhankelijke variabele. Uit de analyse bleek dat verwachte inspanning (*β* = .23, *p* = .002), verwachte effectiviteit (*β* = .20, *p* < .001) en sociale invloed (*β * = .38, *p* < .001) positief samenhangen met CoronaMelder adoptie. Ook het gevoel van verplichting tot gebruik (d.w.z., hoe sterker het gevoel van verplichting, hoe hoger de CoronaMelder adoptie; *β* = .21, *p* < .001), en faciliterende omstandigheden (*β* = .20, *p* = .017) hebben een positief effect op CoronaMelder adoptie. Tot slot bleek uit deze analyse dat leeftijd een positief effect heeft op CoronaMelder adoptie (*β* = .07, *p* = .038), terwijl geslacht geen rol speelt. 
@@ -7986,10 +7986,7 @@ Daarnaast is onderzocht in hoeverre variabelen gerelateerd aan interventies geri
 
 ### Verklarend model adoptie op basis van context-specifieke variabelen
 Ook variabelen specifiek voor de context van de huidige corona pandemie zijn onderzocht. In deze analyse is bekeken in hoeverre deze context-specifieke variabelen samenhangen met CoronaMelder gebruik. Een factoranalyse is uitgevoerd om variabelen te clusteren die sterk met elkaar samenhingen. Uit de factoranalyse werden vier factoren onderscheiden: 
-•	Maatschappelijk-gerelateerde overtuigingen(*α* = .83): de overtuiging dat de CoronaMelder bijdraagt aan Nederlandse economie en aan goed burgerschap, het vertrouwen dat men heeft in de overheid, de overtuiging dat risicogroepen worden beschermd, en dataveiligheid 
-•	Privacy-gerelateerde overtuigingen (*α* = .74): de mate waarin men de overtuiging heeft dat de CoronaMelder de locatie bijhoudt en persoonsgegevens opslaat
-•	Angst-gerelateerde overtuigingen (*α* = .66): de mate waarin men bang is voor de CoronaMelder, en de mate waarin men bang is voor notificaties van de CoronaMelder
-•	Overtuigingen over complottheorieën (*α* = .71): de mate waarin men de overtuiging heeft dat het coronavirus in een laboratorium is gemaakt, en de overtuiging dat de uitbraak van het coronavirus te maken heeft met de aanleg van 5G.
+1) Maatschappelijk-gerelateerde overtuigingen(*α* = .83): de overtuiging dat de CoronaMelder bijdraagt aan Nederlandse economie en aan goed burgerschap, het vertrouwen dat men heeft in de overheid, de overtuiging dat risicogroepen worden beschermd, en dataveiligheid; 2) Privacy-gerelateerde overtuigingen (*α* = .74): de mate waarin men de overtuiging heeft dat de CoronaMelder de locatie bijhoudt en persoonsgegevens opslaat; 3) Angst-gerelateerde overtuigingen (*α* = .66): de mate waarin men bang is voor de CoronaMelder, en de mate waarin men bang is voor notificaties van de CoronaMelder; en 4) Overtuigingen over complottheorieën (*α* = .71): de mate waarin men de overtuiging heeft dat het coronavirus in een laboratorium is gemaakt, en de overtuiging dat de uitbraak van het coronavirus te maken heeft met de aanleg van 5G.
 Uit de factoranalyse bleken de variabelen adequaatheid van de techniek, de kans om anderen te besmetten als men zelf besmet is, en de ernst van het besmetten van anderen als men zelf  besmet is, geen onderdeel uit te maken van één van de factoren. Deze variabelen zijn daarom los meegenomen in de analyse.
 Uit de analyse bleek dat maatschappelijke overtuigingen de grootste voorspeller was van CoronaMelder adoptie (*b* = 1.29, *p* < .001). Overtuigingen over privacy-gerelateerde kwesties hebben een negatieve invloed op CoronaMelder adoptie (*b* = -.12, *p* = .003), evenals angst-gerelateerde overtuigingen (*b* = -.30, *p* < .001). Leeftijd heeft een klein negatief effect op CoronaMelder adoptie in deze analyse (*b* = -.09, *p* = .047). Overtuigingen over complottheorieën, adequaatheid van de techniek, de kans om anderen te besmetten als men zelf besmet is, en de ernst van het besmetten van anderen als men zelf  besmet is, bleken geen effect te hebben op CoronaMelder adoptie. 
 
@@ -9098,7 +9095,8 @@ ggdraw(theplot)
 *Situatie zonder symptomen.* Participanten werd gevraagd in hoeverre zij de intentie hadden om de adviezen uit de app op te volgen na het zien van een melding van de CoronaMelder, waarbij de situatie werd voorgelegd dat zijzelf geen symptomen hadden. Voor deze analyse zijn drie gedragsmaatregelen samengenomen tot één afhankelijke variabele, namelijk ‘bellen om een coronatest aan te vragen’, ‘zo lang thuisblijven als de melding adviseert’, en ‘geen bezoek ontvangen’.
  	Zelfeffectiviteit is de grootste voorspeller van het naleven van de gedragsmaatregelen (*β* = .21, *p* < .001), waarbij een hogere zelfeffectiviteit leidt tot een sterkere naleving van de gedragsmaatregelen. Ook de mate waarin men zichzelf ontvankelijk acht voor besmetting met het coronavirus speelde een significante en positieve rol (*β* = .176, *p* = .002). De overige variabelen (d.w.z., gepercipieerde voordelen, gepercipieerde barrières, gepercipieerde ernst van een besmetting met het coronavirus, leeftijd en geslacht) hadden geen significante invloed op de naleving van de gedragsmaatregelen.
  	
-*Situatie met symptomen.* Net als in de situatie zonder symptomen werd aan participanten gevraagd in hoeverre zij de intentie hadden om de adviezen uit de app op te volgen na het zien van een melding van de CoronaMelder, maar dit keer in een situatie met symptomen. Wederom was zelfeffectiviteit de grootste voorspeller van naleving van de gedragsmaatregelen (*β* = .41, *p* < .001). Daarnaast bleek gepercipieerde ernst een significante en positieve rol te spelen (*β* = .14, *p* = .017). De overige variabelen (d.w.z., gepercipieerde voordelen, gepercipieerde barrières, gepercipieerde ontvankelijkheid voor een besmetting met het coronavirus, leeftijd en geslacht) hadden geen significante invloed op de naleving van de gedragsmaatregelen.
+*Situatie met symptomen.* Net als in de situatie zonder symptomen werd aan participanten gevraagd in hoeverre zij de intentie hadden om de adviezen uit de app op te volgen na het zien van een melding van de CoronaMelder, maar dit keer in een situatie met symptomen. Wederom was zelfeffectiviteit de grootste voorspeller van naleving van de gedragsmaatregelen (*β* = .41, *p* < .001). Daarnaast bleek gepercipieerde ernst een significante en positieve rol te spelen (*β* = .14, *p* = .017). De overige variabelen (d.w.z., gepercipieerde voordelen, gepercipieerde barrières, gepercipieerde ontvankelijkheid voor een besmetting met het coronavirus, leeftijd en geslacht) hadden geen significante invloed op de naleving van de gedragsmaatregelen. Een overzicht van alle predictievariabelen en model fit per model is te vinden in de Appendix (6.2 en 6.3).
+
 
 ##### Zelfeffectiviteit opvolging adviezen
 Om de zelfeffectiviteit in kaart te brengen werd gevraagd in welke mate men dacht in staat te zijn om de adviezen uit de melding op te volgen. Men acht zichzelf goed in staat om te bellen voor een test (`r round((nrow(filter(data, (HBM_selfefficacy_Test == 'Helemaal mee eens'| HBM_selfefficacy_Test == 'Mee eens'| HBM_selfefficacy_Test == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%), zo lang thuis te blijven als wordt geadviseerd (`r round((nrow(filter(data, (HBM_selfefficacy_Quarantaine == 'Helemaal mee eens'| HBM_selfefficacy_Quarantaine == 'Mee eens'| HBM_selfefficacy_Quarantaine == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%), geen bezoek te ontvangen (`r round((nrow(filter(data, (HBM_selfefficacy_Visits == 'Helemaal mee eens'| HBM_selfefficacy_Visits == 'Mee eens'| HBM_selfefficacy_Visits == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%) en de huisarts te bellen (`r round((nrow(filter(data, (HBM_selfefficacy_GP == 'Helemaal mee eens'| HBM_selfefficacy_GP == 'Mee eens'| HBM_selfefficacy_GP == 'Een beetje mee eens'))) /nrow(data))*100, digits = 1)`%).
@@ -11188,7 +11186,10 @@ w4_hbm <- w4_hbm[, c("variable", "vardesc", "est.std", "pvalue")]
 inspect(fit_HBM1, 'r2')
 
 ```
-
+   
+    
+     
+  
 ```{r LogisticRegressionContext, include = FALSE}
 #Test of multicollinearity (VIF should not be >5)
 lm <- lm(Behavior_UTAUT_r ~ Beliefs_society + Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSus_other2 + HBM_PSev_other2 + Beliefs_technologyperformance_5p + lftdcat + geslacht, data = data_wave4)
@@ -11230,8 +11231,9 @@ w1_covid = join(w1_covid, var_lookup)
 w1_covid <- w1_covid[, c("variable", "vardesc", "estimates", "pvalue")]
 
 ```
-
-
+   
+   
+   
 ```{r RegressionAdherenceNosymptoms, include = FALSE}
 
 AdhNS_w4 <- ' 
@@ -11299,8 +11301,9 @@ w4ns_adh = join(w4ns_adh, var_lookup)
 w4ns_adh <- w4ns_adh[, c("variable", "vardesc", "est.std", "pvalue")]
 
 ```
-
- 
+  
+  
+  
 ```{r RegressionAdherenceSymptoms, include = FALSE}
 
 AdhS_w4 <- ' 
@@ -11365,7 +11368,9 @@ w4s_adh = join(w4s_adh, var_lookup)
 w4s_adh <- w4s_adh[, c("variable", "vardesc", "est.std", "pvalue")]
 
 ```
-  
+    
+    
+    
 ```{r echo = FALSE, tab.cap="UTAUT met adoptie als afhankelijke variabele"}
 data_table <- w4_utaut[,-1]
 # Build the basic table
@@ -11374,7 +11379,7 @@ ft <- flextable(
 )
 
 # Header labels
-ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "B", "pvalue" = "p"))
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "B"))), "pvalue" = "p"))
 
 # Round numbers
 ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
@@ -11402,7 +11407,9 @@ ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_ta
 ft_out
 
 ```
-  
+   
+    
+    
 ```{r echo = FALSE, tab.cap="Health Belief Model met adoptie als afhankelijke variabele"}
 data_table <- w4_hbm[,-1]
 # Build the basic table
@@ -11439,6 +11446,8 @@ ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_ta
 ft_out
 ```
    
+   
+   
 ```{r echo = FALSE, tab.cap="Predictiemodel context-gerelateerde variabelen op adoptie"}
 data_table <- w1_covid[,-1]
 # Build the basic table
@@ -11474,7 +11483,9 @@ ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_ta
 
 ft_out
 ```
-  
+   
+    
+     
 ```{r echo = FALSE, tab.cap="Predictiemodel naleving gedragsmaatregelen, met symptomen"}
 data_table <- w4s_adh[,-1]
 # Build the basic table
@@ -11510,7 +11521,9 @@ ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_ta
 
 ft_out
 ```
-   
+     
+       
+        
 ```{r echo = FALSE, tab.cap="Predictiemodel naleving gedragsmaatregelen, zonder symptomen"}
 data_table <- w4ns_adh[,-1]
 # Build the basic table
@@ -11546,7 +11559,8 @@ ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_ta
 
 ft_out
 ```
-  
+    
+    
 ## Tabellen model fit
 
 ```{r ModelfitSEM, echo = FALSE, tab.cap ="Model fit van de Structural Equation Models"}
@@ -11585,7 +11599,9 @@ ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_ta
 ft_out
 
 ```
-  
+   
+    
+     
 ```{r ModelfitLogReg, echo = FALSE, tab.cap="Model fit van de logistische regressie"}
 
 #Model fit Log reg
