@@ -10845,6 +10845,796 @@ pairwiseNominalIndependence(Matriz,
 <w:p><w:r><w:br w:type="page"/></w:r></w:p>
 ```
  
+## Tabellen predictie analyses 
+
+```{r include = FALSE}
+##### Load packages
+# For importing SPSS files
+library(foreign)
+library(plyr)
+library(car)
+library(lavaan)
+library(dplyr)
+library(naniar)
+library(semTools)# to calculate reliability
+library(semPlot)
+library(psy) # to calculate alpha
+library(lmtest) # for logistic regression
+library(aod)# for logistic regression
+library(pscl)
+library(ggplot2)
+library(Hmisc)
+library(psych) # factor analysis
+library(GPArotation) # factor analysis
+library(nFactors)
+library(scales)
+library(DescTools) # For pseudo r2
+
+# For tables
+library(flextable)
+library(arsenal)
+library(data.table)
+
+# Load dataset of wave 4 and remove missing values
+## Wave 4
+data_wave4_in <- read.spss('L_Corona_app_wave4_3p.sav', to.data.frame=TRUE, use.missings=FALSE, use.value.labels=FALSE)
+## Filter out the respondents that did not complete the entire survey 
+data_wave4_filter <- data_wave4_in[!is.na(data_wave4_in$duur),]
+```
+
+```{r SelectingData, include = FALSE}
+# Create a dataset with only the current users and never users for all analyses in which these groups are compared. 
+data_wave4 <- subset(data_wave4_filter, Behavior_UTAUT != 2)
+
+# We only want to analyse users for the adherence analyses
+data_wave4_adherence <- subset(data_wave4_filter, Behavior_UTAUT == 1)
+
+#View(data_wave4_adherence[,c("Behavior_UTAUT","AdherenceNotificationMeasuresSymptoms_Test","AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits")])
+
+## Wave 4
+data_wave4_adherenceS <- subset(data_wave4_adherence, AdherenceNotificationMeasuresSymptoms_Test != 8 & AdherenceNotificationMeasuresSymptoms_Quarantaine != 8 & AdherenceNotificationMeasuresSymptoms_Visits != 8 & AdherenceNotificationMeasuresSymptoms_CallGP != 8)
+
+#View(data_wave4_adherenceS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresSymptoms_Test","AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits", "AdherenceNotificationMeasuresSymptoms_CallGP")])
+
+data_wave4_adherenceNS <- subset(data_wave4_adherence, AdherenceNotificationMeasuresNosymptoms_Test != 8 & AdherenceNotificationMeasuresNosymptoms_Quarantaine != 8 & AdherenceNotificationMeasuresNoSymptoms_Visits != 8 & AdherenceNotificationMeasuresNosymptoms_CallGP != 8)
+
+#View(data_wave4_adherenceNS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresNosymptoms_Test","AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits")])
+
+# Lookup table for variable names to map them into descriptions (for the table)
+var_lookup <- data.frame(variable = c('PE_UTAUT', 'SI_UTAUT', 'FC_UTAUT', 'EE_UTAUT', 'lftdcat', 'geslacht', 'PSus_HBM', 'PSev_HBM', 'HBM_selfefficacy_CoronaMelder', 'HBM_barriers_CoronaMelder', 'HBM_perceivedbenefits_CoronaMelder', 'Adherence_Selfefficacy', 'Adherence_Benefits', 'Adherence_Barriers', 'Beliefs_voluntariness', 'Beliefs_fear', 'Beliefs_notificationfear', 'Beliefs_benefiteconomic', 'Beliefs_civicduty', 'Beliefs_TrustGovernment', 'Beliefs_Protectriskgroups', 'Beliefs_falsesecurityx', 'Beliefs_Conspiracyx', 'Beliefs_monitoringx', 'Beliefs_technologyperformance_dummy', 'Beliefs_fear_dummy', 'Beliefs_notificationfear_dummy', 'Beliefs_benefiteconomic_dummy', 'Beliefs_civicduty_dummy', 'Beliefs_TrustGovernment_dummy', 'Beliefs_Protectriskgroups_dummy', 'HBM_PSus_other2', 'HBM_PSev_other2', 'Media_dummy', 'Beliefs_society', 'Beliefs_fears', 'Beliefs_monitoring', 'Beliefs_conspiracy', 'Beliefs_technologyperformance_5p'), vardesc = c('Verwachte effectiviteit', 'Sociale invloeden', 'Faciliterende omstandigheden', 'Inspanningsverwachting', 'Leeftijd', 'Geslacht', 'Waargenomen vatbaarheid', 'Waargenomen ernst', 'Zelfeffectiviteit', 'Barrières voor gebruik', 'Persoonlijke voordelen van gebruik', 'Zelfeffectiviteit (opvolging)', 'Persoonlijke voordelen van gebruik (opvolging)', 'Barrières (opvolging)', 'Verplichting tot gebruik', 'Angst voor CoronaMelder', 'Angst voor meldingen', 'Maatschappelijke gevolgen', 'Goede burger', 'Vertrouwen in de overheid', 'Risicogroepen beschermen', 'Schijnveiligheid', 'Complottheorieën', 'Surveillance', 'Adequaatheid techniek', 'Angst voor CoronaMelder', 'Angst voor meldingen', 'Maatschappelijke gevolgen', 'Goede burger', 'Vertrouwen in de overheid', 'Risicogroepen beschermen', 'Risico om anderen te besmetten', 'Ernst van anderen besmetten', 'Media', 'Maatschappelijk-gerelateerde overtuigingen', 'Angst-gerelateerde overtuigingen', 'Privacy-gerelateerde overtuigingen', 'overtuigingen over complottheorieën', 'Adequaatheid techniek'))
+
+```
+
+```{r Preparation, include = FALSE}
+#List of recodings that must be performed before runnng the analysis. Some variables need to be reverse coded.
+data_wave4$Behavior_UTAUT_r = car::recode(data_wave4$Behavior_UTAUT, '1=1; 3=0')
+#View(data_wave4[,c("Behavior_UTAUT_r","Behavior_UTAUT")])
+data_wave4$EE1a_UTAUT_r = car::recode(data_wave4$EE1a_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
+data_wave4$EE1b_UTAUT_r = car::recode(data_wave4$EE1b_UTAUT, '1=7; 2=6; 3=5; 4=4; 5=3; 6=2; 7=1') #Higher values represent less effort expectancy (i.e., more ease of use)
+
+# We need to merge effort expectancy for users and non-users, to ensure that we don't enter any missing cases in the model.
+data_wave4$EE1_UTAUT <- rowMeans(data_wave4[, c("EE1a_UTAUT_r","EE1b_UTAUT_r")], na.rm = TRUE)
+data_wave4$EE2_UTAUT <- rowMeans(data_wave4[, c("EE2a_UTAUT","EE2b_UTAUT")], na.rm = TRUE)
+
+# Some variables need to be dummy-coded.
+data_wave4$Beliefs_voluntariness_dummy <- car::recode(data_wave4$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent less voluntariness
+#View(data_wave4[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
+data_wave4$Media_dummy <- car::recode(data_wave4$Media, '1=0; 2=1; 3=1; 4=1; 99=0')
+#View(data_wave4[,c("Media","Media_dummy")])
+
+#The variables measured from not true - true (5 point scales with 'I don't know as answer options) are recoded, so that 'I don't know' represents the middle value.
+data_wave4$Beliefs_technologyperformance_5p <- car::recode(data_wave4$Beliefs_technologyperformance, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_5p")])
+data_wave4$Beliefs_datasafety_5p <- car::recode(data_wave4$Beliefs_datasafety, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("Beliefs_datasafety","Beliefs_datasafety_5p")])
+data_wave4$Beliefs_Conspiracy1_5p <- car::recode(data_wave4$Beliefs_Conspiracy1, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("Conspiracy1","Conspiracy_5p")])
+data_wave4$Beliefs_Conspiracy2_5p <- car::recode(data_wave4$Beliefs_Conspiracy2, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("Conspiracy2","Conspiracy2_5p")])
+data_wave4$Beliefs_locationmonitoring_5p <- car::recode(data_wave4$Beliefs_locationmonitoring, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("locationmonitoring","locationmonitoring_5p")])
+data_wave4$Beliefs_identitymonitoring_5p <- car::recode(data_wave4$Beliefs_identitymonitoring, '1=1; 2=2; 3=4; 4=5; 99=3')
+#View(data_wave4[,c("Beliefs_identitymonitoring","Beliefs_identitymonitoring_5p")])
+data_wave4$Beliefs_falsesecurity1_5p <- car::recode(data_wave4$Beliefs_falsesecurity1, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("falsesecurity1","falsesecurity1_5p")])
+data_wave4$Beliefs_falsesecurity2_5p <- car::recode(data_wave4$Beliefs_falsesecurity2, '1=1; 2=2; 3=4; 4=5; 99=3') 
+#View(data_wave4[,c("falsesecurity2","falsesecurity2_5p")])
+
+# Some variables must be rescaled (the ones measured on a 1 to 5 scale) for the factor analysis
+data_wave4$Beliefs_technologyperformance_resc <- scales:::rescale(data_wave4$Beliefs_technologyperformance_5p, to = c(1, 7)) 
+#View(data_wave4[,c("Beliefs_technologyperformance", "Beliefs_technologyperformance_resc")])
+data_wave4$Beliefs_datasafety_resc <- scales:::rescale(data_wave4$Beliefs_datasafety_5p, to = c(1, 7)) 
+#View(data_wave4[,c("Beliefs_datasafety", "Beliefs_datasafety_resc")])
+data_wave4$Beliefs_Conspiracy1_resc <- scales:::rescale(data_wave4$Beliefs_Conspiracy1_5p, to = c(1, 7)) 
+#View(data_wave4[,c("Beliefs_Conspiracy1", "Beliefs_Conspiracy1_resc")])
+data_wave4$Beliefs_Conspiracy2_resc <- scales:::rescale(data_wave4$Beliefs_Conspiracy2_5p, to = c(1, 7)) 
+#View(data_wave4[,c("Beliefs_Conspiracy2", "Beliefs_Conspiracy2_resc")])
+data_wave4$Beliefs_locationmonitoring_resc <- scales:::rescale(data_wave4$Beliefs_locationmonitoring_5p, to = c(1, 7)) 
+#View(data_wave4[,c("Beliefs_locationmonitoring", "Beliefs_locationmonitoring_resc")])
+data_wave4$Beliefs_identitymonitoring_resc <- scales:::rescale(data_wave4$Beliefs_identitymonitoring_5p, to = c(1, 7)) 
+#View(data_wave4[,c("Beliefs_identitymonitoring", "Beliefs_identitymonitoring_resc")])
+
+# A factor analysis is performed to cluster the context-specific variables.
+COVIDfactors <- data.frame(data_wave4[,c("HBM_PSus_other2", "HBM_PSev_other2", "Beliefs_fear", "Beliefs_notificationfear", "Beliefs_benefiteconomic", "Beliefs_civicduty", "Beliefs_TrustGovernment", "Beliefs_Protectriskgroups", "Beliefs_locationmonitoring_resc", "Beliefs_identitymonitoring_resc", "Beliefs_datasafety_resc", "Beliefs_Conspiracy1_resc", "Beliefs_Conspiracy2_resc", "Beliefs_technologyperformance_resc")])
+
+#Remove rows with missing values and keep only complete cases
+COVIDfactors2=COVIDfactors[complete.cases(COVIDfactors),]
+#View(COVIDfactors)
+
+#Decide the number of factors
+ev <- eigen(cor(COVIDfactors2)) # get eigenvalues
+print(ev)
+ap <- parallel(subject=nrow(COVIDfactors2),var=ncol(COVIDfactors2), rep=100,cent=.05)
+nS <- nScree(x=ev$values, aparallel=ap$eigen$qevpea)
+plotnScree(nS)
+
+#Factor analysis of the data
+factors_COVID <- fa(r = COVIDfactors2, nfactors = 4, rotate="varimax")
+#Getting the factor loadings and model analysis
+factors_COVID
+
+# New variables are created with the factors retrieved from the factor analysis.
+data_wave4$Beliefs_society <- rowMeans(data_wave4[, c("Beliefs_benefiteconomic", "Beliefs_civicduty", "Beliefs_TrustGovernment", "Beliefs_Protectriskgroups", "Beliefs_datasafety_resc")], na.rm = TRUE)
+cronbach(data_wave4[, c("Beliefs_benefiteconomic", "Beliefs_civicduty", "Beliefs_TrustGovernment", "Beliefs_Protectriskgroups", "Beliefs_datasafety_resc")])
+
+data_wave4$Beliefs_monitoring <- rowMeans(data_wave4[, c("Beliefs_locationmonitoring_resc", "Beliefs_identitymonitoring_resc")], na.rm = TRUE)
+cronbach(data_wave4[, c("Beliefs_locationmonitoring_resc", "Beliefs_identitymonitoring_resc")])
+hist(data_wave4$Beliefs_monitoring)
+
+data_wave4$Beliefs_conspiracy <- rowMeans(data_wave4[, c("Beliefs_Conspiracy1_resc", "Beliefs_Conspiracy2_resc")], na.rm = TRUE)
+cronbach(data_wave4[, c("Beliefs_Conspiracy1_resc", "Beliefs_Conspiracy2_resc")])
+hist(data_wave4$Beliefs_conspiracy) # heavily skewed to the right
+
+data_wave4$Beliefs_fears <- rowMeans(data_wave4[, c("Beliefs_fear", "Beliefs_notificationfear")], na.rm = TRUE)
+cronbach(data_wave4[, c("Beliefs_fear", "Beliefs_notificationfear")])
+hist(data_wave4$Beliefs_fears) # also a bit skewed to the right
+
+# From the factor analysis it appears that some variables do not belong to a factor. These variables will be dummy-coded and used in the analysis as dummies.
+data_wave4$Beliefs_technologyperformance_dummy <- car::recode(data_wave4$Beliefs_technologyperformance, '99=0; 1=0; 2=0; 3=1; 4=1') #Value 0 = not true / don't know, value 1 = true that data is safe
+#View(data_wave4[,c("Beliefs_technologyperformance","Beliefs_technologyperformance_dummy")])
+data_wave4$HBM_PSusother_dummy <- car::recode(data_wave4$HBM_PSus_other2, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent higher susceptiblity
+#View(data_wave4[,c("HBM_PSus_other2","HBM_PSusother_dummy")])
+data_wave4$HBM_PSevother_dummy <- car::recode(data_wave4$HBM_PSev_other2, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent higher severity 
+#View(data_wave4[,c("HBM_PSev_other2","Beliefs_PSevother_dummy")])
+
+``` 
+
+```{r NewvariablesAdherence, include = FALSE}
+
+data_wave4_adherenceNS$AdherenceNS_w4 <- rowMeans(data_wave4_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits")], na.rm = TRUE)
+cronbach(data_wave4_adherenceNS[, c("AdherenceNotificationMeasuresNosymptoms_Test", "AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits")])
+
+data_wave4_adherenceS$AdherenceS_w4 <- rowMeans(data_wave4_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits")], na.rm = TRUE)
+cronbach(data_wave4_adherenceS[, c("AdherenceNotificationMeasuresSymptoms_Test", "AdherenceNotificationMeasuresSymptoms_Quarantaine", "AdherenceNotificationMeasuresSymptoms_Visits")])
+
+data_wave4_adherence$AdherenceSelfEfficacy_w4 <- rowMeans(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits")], na.rm = TRUE)
+cronbach(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits")])
+
+data_wave4_adherence$AdherenceBenefits_w4 <- rowMeans(data_wave4_adherence[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
+cronbach(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits")])
+
+data_wave4_adherence$AdherenceBarriers_w4 <- rowMeans(data_wave4_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits")], na.rm = TRUE)
+cronbach(data_wave4_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits")])
+
+```
+
+```{r Histograms, include = FALSE}
+# Based on the histogram the distribution is fairly normal.
+data_wave4$PE_UTAUTx <- rowMeans(data_wave4[, c("PE1_UTAUT", "PE2_UTAUT")], na.rm = TRUE)
+hist(data_wave4$PE_UTAUTx)
+
+ggplot(data_wave4, aes(x=PE_UTAUTx, color=Behavior_UTAUT_r)) + geom_histogram()
+# Based on the histogram the distribution is a bit skewed.
+data_wave4$EE1_UTAUTx <- rowMeans(data_wave4[, c("EE1a_UTAUT_r","EE1b_UTAUT_r")], na.rm = TRUE)
+data_wave4$EE2_UTAUTx <- rowMeans(data_wave4[, c("EE2a_UTAUT","EE2b_UTAUT")], na.rm = TRUE)
+data_wave4$EE_UTAUTx <- rowMeans(data_wave4[, c("EE1_UTAUT", "EE2_UTAUT")], na.rm = TRUE)
+hist(data_wave4$EE_UTAUTx)
+# Based on the histogram the distribution seems to be highly centered around te mean (narrow distribution).
+data_wave4$SI_UTAUTx <- rowMeans(data_wave4[, c("SI1_UTAUT", "SI2_UTAUT")], na.rm = TRUE)
+hist(data_wave4$SI_UTAUTx)
+# Based on the histogram the distribution is is strongly skewed.
+data_wave4$FC_UTAUTx <- rowMeans(data_wave4[, c("FC1_UTAUT", "FC2_UTAUT")], na.rm = TRUE)
+hist(data_wave4$FC_UTAUTx)
+# Based on the histogram the distribution is very much skewed (positive skew).
+data_wave4$Beliefs_falsesecurityx <- rowMeans(data_wave4[, c("Beliefs_falsesecurity1", "Beliefs_falsesecurity2")], na.rm = TRUE)
+hist(data_wave4$Beliefs_falsesecurityx)
+# Based on the histogram the distribution is very much skewed (positive skew).
+data_wave4$Beliefs_Conspiracyx <- rowMeans(data_wave4[, c("Beliefs_Conspiracy1", "Beliefs_Conspiracy2")], na.rm = TRUE)
+hist(data_wave4$Beliefs_Conspiracyx)
+# Based on the histogram the distribution is normal.
+data_wave4$Beliefs_monitoringx <- rowMeans(data_wave4[, c("Beliefs_locationmonitoring", "Beliefs_identitymonitoring", "Beliefs_datasafety_resc")], na.rm = TRUE)
+hist(data_wave4$Beliefs_monitoringx)
+# Based on the histogram the distribution is fairly normal.
+data_wave4$HBM_PSus_selfx <- rowMeans(data_wave4[, c("HBM_PSus_self1", "HBM_PSus_self2")], na.rm = TRUE)
+hist(data_wave4$HBM_PSus_selfx)
+# Based on the histogram the distribution is quite skewed (heavy in the right tail).
+data_wave4$HBM_PSev_selfx <- rowMeans(data_wave4[, c("HBM_PSev_self1", "HBM_PSev_self2")], na.rm = TRUE)
+hist(data_wave4$HBM_PSev_selfx)
+
+```
+
+```{r RegressionUTAUT, include = FALSE}
+
+UTAUT_w4 <- ' 
+#Measurement model
+PE_UTAUT =~ PE1_UTAUT + PE2_UTAUT 
+SI_UTAUT =~ SI1_UTAUT + SI2_UTAUT
+FC_UTAUT =~ FC1_UTAUT + FC2_UTAUT
+EE_UTAUT =~ EE1_UTAUT + EE2_UTAUT
+
+#Regression model
+Behavior_UTAUT_r ~ PE_UTAUT + SI_UTAUT + FC_UTAUT + EE_UTAUT + Beliefs_voluntariness + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+PE_UTAUT ~~ SI_UTAUT + FC_UTAUT + EE_UTAUT + Beliefs_voluntariness + lftdcat + geslacht
+SI_UTAUT ~~ FC_UTAUT + EE_UTAUT + Beliefs_voluntariness + lftdcat + geslacht
+FC_UTAUT ~~ EE_UTAUT + Beliefs_voluntariness + lftdcat + geslacht
+EE_UTAUT ~~ Beliefs_voluntariness + lftdcat + geslacht
+Beliefs_voluntariness ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+fit_UTAUT1 <- sem(UTAUT_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. In this case, this is the Behavior_UTAUT var. 
+summary(fit_UTAUT1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+#reliability(fit_UTAUT1) # PE_UTAUT: alpha = .93
+                    # SI_UTAUT: alpha = .82
+                    # FC_UTAUT: alpha = .80
+                    # EE_UTAUT: alpha = .63
+                    # PSus_HBM: alpha = .78
+                    # PSev_HBM: alpha = .73
+        
+
+parameterestimates(fit_UTAUT1) #unstandardized parameters
+standardizedsolution(fit_UTAUT1) #standardized parameters
+
+# Create results table
+w4_utaut <- standardizedsolution(fit_UTAUT1) %>% filter(lhs == 'Behavior_UTAUT_r' & op == '~') %>% select(rhs, est.std, pvalue)
+names(w4_utaut)[names(w4_utaut) == "rhs"] <- "variable"
+w4_utaut = join(w4_utaut, var_lookup)
+
+# Reorder
+w4_utaut <- w4_utaut[, c("variable", "vardesc", "est.std", "pvalue")]
+
+# Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, the model already has a good fit: 
+## X2 = 105.428
+## CFI   = .999
+## RMSEA = .044 (90% CI [.035, .054])
+## SRMR  = .029
+## R2 = .923
+## However, the p-value of chi square is significant, but this could be due to the large N. 
+
+# Statistics (sample means and covariance matrix)
+inspect(fit_UTAUT1, "sampstat")
+
+## Unstandardized model matrices
+est_fit <- inspect(fit_UTAUT1, "est")
+est_fit$lambda # unstandardised loadings
+est_fit$psi # covariance matrix
+
+## Standardized model matrices
+std_fit <- inspect(fit_UTAUT1, "std")
+std_fit$lambda # standardised loadings. All items load well on the latent factors, only EE1_UTAUT is doubtful (b=.54). So overall, convergent validity is ok. 
+std_fit$psi # latent variable correlation matrix shows that latent variables are not very highly correlated (< .85), so we can speak of discriminant validity.
+
+# Improve model (if needed, in this case I don't think it is)
+# By correlation matrix. From this table, no problematic residual correlations were identified (should be <.1). Only perceived severity and EE have residual correlations exceeding this treshold. 
+# resid(fit_UTAUT1, type ="cor")
+
+## By looking at modification indices. 
+# mod_ind <- modificationindices(fit_UTAUT1)
+# head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
+
+# Compare models
+#fits <- list()
+#fits$fit1 <- fit_UTAUT1
+# Create a new model by adding an additional syntax to a model
+#model2 <- paste0(model, "\n", "PE1_UTAUT ~~ FC1_UTAUT")
+#fits$fit2 <- cfa(model2, data_wave4)
+#round(sapply(fits, function(X) fitmeasures(X)), 3) all output --> in this case, the model was not improved by adding a correlation between PE1_UTAUT and FC1_UTAUT
+
+#Plotting (just to get a vizualisation of whether the model is correct)
+semPaths(fit_UTAUT1, "std")
+
+#Print R squared
+inspect(fit_UTAUT1, 'r2')
+                 
+```
+
+```{r RegressionHBM, include = FALSE}
+
+HBM_w4 <- ' 
+#Measurement model
+
+PSus_HBM =~ HBM_PSus_self1 + HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+
+#Regression model
+Behavior_UTAUT_r ~ PSus_HBM + PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht + Media_dummy
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+PSus_HBM ~~ PSev_HBM + HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht + Media_dummy
+PSev_HBM ~~ HBM_selfefficacy_CoronaMelder + HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht + Media_dummy
+HBM_selfefficacy_CoronaMelder ~~ HBM_barriers_CoronaMelder + HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht + Media_dummy
+HBM_barriers_CoronaMelder ~~ HBM_perceivedbenefits_CoronaMelder + lftdcat + geslacht + Media_dummy
+HBM_perceivedbenefits_CoronaMelder ~~ lftdcat + geslacht + Media_dummy
+lftdcat ~~ geslacht + Media_dummy
+geslacht ~~ Media_dummy'
+
+fit_HBM1 <- sem(HBM_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fit_HBM1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
+## Chi square = 71.648
+## CFI   = .993
+## RMSEA = .054 (90% CI [.042, .067])
+## SRMR  = .069
+## R2 = .487
+## The chi square is significant, but this could be due to the large N. 
+
+## Standardized model matrices
+std_fit <- inspect(fit_HBM1, "std")
+std_fit$lambda # standardised loadings. All items load well on the latent factors: convergent validity is good. 
+std_fit$psi # latent variable correlation matrix shows that latent variables are not very highly correlated (< .85), so we can speak of discriminant validity.
+
+# Create results table
+w4_hbm <- standardizedsolution(fit_HBM1) %>% filter(lhs == 'Behavior_UTAUT_r' & op == '~') %>% select(rhs, est.std, pvalue)
+names(w4_hbm)[names(w4_hbm) == "rhs"] <- "variable"
+w4_hbm = join(w4_hbm, var_lookup)
+
+# Reorder
+w4_hbm <- w4_hbm[, c("variable", "vardesc", "est.std", "pvalue")]
+
+#Print R squared
+inspect(fit_HBM1, 'r2')
+
+```
+
+```{r LogisticRegressionContext, include = FALSE}
+#Test of multicollinearity (VIF should not be >5)
+lm <- lm(Behavior_UTAUT_r ~ Beliefs_society + Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSus_other2 + HBM_PSev_other2 + Beliefs_technologyperformance_5p + lftdcat + geslacht, data = data_wave4)
+
+car::vif(lm)
+
+#Logistic regression
+mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_society + Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSus_other2 + HBM_PSev_other2 + Beliefs_technologyperformance_5p + lftdcat + geslacht, data = data_wave4, family=binomial)
+
+summary(mylogit)
+PseudoR2(mylogit)
+confint(mylogit)
+nobs(mylogit)
+
+## Pseudo R2 = .295
+## AIC = 1172.5
+
+#Odds ratios and 95% CIs
+exp(cbind(OR = coef(mylogit), confint(mylogit)))
+
+
+#Correlation table
+#df <- data_wave4[,c("HBM_PSus_other2", "HBM_PSev_other2", "Beliefs_fears", "Beliefs_monitoring", "Beliefs_society", "Beliefs_conspiracy", "Beliefs_technologyperformance_5p", "lftdcat", "geslacht")]
+
+#cortable <- round(cor(na.omit(df), method = "pearson"),2)
+#print(cortable)
+
+#upper<-cortable
+#upper[upper.tri(cortable)]<-""
+#upper<-as.data.frame(upper)
+#upper
+
+# Create results table
+w1_covid <- data.frame(estimates = coef(summary(mylogit))[-1,'Estimate'], pvalue = coef(summary(mylogit))[-1,'Pr(>|z|)'])
+setDT(w1_covid, keep.rownames = "variable")[]
+w1_covid = join(w1_covid, var_lookup)
+
+# Reorder
+w1_covid <- w1_covid[, c("variable", "vardesc", "estimates", "pvalue")]
+
+```
+
+
+```{r RegressionAdherenceNosymptoms, include = FALSE}
+
+AdhNS_w4 <- ' 
+#Measurement model
+
+Adherence_Selfefficacy =~ HBM_selfefficacy_Test + HBM_selfefficacy_Quarantaine + HBM_selfefficacy_Visits
+Adherence_Benefits =~ HBM_perceivedbenefits_Test + HBM_perceivedbenefits_Quarantaine + HBM_perceivedbenefits_Visits
+Adherence_Barriers =~ HBM_barriers_Test + HBM_barriers_Quarantaine + HBM_barriers_Visits
+PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+
+#Regression model
+AdherenceNS_w4 ~ Adherence_Selfefficacy + Adherence_Benefits + Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+Adherence_Selfefficacy ~~ Adherence_Benefits + Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Benefits ~~ Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Barriers ~~ PSus_HBM + PSev_HBM + lftdcat + geslacht
+PSus_HBM ~~ PSev_HBM + lftdcat + geslacht
+PSev_HBM ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+fitadhNS_w4 <- sem(AdhNS_w4, data = data_wave4_adherenceNS, estimator = "MLM") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fitadhNS_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is acceptable: 
+## Chisquare = 303.967
+## CFI   = .934
+## RMSEA = .080 (90% CI [.071, .090])
+## SRMR  = .052
+## The chi square is significant, but this could be due to the large N. 
+
+# Improve model (In this case I think it is neeeded due to the high CFI and RMSEA)
+## By looking at modification indices. 
+mod_ind <- modificationindices(fitadhNS_w4)
+head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
+
+# Compare models --> we improve the model the same way as the symptoms model
+fits <- list()
+fits$fit1 <- fitadhNS_w4
+# Create a new model by adding an additional syntax to a model
+AdhNS1_w4 <- paste0(AdhNS_w4, "\n", "HBM_barriers_Test ~~ HBM_perceivedbenefits_Test")
+fits$fit2 <- sem(AdhNS1_w4, data_wave4_adherenceNS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
+# Model fit is good when a correlation is added between perceived benefits and perceived barriers of testing. This is the only correlation added
+
+## Chi squared = 250.507
+## CFI   = .949
+## RMSEA = .071 (90% CI [.061, .081])
+## SRMR  = .052
+## R2 = .084
+## The chi square is significant, but this could be due to the large N. 
+summary(fits$fit2, fit.measures = TRUE, standardized = TRUE, ci = TRUE, rsquare = TRUE)
+
+semPaths(fits$fit2, "std")
+
+
+
+# Create results table
+w4ns_adh <- standardizedsolution(fits$fit2) %>% filter(lhs == "AdherenceNS_w4" & op == '~') %>% select(rhs, est.std, pvalue)
+names(w4ns_adh)[names(w4ns_adh) == "rhs"] <- "variable"
+w4ns_adh = join(w4ns_adh, var_lookup)
+
+# Reorder
+w4ns_adh <- w4ns_adh[, c("variable", "vardesc", "est.std", "pvalue")]
+
+```
+
+ 
+```{r RegressionAdherenceSymptoms, include = FALSE}
+
+AdhS_w4 <- ' 
+#Measurement model
+
+Adherence_Selfefficacy =~ HBM_selfefficacy_Test + HBM_selfefficacy_Quarantaine + HBM_selfefficacy_Visits
+Adherence_Benefits =~ HBM_perceivedbenefits_Test + HBM_perceivedbenefits_Quarantaine + HBM_perceivedbenefits_Visits
+Adherence_Barriers =~ HBM_barriers_Test + HBM_barriers_Quarantaine + HBM_barriers_Visits
+PSus_HBM =~ aa*HBM_PSus_self1 + aa*HBM_PSus_self2
+PSev_HBM =~ HBM_PSev_self1 + HBM_PSev_self2
+
+#Regression model
+AdherenceS_w4 ~ Adherence_Selfefficacy + Adherence_Benefits + Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+
+#Covariances between independent vars, see https://www.youtube.com/watch?v=n-ULF6BGVw0 
+Adherence_Selfefficacy ~~ Adherence_Benefits + Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Benefits ~~ Adherence_Barriers + PSus_HBM + PSev_HBM + lftdcat + geslacht
+Adherence_Barriers ~~ PSus_HBM + PSev_HBM + lftdcat + geslacht
+PSus_HBM ~~ PSev_HBM + lftdcat + geslacht
+PSev_HBM ~~ lftdcat + geslacht
+lftdcat ~~ geslacht'
+
+fitadhS_w4 <- sem(AdhS_w4, data = data_wave4_adherenceS, estimator = "MLM") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
+summary(fitadhS_w4, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
+
+
+# RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is acceptable: 
+## CFI   = .935
+## RMSEA = .080 (90% CI [.071, .090])
+## SRMR  = .053
+## The chi square is significant, but this could be due to the large N. 
+
+# Improve model (In this case I think it is neeeded due to the high CFI and RMSEA)
+## By looking at modification indices. 
+mod_ind <- modificationindices(fitadhS_w4)
+head(mod_ind[order(mod_ind$mi, decreasing=TRUE), ], 10) ##You can order the modification indices. This argument gives you the first 10 highest correlations.
+
+# Compare models --> we improve the model the same way as the no-symptoms model
+fits <- list()
+fits$fit1 <- fitadhS_w4
+# Create a new model by adding an additional syntax to a model
+AdhS1_w4 <- paste0(AdhS_w4, "\n", "HBM_barriers_Test ~~ HBM_perceivedbenefits_Test")
+fits$fit2 <- sem(AdhS1_w4, data_wave4_adherenceS)
+round(sapply(fits, function(X) fitmeasures(X, c("chisq", "df", "cfi", "rmsea", "srmr"))), 2) 
+# Model fit is good when a correlation is added between perceived benefits and perceived barriers of testing. This is the only correlation added
+
+## Chi squared = 250.609
+## CFI   = .950
+## RMSEA = .071 (90% CI [.061, .081])
+## SRMR  = .052
+## R2 = .204
+## The chi square is significant, but this could be due to the large N. 
+summary(fits$fit2, fit.measures = TRUE, standardized = TRUE, ci = TRUE, rsquare = TRUE)
+
+
+# Create results table
+w4s_adh <- standardizedsolution(fits$fit2) %>% filter(lhs == "AdherenceS_w4" & op == '~') %>% select(rhs, est.std, pvalue)
+names(w4s_adh)[names(w4s_adh) == "rhs"] <- "variable"
+w4s_adh = join(w4s_adh, var_lookup)
+
+# Reorder
+w4s_adh <- w4s_adh[, c("variable", "vardesc", "est.std", "pvalue")]
+
+```
+
+
+
+```{r echo = FALSE, tab.cap="UTAUT met adoptie als afhankelijke variabele"}
+data_table <- w4_utaut[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+
+```
+
+
+
+```{r echo = FALSE, tab.cap="Health Belief Model met adoptie als afhankelijke variabele"}
+data_table <- w4_hbm[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
+
+
+
+```{r echo = FALSE, tab.cap="Predictiemodel context-gerelateerde variabelen op adoptie"}
+data_table <- w1_covid[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "estimates" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
+
+
+
+```{r echo = FALSE, tab.cap="Predictiemodel naleving gedragsmaatregelen, met symptomen"}
+data_table <- w4s_adh[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
+
+
+
+```{r echo = FALSE, tab.cap="Predictiemodel naleving gedragsmaatregelen, zonder symptomen"}
+data_table <- w4ns_adh[,-1]
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+
+# Round numbers
+ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+```
+
+
+
+## Tabellen model fit
+
+```{r Model fit table SEM, echo = FALSE, tab.cap ="Model fit van de Structural Equation Models"}
+
+#Model fit SEMS
+dftab <- data.frame(Model = c("UTAUT", "HBM", "Adherence no symptoms", "Adherence symptoms"), 'Chi-Squared' = c('105.428', '71.648', '250.507', '250.609'), CFI = c('.999', '.993', '.949', '.950'), RMSEA = c('.044', '.054', '.071', '.071'), '90percent-CI' = c('[.035, .054]', '[.042, .067]', '[.061, .081]', '[.061, .081]'), SRMR = c('.029', '.069', '.052', '.052'), 'R-squared' = c('.923', '.487', '.084', '.204'))
+
+
+
+# Build the basic table
+ft <- flextable(
+  head(dftab, n = nrow(dftab))
+)
+
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 3.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+
+```
+
+
+
+```{r Model fit table log reg, echo = FALSE, tab.cap="Model fit van de logistische regressie"}
+
+#Model fit Log reg
+dftab <- data.frame(Model = c("Context-related variables"), 'Pseudo-R-squared' = c('.295'), 'AIC' = c('1172.5'))
+
+
+# Build the basic table
+ft <- flextable(
+  head(dftab, n = nrow(dftab))
+)
+
+
+# Change layout of table
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "center", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining space.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 4.5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 2)
+ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_table))-1))
+
+ft_out
+
+```
 
 # Bijlagen
 Als bijlage kunt u bij dit rapport vinden:  
