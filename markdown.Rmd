@@ -11374,7 +11374,7 @@ ft <- flextable(
 )
 
 # Header labels
-ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "B", "pvalue" = "p"))
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "β", "pvalue" = "p"))
 
 # Round numbers
 ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
@@ -11411,7 +11411,7 @@ ft <- flextable(
 )
 
 # Header labels
-ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "B", "pvalue" = "p"))
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "β", "pvalue" = "p"))
 
 # Round numbers
 ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
@@ -11447,7 +11447,7 @@ ft <- flextable(
 )
 
 # Header labels
-ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "estimates" = "b", "pvalue" = "p"))
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "estimates" = "β", "pvalue" = "p"))
 
 # Round numbers
 ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
@@ -11483,7 +11483,7 @@ ft <- flextable(
 )
 
 # Header labels
-ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "B", "pvalue" = "p"))
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "β", "pvalue" = "p"))
 
 # Round numbers
 ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
@@ -11519,7 +11519,7 @@ ft <- flextable(
 )
 
 # Header labels
-ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "B", "pvalue" = "p"))
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "β", "pvalue" = "p"))
 
 # Round numbers
 ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
