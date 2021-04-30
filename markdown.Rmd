@@ -10901,7 +10901,7 @@ data_wave4_adherenceNS <- subset(data_wave4_adherence, AdherenceNotificationMeas
 #View(data_wave4_adherenceNS[,c("Behavior_UTAUT","AdherenceNotificationMeasuresNosymptoms_Test","AdherenceNotificationMeasuresNosymptoms_Quarantaine", "AdherenceNotificationMeasuresNoSymptoms_Visits")])
 
 # Lookup table for variable names to map them into descriptions (for the table)
-var_lookup <- data.frame(variable = c('PE_UTAUT', 'SI_UTAUT', 'FC_UTAUT', 'EE_UTAUT', 'lftdcat', 'geslacht', 'PSus_HBM', 'PSev_HBM', 'HBM_selfefficacy_CoronaMelder', 'HBM_barriers_CoronaMelder', 'HBM_perceivedbenefits_CoronaMelder', 'Adherence_Selfefficacy', 'Adherence_Benefits', 'Adherence_Barriers', 'Beliefs_voluntariness', 'Beliefs_fear', 'Beliefs_notificationfear', 'Beliefs_benefiteconomic', 'Beliefs_civicduty', 'Beliefs_TrustGovernment', 'Beliefs_Protectriskgroups', 'Beliefs_falsesecurityx', 'Beliefs_Conspiracyx', 'Beliefs_monitoringx', 'Beliefs_technologyperformance_dummy', 'Beliefs_fear_dummy', 'Beliefs_notificationfear_dummy', 'Beliefs_benefiteconomic_dummy', 'Beliefs_civicduty_dummy', 'Beliefs_TrustGovernment_dummy', 'Beliefs_Protectriskgroups_dummy', 'HBM_PSus_other2', 'HBM_PSev_other2', 'Media_dummy', 'Beliefs_society', 'Beliefs_fears', 'Beliefs_monitoring', 'Beliefs_conspiracy', 'Beliefs_technologyperformance_5p'), vardesc = c('Verwachte effectiviteit', 'Sociale invloeden', 'Faciliterende omstandigheden', 'Inspanningsverwachting', 'Leeftijd', 'Geslacht', 'Waargenomen vatbaarheid', 'Waargenomen ernst', 'Zelfeffectiviteit', 'Barrières voor gebruik', 'Persoonlijke voordelen van gebruik', 'Zelfeffectiviteit (opvolging)', 'Persoonlijke voordelen van gebruik (opvolging)', 'Barrières (opvolging)', 'Verplichting tot gebruik', 'Angst voor CoronaMelder', 'Angst voor meldingen', 'Maatschappelijke gevolgen', 'Goede burger', 'Vertrouwen in de overheid', 'Risicogroepen beschermen', 'Schijnveiligheid', 'Complottheorieën', 'Surveillance', 'Adequaatheid techniek', 'Angst voor CoronaMelder', 'Angst voor meldingen', 'Maatschappelijke gevolgen', 'Goede burger', 'Vertrouwen in de overheid', 'Risicogroepen beschermen', 'Risico om anderen te besmetten', 'Ernst van anderen besmetten', 'Media', 'Maatschappelijk-gerelateerde overtuigingen', 'Angst-gerelateerde overtuigingen', 'Privacy-gerelateerde overtuigingen', 'overtuigingen over complottheorieën', 'Adequaatheid techniek'))
+var_lookup <- data.frame(variable = c('PE_UTAUT', 'SI_UTAUT', 'FC_UTAUT', 'EE_UTAUT', 'lftdcat', 'geslacht', 'PSus_HBM', 'PSev_HBM', 'HBM_selfefficacy_CoronaMelder', 'HBM_barriers_CoronaMelder', 'HBM_perceivedbenefits_CoronaMelder', 'Adherence_Selfefficacy', 'Adherence_Benefits', 'Adherence_Barriers', 'Beliefs_voluntariness', 'Beliefs_fear', 'Beliefs_notificationfear', 'Beliefs_benefiteconomic', 'Beliefs_civicduty', 'Beliefs_TrustGovernment', 'Beliefs_Protectriskgroups', 'Beliefs_falsesecurityx', 'Beliefs_Conspiracyx', 'Beliefs_monitoringx', 'Beliefs_technologyperformance_dummy', 'Beliefs_fear_dummy', 'Beliefs_notificationfear_dummy', 'Beliefs_benefiteconomic_dummy', 'Beliefs_civicduty_dummy', 'Beliefs_TrustGovernment_dummy', 'Beliefs_Protectriskgroups_dummy', 'HBM_PSus_other2', 'HBM_PSev_other2', 'Media_dummy', 'Beliefs_society', 'Beliefs_fears', 'Beliefs_monitoring', 'Beliefs_conspiracy', 'Beliefs_technologyperformance_5p'), vardesc = c('Verwachte effectiviteit', 'Sociale invloeden', 'Faciliterende omstandigheden', 'Inspanningsverwachting', 'Leeftijd', 'Geslacht', 'Waargenomen vatbaarheid', 'Waargenomen ernst', 'Zelfeffectiviteit', 'Barrières voor gebruik', 'Persoonlijke voordelen van gebruik', 'Zelfeffectiviteit (opvolging)', 'Persoonlijke voordelen opvolging adviezen', 'Barrières (opvolging)', 'Verplichting tot gebruik', 'Angst voor CoronaMelder', 'Angst voor meldingen', 'Maatschappelijke gevolgen', 'Goede burger', 'Vertrouwen in de overheid', 'Risicogroepen beschermen', 'Schijnveiligheid', 'Complottheorieën', 'Surveillance', 'Adequaatheid techniek', 'Angst voor CoronaMelder', 'Angst voor meldingen', 'Maatschappelijke gevolgen', 'Goede burger', 'Vertrouwen in de overheid', 'Risicogroepen beschermen', 'Risico om anderen te besmetten', 'Ernst van anderen besmetten', 'Media', 'Maatschappelijk-gerelateerde overtuigingen', 'Angst-gerelateerde overtuigingen', 'Privacy-gerelateerde overtuigingen', 'Overtuigingen over complottheorieën', 'Adequaatheid techniek'))
 
 ```
 
@@ -11365,9 +11365,7 @@ w4s_adh = join(w4s_adh, var_lookup)
 w4s_adh <- w4s_adh[, c("variable", "vardesc", "est.std", "pvalue")]
 
 ```
-
-
-
+  
 ```{r echo = FALSE, tab.cap="UTAUT met adoptie als afhankelijke variabele"}
 data_table <- w4_utaut[,-1]
 # Build the basic table
@@ -11376,7 +11374,7 @@ ft <- flextable(
 )
 
 # Header labels
-ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "B", "pvalue" = "p"))
 
 # Round numbers
 ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
@@ -11404,9 +11402,7 @@ ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_ta
 ft_out
 
 ```
-
-
-
+  
 ```{r echo = FALSE, tab.cap="Health Belief Model met adoptie als afhankelijke variabele"}
 data_table <- w4_hbm[,-1]
 # Build the basic table
@@ -11415,7 +11411,7 @@ ft <- flextable(
 )
 
 # Header labels
-ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "B", "pvalue" = "p"))
 
 # Round numbers
 ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
@@ -11442,9 +11438,7 @@ ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_ta
 
 ft_out
 ```
-
-
-
+   
 ```{r echo = FALSE, tab.cap="Predictiemodel context-gerelateerde variabelen op adoptie"}
 data_table <- w1_covid[,-1]
 # Build the basic table
@@ -11453,7 +11447,7 @@ ft <- flextable(
 )
 
 # Header labels
-ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "estimates" = "Β", "pvalue" = "p"))
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "estimates" = "b", "pvalue" = "p"))
 
 # Round numbers
 ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
@@ -11480,9 +11474,7 @@ ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_ta
 
 ft_out
 ```
-
-
-
+  
 ```{r echo = FALSE, tab.cap="Predictiemodel naleving gedragsmaatregelen, met symptomen"}
 data_table <- w4s_adh[,-1]
 # Build the basic table
@@ -11491,7 +11483,7 @@ ft <- flextable(
 )
 
 # Header labels
-ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "B", "pvalue" = "p"))
 
 # Round numbers
 ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
@@ -11518,9 +11510,7 @@ ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_ta
 
 ft_out
 ```
-
-
-
+   
 ```{r echo = FALSE, tab.cap="Predictiemodel naleving gedragsmaatregelen, zonder symptomen"}
 data_table <- w4ns_adh[,-1]
 # Build the basic table
@@ -11529,7 +11519,7 @@ ft <- flextable(
 )
 
 # Header labels
-ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "Β", "pvalue" = "p"))
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "est.std" = "B", "pvalue" = "p"))
 
 # Round numbers
 ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
@@ -11556,15 +11546,13 @@ ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_ta
 
 ft_out
 ```
-
-
-
+  
 ## Tabellen model fit
 
-```{r Model fit table SEM, echo = FALSE, tab.cap ="Model fit van de Structural Equation Models"}
+```{r ModelfitSEM, echo = FALSE, tab.cap ="Model fit van de Structural Equation Models"}
 
 #Model fit SEMS
-dftab <- data.frame(Model = c("UTAUT", "HBM", "Adherence no symptoms", "Adherence symptoms"), 'Chi-Squared' = c('105.428', '71.648', '250.507', '250.609'), CFI = c('.999', '.993', '.949', '.950'), RMSEA = c('.044', '.054', '.071', '.071'), '90percent-CI' = c('[.035, .054]', '[.042, .067]', '[.061, .081]', '[.061, .081]'), SRMR = c('.029', '.069', '.052', '.052'), 'R-squared' = c('.923', '.487', '.084', '.204'))
+dftab <- data.frame(Model = c("UTAUT", "HBM", "Naleving van de maatregelen (zonder symptomen)", "Naleving van de maatregelen (met symptomen)"), 'Chi-Squared' = c('105.428', '71.648', '250.507', '250.609'), CFI = c('.999', '.993', '.949', '.950'), RMSEA = c('.044', '.054', '.071', '.071'), '90percent-CI' = c('[.035, .054]', '[.042, .067]', '[.061, .081]', '[.061, .081]'), SRMR = c('.029', '.069', '.052', '.052'), 'R-squared' = c('.923', '.487', '.084', '.204'))
 
 
 
@@ -11597,13 +11585,11 @@ ft_out <- width(ft_out, j = -1, width = (table_width-2)/(length(colnames(data_ta
 ft_out
 
 ```
-
-
-
-```{r Model fit table log reg, echo = FALSE, tab.cap="Model fit van de logistische regressie"}
+  
+```{r ModelfitLogReg, echo = FALSE, tab.cap="Model fit van de logistische regressie"}
 
 #Model fit Log reg
-dftab <- data.frame(Model = c("Context-related variables"), 'Pseudo-R-squared' = c('.295'), 'AIC' = c('1172.5'))
+dftab <- data.frame(Model = c("Context-gerelateerde variabelen"), 'Pseudo-R-squared' = c('.295'), 'AIC' = c('1172.5'))
 
 
 # Build the basic table
