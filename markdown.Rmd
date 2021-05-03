@@ -171,9 +171,9 @@ attr(data_currentvsneveruserneutral$woonvorm,'label')  <- 'Woonvorm huishouden'
 
 ##### Calculate size of user subgroups
 # Lookup table for totals of different user groups
-usergroup_names = c("users", "nonusers", "nonusers_no_intention", "nonusers_neutral", "nonusers_intention")
+usergroup_names = c("users", "former_users", "nonusers", "nonusers_no_intention", "nonusers_neutral", "nonusers_intention")
 
-usergroup_labels = c("Gebruikers", "Niet gebruikers", "Niet gebruikers - niet van plan om te gaan gebruiken", "Niet gebruikers - neutraal", "Niet gebruikers - wel van plan om te gaan gebruiken")
+usergroup_labels = c("Gebruikers", "Voormalig gebruikers", "Niet gebruikers", "Niet gebruikers - niet van plan om te gaan gebruiken", "Niet gebruikers - neutraal", "Niet gebruikers - wel van plan om te gaan gebruiken")
 
 # Create dataframe for totals of each user group
 user_totals <- data.frame(matrix(ncol = length(usergroup_names), nrow = 1))
@@ -182,17 +182,20 @@ colnames(user_totals) <- usergroup_names
 # Current user
 user_totals[1] <- sum(data$user_status == "Gebruiker")
 
+# Former user
+user_totals[2] <- sum(data$user_status == "Voormalig gebruiker")
+
 # Non user
-user_totals[2] <- sum(data$user_status == "Niet gebruiker")
+user_totals[3] <- sum(data$user_status == "Niet gebruiker")
 
 # Non user -- not planning to use
-user_totals[3] <- sum(data$user_status_intention == "Nooit gebruikt en niet van plan")
+user_totals[4] <- sum(data$user_status_intention == "Nooit gebruikt en niet van plan")
 
 # Non user -- neutral
-user_totals[4] <- sum(data$user_status_intention == "Nooit gebruikt en neutraal")
+user_totals[5] <- sum(data$user_status_intention == "Nooit gebruikt en neutraal")
 
 # Non user -- planning to use
-user_totals[5] <- sum(data$user_status_intention == "Nooit gebruikt en wel van plan")
+user_totals[6] <- sum(data$user_status_intention == "Nooit gebruikt en wel van plan")
 
 ######### Set up data preprocessing and analysis for comparison with earlier waves ####################
 ##### Load dataset of previous wave (not included on Github) and remove missing values
@@ -1876,12 +1879,47 @@ De onderstaande tabel toont het verloop in gebruikersstatus tussen de huidige en
 ```{r userstatustime, echo=FALSE, tab.cap="Verloop in gebruikersstatus tussen de huidige en de vorige meting."}
 
 table_userstatusintention_cw_wmin1 = table(data_currentwave_wavemin1$user_status_intention_cw, data_currentwave_wavemin1$user_status_intention_wmin1)
-df_userstatusintention_cw_wmin1 = as.data.frame.matrix(table_userstatusintention_cw_wmin1)
+#df_userstatusintention_cw_wmin1 = as.data.frame.matrix(table_userstatusintention_cw_wmin1)
+df_userstatusintention_cw_wmin1 = as.data.frame(table_userstatusintention_cw_wmin1)
+df_userstatusintention_cw_wmin1_wide <- spread(df_userstatusintention_cw_wmin1, Var2, Freq)
 #flextable(df_userstatusintention_cw_wmin1)
 #flextable(as.data.frame(table_userstatusintention_cw_wmin1))
 #flextable(data.frame(rbind(table_userstatusintention_cw_wmin1)))
 
-knitr::kable(df_userstatusintention_cw_wmin1, format="markdown")
+# Build the basic table
+ft <- flextable(
+  head(df_userstatusintention_cw_wmin1_wide, n = nrow(df_userstatusintention_cw_wmin1_wide))
+)
+
+# Header
+table_headerlabels = list()
+table_headerlabels["Var1"] <- ""
+
+ft <- set_header_labels(ft, values = table_headerlabels)
+
+# Change layout of table, and footer specifically
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining 5.5 inch.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 7
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 1.5)
+ft_out <- width(ft_out, j = -1, width = (table_width-1.5)/(length(colnames(df_userstatusintention_cw_wmin1_wide))-1))
+
+ft_out
+
+
+#knitr::kable(df_userstatusintention_cw_wmin1, format="markdown")
 
 ```
 
@@ -2391,14 +2429,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
+
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
   
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -2706,14 +2746,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
-  
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+    
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -2804,14 +2846,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
-  
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+    
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -2930,14 +2974,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
-  
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+    
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -3037,13 +3083,15 @@ for(idx in 1:length(graph_variablenames)) {
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
   
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+  
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -3422,14 +3470,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
-  
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+    
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -3878,14 +3928,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
-  
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+    
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -3960,9 +4012,9 @@ include_vars = c("Heel erg positief", "Positief", "Een beetje positief")
 # Note: for this table, the totals should include only people that have seen some messages about CoronaMelder
 # in the media, so we should filter those out (and not use the generic totals table created at the start
 # of this document).
-usergroup_names = c("users", "nonusers", "nonusers_no_intention", "nonusers_neutral", "nonusers_intention")
+usergroup_names = c("users", "former_users", "nonusers", "nonusers_no_intention", "nonusers_neutral", "nonusers_intention")
 
-usergroup_labels = c("Gebruikers", "Niet gebruikers", "Niet gebruikers - niet van plan om te gaan gebruiken", "Niet gebruikers - neutraal", "Niet gebruikers - wel van plan om te gaan gebruiken")
+usergroup_labels = c("Gebruikers", "Voormalig gebruikers", "Niet gebruikers", "Niet gebruikers - niet van plan om te gaan gebruiken", "Niet gebruikers - neutraal", "Niet gebruikers - wel van plan om te gaan gebruiken")
 
 user_totals_media <- data.frame(matrix(ncol = length(usergroup_names), nrow = 1))
 colnames(user_totals_media) <- usergroup_names
@@ -3970,17 +4022,20 @@ colnames(user_totals_media) <- usergroup_names
 # Current user
 user_totals_media[1] <- sum(data$user_status == "Gebruiker" & data$Media != "Nooit" & data$Media != "Weet ik niet")
 
+# Former user
+user_totals_media[2] <- sum(data$user_status == "Voormalig gebruiker" & data$Media != "Nooit" & data$Media != "Weet ik niet")
+
 # Non user
-user_totals_media[2] <- sum(data$user_status == "Niet gebruiker" & data$Media != "Nooit" & data$Media != "Weet ik niet")
+user_totals_media[3] <- sum(data$user_status == "Niet gebruiker" & data$Media != "Nooit" & data$Media != "Weet ik niet")
 
 # Non user -- not planning to use
-user_totals_media[3] <- sum(data$user_status_intention == "Nooit gebruikt en niet van plan" & data$Media != "Nooit" & data$Media != "Weet ik niet")
+user_totals_media[4] <- sum(data$user_status_intention == "Nooit gebruikt en niet van plan" & data$Media != "Nooit" & data$Media != "Weet ik niet")
 
 # Non user -- neutral
-user_totals_media[4] <- sum(data$user_status_intention == "Nooit gebruikt en neutraal" & data$Media != "Nooit" & data$Media != "Weet ik niet")
+user_totals_media[5] <- sum(data$user_status_intention == "Nooit gebruikt en neutraal" & data$Media != "Nooit" & data$Media != "Weet ik niet")
 
 # Non user -- planning to use
-user_totals_media[5] <- sum(data$user_status_intention == "Nooit gebruikt en wel van plan" & data$Media != "Nooit" & data$Media != "Weet ik niet")
+user_totals_media[6] <- sum(data$user_status_intention == "Nooit gebruikt en wel van plan" & data$Media != "Nooit" & data$Media != "Weet ik niet")
 
 # === NO MORE EDITS SHOULD BE NEEDED BELOW THIS POINT ===
 
@@ -3996,14 +4051,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
-  
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig Gebruiker"))
+    
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -4375,14 +4432,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
+
+    data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
   
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -4667,14 +4726,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
-  
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+    
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -5612,13 +5673,16 @@ for(idx in 1:length(graph_variablenames)) {
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
   
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+  
+  
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -5939,14 +6003,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
-  
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+    
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -6304,14 +6370,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
-  
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+    
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -6849,14 +6917,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
-  
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+    
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -7281,14 +7351,16 @@ for(idx in 1:length(graph_variablenames)) {
   data_grouptable[idx,"variable"] = graph_questionlabels[idx]
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
-  
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+    
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -7714,13 +7786,15 @@ for(idx in 1:length(graph_variablenames)) {
   
   data_grouptable[idx,2] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Gebruiker"))
   
-  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
+  data_grouptable[idx,3] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Voormalig gebruiker"))
+  
+  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status == "Niet gebruiker"))
 
-  data_grouptable[idx,4] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
+  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en niet van plan"))
 
-  data_grouptable[idx,5] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
+  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en neutraal"))
 
-  data_grouptable[idx,6] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
+  data_grouptable[idx,7] = nrow(filter(data, (eval(parse(text=graph_variablenames[idx]))) %in% include_vars & user_status_intention == "Nooit gebruikt en wel van plan"))
 }
 
 # Build the basic table
@@ -7998,15 +8072,196 @@ In totaal hebben `r nrow(filter(data, (Behavior_UTAUT == 'Ik gebruik de CoronaMe
 
 Van de respondenten die ooit een melding van de CoronaMelder hebben ontvangen gaf `r round(nrow(filter(data, (Notification_behavior_test == 'Ja')))/nrow(filter(data, (notifications_1 == 'Ja, 1 keer' | notifications_1 == 'Ja, al meerdere keren')))*100, digits = 1)`% aan een coronatest te hebben aangevraagd na de melding. Daarnaast gaf `r round(nrow(filter(data, (Notification_behavior_quarantaine == 'Vaak' | Notification_behavior_quarantaine == 'Meestal' | Notification_behavior_quarantaine == 'Altijd')))/nrow(filter(data, (notifications_1 == 'Ja, 1 keer' | notifications_1 == 'Ja, al meerdere keren')))*100, digits = 1)`% aan dat hij of zij vaak, meestal of altijd zo lang thuis is gebleven als de melding adviseert. Slechts `r round(nrow(filter(data, (Notification_behavior_quarantaine == 'Nooit' | Notification_behavior_quarantaine == 'Zelden')))/nrow(filter(data, (notifications_1 == 'Ja, 1 keer' | notifications_1 == 'Ja, al meerdere keren')))*100, digits = 1)`% gaf aan nooit of zelden zo lang thuis te zijn gebleven als de melding adviseert. 
 
-TABEL Notification_behavior_quarantaine HIER. 
 
+```{r notificationquarantaine, echo=FALSE, tab.cap="Thuis blijven zo lang als de melding adviseert"}
+# Order in which you would like to have the items appear (first = top, last = bottom) in the horizontal bar chart
+graph_variablenames = c("Notification_behavior_quarantaine")
+graph_questionlabels = c("Ben u nadat u deze melding(en) kreeg zo lang thuis gebleven als de melding adviseert?"); 
+
+# Order of the question categories: first = most green, last = most red # Check if the answer categories match with the codebook (e.g, sometimes also 'weet ik niet is one of the answeroptions')
+graph_answercategories = c("Altijd", "Meestal", "Vaak", "Regelmatig", "Soms", "Zelden", "Nooit"); 
+
+### Nothing needs to be changed in the script below. 
+# Create a dataframe for the plot
+#First only keep the variables you wish to keep. Note: nomem_enc is the participant id
+data_graph_wideformat = select(data, nomem_encr, all_of(graph_variablenames))
+
+# Create the table. Step 1: new data frame containing counts
+data_table = data.frame(matrix(0, ncol = 0, nrow = length(levels(data[[graph_variablenames[1]]]))))
+
+# We need one extra (empty) column label for the row with the possible values
+table_questionlabels = list()
+table_questionlabels["table_answercategories"] <- ""
+
+# We also need the 'unreversed' question labels ;)
+graph_questionlabels_unrev <- graph_questionlabels
+
+# Inefficient loop, but it does a lot for us: add the counts as columns to the dataframe,
+# and add the correct labels for column headings
+for(idx in 1:length(graph_variablenames)) {
+  
+  if (idx == 1) {
+    data_table["table_answercategories"] <- as.data.frame(table(data_graph_wideformat[graph_variablenames[idx]]))[1]
+  }
+  
+  # Add to new dataframe
+  data_table[graph_variablenames[idx]] <- as.data.frame(table(data_graph_wideformat[graph_variablenames[idx]]))[2]
+  
+  # Add correct mapping to column headings
+  table_questionlabels[graph_variablenames[idx]] <- graph_questionlabels_unrev[idx]
+}
+
+
+
+
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = table_questionlabels)
+
+# Set up the footer of totals
+totals = c("Totaal")
+
+# Percentages and totals
+for(colname in colnames(data_table)) {
+  if(colname != "table_answercategories") {
+    # Add percentage to cell
+    ft <- compose(ft, j = colname, value = as_paragraph(eval(parse(text=colname)), " (", sprintf("%.1f", eval(parse(text=colname))/sum(eval(parse(text=colname)))*100), "%)"))
+    
+    # Add total to footer
+    tablecolumn = paste("data_table$", colname)
+    totals <- c(totals, paste(sum(eval(parse(text=tablecolumn))), " (100%)"))
+  }
+}
+
+# Actually add the footer with totals
+ft <- add_footer_row(ft, values = totals, colwidths = rep(1, length(totals)))
+
+# Change layout of table, and footer specifically
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "right", part = "footer")
+ft <- padding(ft, padding = 5, part = "footer")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining 5.5 inch.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 1.5)
+ft_out <- width(ft_out, j = -1, width = (table_width-1.5)/(length(colnames(data_table))-1))
+
+ft_out
+
+```
 `r round(nrow(filter(data, (Notification_symptoms == 'Ja')))/nrow(filter(data, (notifications_1 == 'Ja, 1 keer' | notifications_1 == 'Ja, al meerdere keren')))*100, digits = 1)`% gaf aan binnen een week na het ontvangen van de melding symptomen te hebben gehad die bij een besmetting met het coronavirus pasten en `r round(nrow(filter(data, (Notification_symptoms == 'Nee')))/nrow(filter(data, (notifications_1 == 'Ja, 1 keer' | notifications_1 == 'Ja, al meerdere keren')))*100, digits = 1)`% gaf aan dat dit niet het geval was. 
 
 Van de mensen die aangaven een of meerdere meldingen te hebben ontvangen gaf `r round(nrow(filter(data, (Notification_justified == 'Ja')))/nrow(filter(data, (notifications_1 == 'Ja, 1 keer' | notifications_1 == 'Ja, al meerdere keren')))*100, digits = 1)`% aan te denken dat hij/zij inderdaad in contact was geweest met iemand met het coronavirus. `r round(nrow(filter(data, (Notification_justified == 'Nee')))/nrow(filter(data, (notifications_1 == 'Ja, 1 keer' | notifications_1 == 'Ja, al meerdere keren')))*100, digits = 1)`% dacht van niet en de rest gaf aan dit niet meer te weten (`r round(nrow(filter(data, (Notification_justified == 'Weet ik niet (meer)')))/nrow(filter(data, (notifications_1 == 'Ja, 1 keer' | notifications_1 == 'Ja, al meerdere keren')))*100, digits = 1)`%). 
 
 Er werd ook gevraagd of de respondent angstig werd na het ontvangen van de melding. `r round(nrow(filter(data, (Notification_fear == 'Een beetje mee eens' | Notification_fear == 'Mee eens' | Notification_fear == 'Helemaal mee eens')))/nrow(filter(data, (notifications_1 == 'Ja, 1 keer' | notifications_1 == 'Ja, al meerdere keren')))*100, digits = 1)`% gaf aan dat dit in meer of mindere mate het geval was; `r round(nrow(filter(data, (Notification_fear == 'Een beetje oneens' | Notification_fear == 'Oneens' | Notification_fear == 'Helemaal mee oneens')))/nrow(filter(data, (notifications_1 == 'Ja, 1 keer' | notifications_1 == 'Ja, al meerdere keren')))*100, digits = 1)`% gaf aan van niet en `r round(nrow(filter(data, (Notification_fear == 'Neutraal')))/nrow(filter(data, (notifications_1 == 'Ja, 1 keer' | notifications_1 == 'Ja, al meerdere keren')))*100, digits = 1)`% stond hier neutraal in. 
 
-TABEL Notification_fear hier
+```{r notificationfear, echo=FALSE, tab.cap="Angstig na het ontvangen van een melding"}
+# Order in which you would like to have the items appear (first = top, last = bottom) in the horizontal bar chart
+graph_variablenames = c("Notification_fear")
+graph_questionlabels = c("Ik werd angstig toen ik de melding van de coronamelder app ontving"); 
+
+# Order of the question categories: first = most green, last = most red # Check if the answer categories match with the codebook (e.g, sometimes also 'weet ik niet is one of the answeroptions')
+graph_answercategories = c("Helemaal mee eens", "Mee eens", "Een beetje mee eens", "Neutraal", "Een beetje oneens", "Oneens", "Helemaal mee oneens"); 
+
+### Nothing needs to be changed in the script below. 
+# Create a dataframe for the plot
+#First only keep the variables you wish to keep. Note: nomem_enc is the participant id
+data_graph_wideformat = select(data, nomem_encr, all_of(graph_variablenames))
+
+# Create the table. Step 1: new data frame containing counts
+data_table = data.frame(matrix(0, ncol = 0, nrow = length(levels(data[[graph_variablenames[1]]]))))
+
+# We need one extra (empty) column label for the row with the possible values
+table_questionlabels = list()
+table_questionlabels["table_answercategories"] <- ""
+
+# We also need the 'unreversed' question labels ;)
+graph_questionlabels_unrev <- graph_questionlabels
+
+# Inefficient loop, but it does a lot for us: add the counts as columns to the dataframe,
+# and add the correct labels for column headings
+for(idx in 1:length(graph_variablenames)) {
+  
+  if (idx == 1) {
+    data_table["table_answercategories"] <- as.data.frame(table(data_graph_wideformat[graph_variablenames[idx]]))[1]
+  }
+  
+  # Add to new dataframe
+  data_table[graph_variablenames[idx]] <- as.data.frame(table(data_graph_wideformat[graph_variablenames[idx]]))[2]
+  
+  # Add correct mapping to column headings
+  table_questionlabels[graph_variablenames[idx]] <- graph_questionlabels_unrev[idx]
+}
+
+
+
+
+# Build the basic table
+ft <- flextable(
+  head(data_table, n = nrow(data_table))
+)
+
+# Header labels
+ft <- set_header_labels(ft, values = table_questionlabels)
+
+# Set up the footer of totals
+totals = c("Totaal")
+
+# Percentages and totals
+for(colname in colnames(data_table)) {
+  if(colname != "table_answercategories") {
+    # Add percentage to cell
+    ft <- compose(ft, j = colname, value = as_paragraph(eval(parse(text=colname)), " (", sprintf("%.1f", eval(parse(text=colname))/sum(eval(parse(text=colname)))*100), "%)"))
+    
+    # Add total to footer
+    tablecolumn = paste("data_table$", colname)
+    totals <- c(totals, paste(sum(eval(parse(text=tablecolumn))), " (100%)"))
+  }
+}
+
+# Actually add the footer with totals
+ft <- add_footer_row(ft, values = totals, colwidths = rep(1, length(totals)))
+
+# Change layout of table, and footer specifically
+ft <- fontsize(ft, size = 10, part = "all")
+ft <- font(ft, fontname = "Cambria", part = "all")
+ft <- align(ft, j = -1, align = "right", part = "footer")
+ft <- padding(ft, padding = 5, part = "footer")
+
+# Basic autofit does not work well with Word, found this code below
+# but it seems to make all columns of equal size (7 inch / number of columns?)
+# Might give unwanted results, so we might want to control this per column.
+
+# Note: 7 inch is the page width in Word
+# We now divide this into 1.5 inch for the first column (the values),
+# and divide the other columns equally among the remaining 5.5 inch.
+# If you only have one or few columns, you might want to reduce the total width below:
+table_width <- 5
+
+# Set width
+ft_out <- ft %>% autofit()
+ft_out <- width(ft_out, j = 1, width = 1.5)
+ft_out <- width(ft_out, j = -1, width = (table_width-1.5)/(length(colnames(data_table))-1))
+
+ft_out
+
+```
+
 
 #### Intentie tot opvolgen adviezen gegeven in de melding
 Aan de respondenten is gevraagd in hoeverre zij de intentie hebben om, na ontvangen van een melding, zich te houden aan de adviezen die in een melding van de CoronaMelder worden gegeven. Om dit te onderzoeken werd proefpersonen twee situaties voorgelegd (situatie waarin men wel of geen symptomen had) en werd een screenshot van de melding getoond. 
