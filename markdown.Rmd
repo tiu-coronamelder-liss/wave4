@@ -11570,7 +11570,7 @@ ft_out
 ```{r ModelfitSEM, echo = FALSE, tab.cap ="Model fit van de Structural Equation Models"}
 
 #Model fit SEMS
-dftab <- data.frame(Model = c("UTAUT", "HBM", "Naleving van de maatregelen (zonder symptomen)", "Naleving van de maatregelen (met symptomen)"), 'Chi-Squared' = c('105.428', '71.648', '250.507', '250.609'), CFI = c('.999', '.993', '.949', '.950'), RMSEA = c('.044', '.054', '.071', '.071'), '90percent-CI' = c('[.035, .054]', '[.042, .067]', '[.061, .081]', '[.061, .081]'), SRMR = c('.029', '.069', '.052', '.052'), 'R-squared' = c('.923', '.487', '.084', '.204'))
+dftab <- data.frame(Model = c("UTAUT", "HBM", "Naleving van de maatregelen (zonder symptomen)", "Naleving van de maatregelen (met symptomen)"), 'Chi-Squared' = c('105.428', '71.648', '250.507', '250.609'), CFI = c('.999', '.993', '.949', '.950'), RMSEA = c('.044', '.054', '.071', '.071'), '90percent CI' = c('[.035, .054]', '[.042, .067]', '[.061, .081]', '[.061, .081]'), SRMR = c('.029', '.069', '.052', '.052'), 'R-squared' = c('.923', '.487', '.084', '.204'), check.names = FALSE)
 
 
 
@@ -11609,7 +11609,7 @@ ft_out
 ```{r ModelfitLogReg, echo = FALSE, tab.cap="Model fit van de logistische regressie"}
 
 #Model fit Log reg
-dftab <- data.frame(Model = c("Context-gerelateerde variabelen"), 'Pseudo-R-squared' = c('.295'), 'AIC' = c('1172.5'))
+dftab <- data.frame(Model = c("Context-gerelateerde variabelen"), 'Pseudo R-squared' = c('.295'), 'AIC' = c('1172.5'), check.names = FALSE)
 
 
 # Build the basic table
