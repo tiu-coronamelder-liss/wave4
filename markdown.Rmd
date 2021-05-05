@@ -8050,18 +8050,75 @@ ggdraw(theplot)
 
 ## Verklarende modellen voor adoptie
 
-Om te onderzoeken welke factoren samenhangen met het gebruik van de CoronaMelder zijn er drie verklarende modellen opgesteld met de variabelen uit deze vierde meting, namelijk 1) een model met algemene technologie adoptie variabelen op basis van de Unified Theory of Acceptance and Use of Technology (UTAUT), 2) een model met variabelen specifiek voor interventies gericht op gezondheid - op basis van het Health Belief Model (HBM), en 3) een model met variabelen specifiek voor de context van de huidige corona pandemie en speciek voor digitale contact tracing applicaties, zoals bijvoorbeeld vertrouwen in de overheidsaanpak, complottheorieën, en overtuigingen met betrekking tot de privacy. De afhankelijke variabele in al deze modellen was CoronaMelder gebruik (huidige gebruiker versus nooit gebruikt). In alle modellen zijn leeftijd en geslacht toegevoegd om voor deze factoren te controleren. Een overzicht van alle predictievariabelen en model fit per model is te vinden in de Appendix.
+Om te onderzoeken welke factoren samenhangen met het gebruik van de CoronaMelder zijn er drie verklarende modellen opgesteld met de variabelen uit deze vierde meting, namelijk 1) een model met algemene technologie adoptie variabelen op basis van de Unified Theory of Acceptance and Use of Technology (UTAUT), 2) een model met variabelen specifiek voor interventies gericht op gezondheid - op basis van het Health Belief Model (HBM), en 3) een model met variabelen specifiek voor de context van de huidige corona pandemie en speciek voor digitale contact tracing applicaties, zoals bijvoorbeeld vertrouwen in de overheidsaanpak, complottheorieën, en overtuigingen met betrekking tot de privacy. De afhankelijke variabele in al deze modellen was CoronaMelder gebruik (huidige gebruiker versus nooit gebruikt). Deze modellen zijn apart getoets vanwege conceptuele overlap tussen de modellen. In alle modellen zijn leeftijd en geslacht toegevoegd om voor deze factoren te controleren. Een overzicht van model fit parameters is te vinden in de Appendix.
 
 ### Verklarend model adoptie op basis van het UTAUT
-Om te onderzoeken welke technologie adoptie variabelen samenhangen met CoronaMelder gebruik, is er een Standard Equation Modelling (SEM) analyse uitgevoerd met de UTAUT voorspellers als onafhankelijke variabelen en CoronaMelder adoptie als afhankelijke variabele. Uit de analyse bleek dat verwachte inspanning (*β* = .23, *p* = .002), verwachte effectiviteit (*β* = .20, *p* < .001) en sociale invloed (*β * = .38, *p* < .001) positief samenhangen met CoronaMelder adoptie. Ook het gevoel van verplichting tot gebruik (d.w.z., hoe sterker het gevoel van verplichting, hoe hoger de CoronaMelder adoptie; *β* = .21, *p* < .001), en faciliterende omstandigheden (*β* = .20, *p* = .017) hebben een positief effect op CoronaMelder adoptie. Tot slot bleek uit deze analyse dat leeftijd een marginaal significante positieve samenhang met adoptie had.  
+Om te onderzoeken welke technologie adoptie variabelen samenhangen met CoronaMelder gebruik, is er een Standard Equation Modelling (SEM) analyse uitgevoerd met de UTAUT voorspellers als onafhankelijke variabelen en CoronaMelder adoptie als afhankelijke variabele. Hieronder is te zien welke vragen gebruikt zijn voor deze analyse:
+
+1) Inspanningsverwachting items (*α* = .63):   
+
+- Het kost(te) mij veel tijd en energie om de CoronaMelder app te gebruiken
+- Ik denk dat het mij veel tijd en energie kost om de CoronaMelder app te gebruiken
+- De CoronaMelder app is makkelijk te gebruiken
+- Ik denk dat de CoronaMelder app makkelijk te gebruiken is  
+
+
+2) Verwachte effectiviteit items (*α* = .93):  
+
+- Door de CoronaMelder app te gebruiken help ik mee bij de bestrijding van het coronavirus
+- De CoronaMelder app is nuttig om ervoor te zorgen dat het coronavirus zich minder verspreidt
+
+3) Sociale invloed items (*α* = .82):  
+
+- Veel mensen in mijn omgeving gebruiken de CoronaMelder app
+- Mensen in mijn directe omgeving vinden dat ik de CoronaMelder app moet gebruiken  
+
+4) Faciliterende omstandigheden items (*α* = .80):  
+
+- Ik heb een smartphone tot mijn beschikking met toegang tot het internet waarmee ik de CoronaMelder app kan gebruiken
+- Ik heb genoeg (technische) kennis om de CoronaMelder app te gebruiken  
+
+5) Vrijwilligheid / gevoel van verplichting tot gebruik item:
+
+- Ik voel me verplicht om de CoronaMelder app te gebruiken  
+
+Uit de analyse bleek dat verwachte inspanning (*β* = .23, *p* = .002), verwachte effectiviteit (*β* = .20, *p* < .001) en sociale invloed (*β * = .38, *p* < .001) positief samenhangen met CoronaMelder adoptie. Ook het gevoel van verplichting tot gebruik (d.w.z., hoe sterker het gevoel van verplichting, hoe hoger de CoronaMelder adoptie; *β* = .21, *p* < .001), en faciliterende omstandigheden (*β* = .20, *p* = .017) hangen positief samen met CoronaMelder gebruik.   
 
 ### Verklarend model adoptie op basis van het HBM
-Daarnaast is onderzocht in hoeverre variabelen gerelateerd aan interventies gericht op gezondheid een rol spelen in het voorspellen van CoronaMelder adoptie. Hiervoor is een SEM analyse uitgevoerd met onafhankelijke variabelen zoals in het HBM gespecifieerd, en CoronaMelder gebruik als afhankelijke variabele. Uit de analyse bleek dat gepercipieerde voordelen een positieve (*β* = .47, *p* < .001), en gepercipieerde barrières een negatieve invloed hebben (*β* = -.14, *p* < .001) op CoronaMelder adoptie. Daarnaast heeft de mate waarin men het gevoel heeft in staat te zijn om de CoronaMelder te gebruiken (zelfeffectiviteit), een positieve relatie met CoronaMelder gebruik (*β* = .31, *p* < .001). De perceptie van de vatbaarheid om besmet te raken met het coronavirus (*perceived susceptibility*) en hoe erg men het zou vinden om besmet te raken (*perceived severity*) speelden geen rol, evenals leeftijd, geslacht, en de mate waarin men de CoronaMelder voorbij heeft zien komen in de media/het nieuws (*cue to action*). 
+Daarnaast is onderzocht in hoeverre variabelen gerelateerd aan interventies gericht op gezondheid een rol spelen in het voorspellen van CoronaMelder adoptie. Hiervoor is een SEM analyse uitgevoerd met onafhankelijke variabelen zoals in het HBM gespecifieerd, en CoronaMelder gebruik als afhankelijke variabele. Hieronder is te zien welke vragen gebruikt zijn voor deze analyse:
+
+1) Vatbaarheid items :  
+
+- Ik loop in de komende twee maanden risico op een besmetting met het coronavirus
+- Er is een grote kans dat ik in de komende twee maanden besmet raak met het coronavirus  
+
+2) Ernst van de besmetting items:  
+
+- Ik vind het erg om besmet te raken met het coronavirus
+- Een besmetting met het coronavirus heeft voor mij grote lichamelijke, psychische of economische gevolgen  
+
+3) Gepercipieerde voordelen van gebruik item:  
+
+- Het heeft voor mij persoonlijke voordelen om de CoronaMelder te gebruiken  
+
+4) Gepercipieerde barrières item:  
+
+- Het heeft voor mij persoonlijke nadelen om de CoronaMelder te gebruiken
+
+5) Zelfeffectiviteit item:  
+
+- Ik ben in staat om de CoronaMelder app te gebruiken
+
+5) Cue to action item:  
+
+- Hoe vaak hebt u de CoronaMelder voorbij zien komen in de media en/of het nieuws in de afgelopen maand?
+
+Uit de analyse bleek dat gepercipieerde voordelen een positieve (*β* = .47, *p* < .001), en gepercipieerde barrières een negatieve samenhang hebben (*β* = -.14, *p* < .001) met CoronaMelder gebruik. Daarnaast heeft de mate waarin men het gevoel heeft in staat te zijn om de CoronaMelder te gebruiken (zelfeffectiviteit), een positieve relatie met CoronaMelder gebruik (*β* = .31, *p* < .001). De perceptie van de vatbaarheid voor het coronavirus, de ernst van een besmetting, en de de mate waarin men de CoronaMelder voorbij heeft zien komen in de media/het nieuws hingen in dit model niet significant samen met CoronaMelder gebruik. 
 
 ### Verklarend model adoptie op basis van context-specifieke variabelen
-Ook variabelen specifiek voor de context van de huidige corona pandemie zijn onderzocht. In deze logistische regressie analyse is bekeken in hoeverre deze context-specifieke variabelen samenhangen met CoronaMelder gebruik. Een factoranalyse is uitgevoerd om variabelen te clusteren die sterk met elkaar samenhingen. Uit de factoranalyse werden vier factoren onderscheiden:  
+Ook variabelen specifiek voor de context van de huidige corona pandemie zijn onderzocht. In deze logistische regressie analyse is bekeken in hoeverre deze context-specifieke variabelen samenhangen met CoronaMelder gebruik. Eer is een factoranalyse uitgevoerd om items te clusteren die sterk met elkaar samenhingen. Uit de factoranalyse werden vier factoren onderscheiden:  
 
-1) Maatschappelijk-gerelateerde overtuigingen(*α* = .83): de overtuiging dat de CoronaMelder bijdraagt aan Nederlandse economie en aan goed burgerschap, het vertrouwen dat men heeft in de overheid, de overtuiging dat risicogroepen worden beschermd, en dataveiligheid;   
+1) Maatschappelijk-gerelateerde overtuigingen (*α* = .83): de overtuiging dat de CoronaMelder bijdraagt aan Nederlandse economie en aan goed burgerschap, het vertrouwen dat men heeft in de overheid, de overtuiging dat risicogroepen worden beschermd, en dataveiligheid   
 
 2) Privacy-gerelateerde overtuigingen (*α* = .74): de mate waarin men de overtuiging heeft dat de CoronaMelder de locatie bijhoudt en persoonsgegevens opslaat;  
 
@@ -8071,7 +8128,7 @@ Ook variabelen specifiek voor de context van de huidige corona pandemie zijn ond
 
 Uit de factoranalyse bleken de variabelen adequaatheid van de techniek, de kans om anderen te besmetten als men zelf besmet is, en de ernst van het besmetten van anderen als men zelf  besmet is, geen onderdeel uit te maken van één van de factoren. Deze variabelen zijn daarom los meegenomen in de logistische regressie analyse.  
 
-Uit de logistische regressie analyse bleek dat maatschappelijke overtuigingen de grootste positieve voorspeller was van CoronaMelder adoptie (*b* = 1.29, *p* < .001). Ook de adequaatheid van de techniek hing positief samen met CoronaMelder adoptie ((*b* = 0.17, *p* = .030)). Overtuigingen over privacy-gerelateerde kwesties hebben een negatieve invloed op CoronaMelder adoptie (*b* = -.12, *p* = .003), evenals angst-gerelateerde overtuigingen (*b* = -.30, *p* < .001). Leeftijd had een marginaal significante negatieve samenhang met CoronaMelder adoptie in deze analyse (*b* = -.09, *p* = .047). Overtuigingen over complottheorieën, de kans om anderen te besmetten als men zelf besmet is, en de ernst van het besmetten van anderen als men zelf  besmet is, bleken geen effect te hebben op CoronaMelder adoptie. 
+Uit de logistische regressie analyse bleek dat maatschappelijke overtuigingen positief samenhingen met CoronaMelder gebruik (*b* = 1.29, *p* < .001). Ook de adequaatheid van de techniek hing positief samen met CoronaMelder gebruik (*b* = 0.17, *p* = .030). Overtuigingen over privacy-gerelateerde kwesties hebben een negatieve samenhang met CoronaMelder gebruik (*b* = -.12, *p* = .003), evenals angst-gerelateerde overtuigingen (*b* = -.30, *p* < .001). Overtuigingen over complottheorieën, de kans om anderen te besmetten als men zelf besmet is, en de ernst van het besmetten van anderen als men zelf  besmet is, bleken geen significante samenhang met CoronaMelder gebruik te hebben.  
 
 ## Effecten
 ### Meldingen en reacties op adviezen gegeven in de melding
@@ -10299,11 +10356,14 @@ ggdraw(theplot)
 ```
 
 
-#### Verklarend model voor opvolging adviezen gegeven in melding
+#### Verklarend model voor intentie tot opvolging adviezen gegeven in melding
+
+Om de intentie tot het opvolgen van de in de melding gegeven adviezen te verklaren zijn twee voorspellende modellen getest: een voor de intentie tot opvolging in het hypothetisch geval van klachten en een voor de intentie tot opvolging in het hypothetisch geval van afwezigheid van klachten. Een overzicht van de model fit parameters is te vinden in de Appendix.
+
 *Situatie zonder symptomen.* Participanten werd gevraagd in hoeverre zij de intentie hadden om de adviezen uit de app op te volgen na het zien van een melding van de CoronaMelder, waarbij de situatie werd voorgelegd dat zijzelf geen symptomen hadden. Voor deze analyse zijn drie gedragsmaatregelen samengenomen tot één afhankelijke variabele, namelijk ‘bellen om een coronatest aan te vragen’, ‘zo lang thuisblijven als de melding adviseert’, en ‘geen bezoek ontvangen’.
- 	Zelfeffectiviteit is de grootste voorspeller van het naleven van de gedragsmaatregelen (*β* = .21, *p* < .001), waarbij een hogere zelfeffectiviteit leidt tot een sterkere naleving van de gedragsmaatregelen. Ook de mate waarin men zichzelf ontvankelijk acht voor besmetting met het coronavirus speelde een significante en positieve rol (*β* = .176, *p* = .002). De overige variabelen (d.w.z., gepercipieerde voordelen, gepercipieerde barrières, gepercipieerde ernst van een besmetting met het coronavirus, leeftijd en geslacht) hadden geen significante invloed op de naleving van de gedragsmaatregelen.
+Zelfeffectiviteit hangt positief samen met de intentie tot naleving van de adviezen (*β* = .21, *p* < .001), waarbij een hogere zelfeffectiviteit leidt tot een sterkere intentie tot naleving van de adviezen. Ook de mate waarin men zichzelf ontvankelijk acht voor besmetting met het coronavirus hing significant positief samen met de intentie tot opvolging van de adviezen (*β* = .176, *p* = .002). De overige variabelen (d.w.z., gepercipieerde voordelen, gepercipieerde barrières en gepercipieerde ernst van een besmetting met het coronavirus) hadden geen significante samenhang met de intentie tot het naleven van de adviezen.
  	
-*Situatie met symptomen.* Net als in de situatie zonder symptomen werd aan participanten gevraagd in hoeverre zij de intentie hadden om de adviezen uit de app op te volgen na het zien van een melding van de CoronaMelder, maar dit keer in een situatie met symptomen. Wederom was zelfeffectiviteit de grootste voorspeller van naleving van de gedragsmaatregelen (*β* = .41, *p* < .001). Daarnaast bleek gepercipieerde ernst een significante en positieve rol te spelen (*β* = .14, *p* = .017). De overige variabelen (d.w.z., gepercipieerde voordelen, gepercipieerde barrières, gepercipieerde ontvankelijkheid voor een besmetting met het coronavirus, leeftijd en geslacht) hadden geen significante invloed op de naleving van de gedragsmaatregelen. Een overzicht van alle predictievariabelen en model fit per model is te vinden in de Appendix (6.2 en 6.3).
+*Situatie met symptomen.* Net als in de situatie zonder symptomen werd aan participanten gevraagd in hoeverre zij de intentie hadden om de adviezen uit de app op te volgen na het zien van een melding van de CoronaMelder, maar dit keer in een situatie met symptomen. Wederom hing zelfeffectiviteit positief samen met de intentie tot opvolgen van de adviezen (*β* = .41, *p* < .001). Daarnaast hing gepercipieerde ernst significant positief samen met de intentie tot opvolging van de adviezen (*β* = .14, *p* = .017). De overige variabelen (d.w.z., gepercipieerde voordelen, gepercipieerde barrières en gepercipieerde ontvankelijkheid voor een besmetting met het coronavirus) hadden geen significante samenhang met de intentie tot het opvolgen vn de adviezen. 
 
 
 
@@ -11111,6 +11171,7 @@ pairwiseNominalIndependence(Matriz,
  
 ## Tabellen verklarende modellen - predictie analyses 
 
+Hieronder zijn de tabellen van de verklarende modellen te zien met de op de theorie gebaseerde predictoren (exclusief controlevariabelen). 
 ```{r include = FALSE}
 ##### Load packages
 # For importing SPSS files
@@ -11714,7 +11775,7 @@ ft_out
    
    
    
-```{r echo = FALSE, tab.cap="Verklarend model op basis van context-gerelateerde variabelen met CoronaMelder gebruik als afhankelijke variabele"}
+```{r echo = FALSE, eval=FALSE, tab.cap="Verklarend model op basis van context-gerelateerde variabelen met CoronaMelder gebruik als afhankelijke variabele"}
 data_table <- w1_covid[,-1]
 # Build the basic table
 ft <- flextable(
@@ -11722,7 +11783,7 @@ ft <- flextable(
 )
 
 # Header labels
-ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "estimates" = "β", "pvalue" = "p"))
+ft <- set_header_labels(ft, values = list("vardesc" = "Variabele", "estimates" = "logit", "pvalue" = "p"))
 
 # Round numbers
 ft <- colformat_num(x = ft, j = -1, big.mark = ".", decimal.mark = ",", digits = 3)
@@ -11832,7 +11893,7 @@ ft_out
 ```{r ModelfitSEM, echo = FALSE, tab.cap ="Model fit van de Structural Equation Models"}
 
 #Model fit SEMS
-dftab <- data.frame(Model = c("UTAUT", "HBM", "Naleving van de maatregelen (zonder symptomen)", "Naleving van de maatregelen (met symptomen)"), 'Chi-Squared' = c('105.428', '71.648', '250.507', '250.609'), CFI = c('.999', '.993', '.949', '.950'), RMSEA = c('.044', '.054', '.071', '.071'), '90percent CI' = c('[.035, .054]', '[.042, .067]', '[.061, .081]', '[.061, .081]'), SRMR = c('.029', '.069', '.052', '.052'), 'R-squared' = c('.923', '.487', '.084', '.204'), check.names = FALSE)
+dftab <- data.frame(Model = c("UTAUT", "HBM", "Naleving van de maatregelen (zonder symptomen)", "Naleving van de maatregelen (met symptomen)"), CFI = c('.999', '.993', '.949', '.950'), RMSEA = c('.044', '.054', '.071', '.071'), '90percent CI' = c('[.035, .054]', '[.042, .067]', '[.061, .081]', '[.061, .081]'), SRMR = c('.029', '.069', '.052', '.052'), check.names = FALSE)
 
 
 

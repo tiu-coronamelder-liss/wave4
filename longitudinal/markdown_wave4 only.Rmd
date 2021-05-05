@@ -90,6 +90,8 @@ data_wave4$EE2_UTAUT <- rowMeans(data_wave4[, c("EE2a_UTAUT","EE2b_UTAUT")], na.
 # Some variables need to be dummy-coded.
 data_wave4$Beliefs_voluntariness_dummy <- car::recode(data_wave4$Beliefs_voluntariness, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1') #Higher values represent less voluntariness
 #View(data_wave4[,c("Beliefs_voluntariness","Beliefs_voluntariness_dummy")])
+data_wave4$Beliefs_fear_dummy <- car::recode(data_wave4$Beliefs_fear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1')
+data_wave4$Beliefs_fear_notification_dummy <- car::recode(data_wave4$Beliefs_notificationfear, '1=0; 2=0; 3=0; 4=0; 5=1; 6=1; 7=1')
 data_wave4$Media_dummy <- car::recode(data_wave4$Media, '1=0; 2=1; 3=1; 4=1; 99=0')
 #View(data_wave4[,c("Media","Media_dummy")])
 
@@ -258,7 +260,7 @@ summary(fit_UTAUT1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
                     # EE_UTAUT: alpha = .63
                     # PSus_HBM: alpha = .78
                     # PSev_HBM: alpha = .73
-        
+#reliability(fit_UTAUT1)       
 
 parameterestimates(fit_UTAUT1) #unstandardized parameters
 standardizedsolution(fit_UTAUT1) #standardized parameters
@@ -379,6 +381,43 @@ car::vif(lm)
 
 #Logistic regression
 mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_society + Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSus_other2 + HBM_PSev_other2 + Beliefs_technologyperformance_5p + lftdcat + geslacht, data = data_wave4, family=binomial)
+
+############### Testjes Nynke
+mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSus_other2 + HBM_PSev_other2 + Beliefs_technologyperformance_5p + lftdcat + geslacht, data = data_wave4, family=binomial)
+
+mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_society + Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSus_other2 + HBM_PSev_other2 + Beliefs_technologyperformance_5p + lftdcat + geslacht + Beliefs_society*lftdcat, data = data_wave4, family=binomial)
+
+mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_society + Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSus_other2 + HBM_PSev_other2 + Beliefs_technologyperformance_5p + lftdcat + geslacht, data = data_wave4, family=binomial(link="logit"))
+
+# Toch nogmaals een check op alle vars
+hist(data_wave4$Behavior_UTAUT_r)
+hist(data_wave4$Beliefs_society)
+hist(data_wave4$Beliefs_fears) # highly skewed to the left
+hist(log(data_wave4$Beliefs_fears)) # slightly better
+hist(data_wave4$Beliefs_fear_notification_dummy)
+hist(data_wave4$Beliefs_fear_dummy)
+hist(data_wave4$Beliefs_monitoring)
+hist(data_wave4$Beliefs_conspiracy)# highly skewed
+hist(data_wave4$HBM_PSus_other2)# quite normal
+hist(data_wave4$HBM_PSev_other2)# skewed to right
+hist(data_wave4$Beliefs_technologyperformance_5p)# is nog als 5, niet als 7
+hist(data_wave4$lftdcat)
+hist(data_wave4$geslacht)
+
+# Interpretatie van de estimates.   
+# Normality not required for logistic regression: https://www.statisticssolutions.com/assumptions-of-logistic-regression/
+# For every unit increase in X the log-odds of being a user increases by estimate. I.e., the chances of being a user increase are X increaes. 
+# For every unit increase in X, the odds of being a user are 1-estimate times the odds of those with one X unit less (i.e. -1.09 %)
+# Dus voor Beliefs society: For every unit increase in Beliefs_society the log-odds of being a user increases by 1.29. I.e., the chances of being a user increase as Beliefs_society increases. For every unit increase in Beliefs_society, the odds of being a user are 1-1.29=-0.29 times the odds of those with one X unit less (i.e. -1.09 %)
+
+# Probeersel met dummies (check of di gekke verdelingen uitmaken)
+
+# Met paar dummies ipv 
+mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_society + Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSusother_dummy + HBM_PSevother_dummy + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave4, family=binomial)
+# Ook dummies voor die fear variabele
+mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_society + Beliefs_fear_dummy + Beliefs_fear_notification_dummy + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSusother_dummy + HBM_PSevother_dummy + Beliefs_technologyperformance_dummy + lftdcat + geslacht, data = data_wave4, family=binomial)
+
+############## Testjes Nynke
 
 summary(mylogit)
 PseudoR2(mylogit)
