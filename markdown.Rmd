@@ -11109,7 +11109,7 @@ pairwiseNominalIndependence(Matriz,
 <w:p><w:r><w:br w:type="page"/></w:r></w:p>
 ```
  
-## Tabellen predictie analyses 
+## Tabellen verklarende modellen - predictie analyses 
 
 ```{r include = FALSE}
 ##### Load packages
@@ -11827,7 +11827,7 @@ ft_out
 ```
     
     
-## Tabellen model fit
+## Tabellen verklarende modellen - model fit
 
 ```{r ModelfitSEM, echo = FALSE, tab.cap ="Model fit van de Structural Equation Models"}
 
