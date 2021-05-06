@@ -383,7 +383,12 @@ car::vif(lm)
 mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_society + Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSus_other2 + HBM_PSev_other2 + Beliefs_technologyperformance_5p + lftdcat + geslacht, data = data_wave4, family=binomial)
 
 ############### Testjes Nynke
+#library(epiDisplay)
+
+
 mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSus_other2 + HBM_PSev_other2 + Beliefs_technologyperformance_5p + lftdcat + geslacht, data = data_wave4, family=binomial)
+
+#logistic.display(mylogit)
 
 mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_society + Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSus_other2 + HBM_PSev_other2 + Beliefs_technologyperformance_5p + lftdcat + geslacht + Beliefs_society*lftdcat, data = data_wave4, family=binomial)
 
@@ -407,9 +412,11 @@ hist(data_wave4$geslacht)
 # Interpretatie van de estimates.   
 # Normality not required for logistic regression: https://www.statisticssolutions.com/assumptions-of-logistic-regression/
 # For every unit increase in X the log-odds of being a user increases by estimate. I.e., the chances of being a user increase are X increaes. 
-# For every unit increase in X, the odds of being a user are 1-estimate times the odds of those with one X unit less (i.e. -1.09 %)
-# Dus voor Beliefs society: For every unit increase in Beliefs_society the log-odds of being a user increases by 1.29. I.e., the chances of being a user increase as Beliefs_society increases. For every unit increase in Beliefs_society, the odds of being a user are 1-1.29=-0.29 times the odds of those with one X unit less (i.e. -1.09 %)
-
+# For every unit increase in X, the odds of being a user are exp(estimate) times the odds of those with one X unit less (i.e. -1.09 %)
+# Dus voor Beliefs society: For every unit increase in Beliefs_society the log-odds of being a user increases by 1.29. I.e., the chances of being a user increase as Beliefs_society increases. For every unit increase in Beliefs_society, the odds of being a user are exp(1.29)=3.63 times the odds of those with one X unit less (i.e. -1.09 %)
+plot(data_wave4$Beliefs_society, data_wave4$Behavior_UTAUT_r)
+table(data_wave4$Beliefs_society, data_wave4$Behavior_UTAUT_r)
+tapply(data_wave4$Beliefs_society, data_wave4$Behavior_UTAUT_r, mean)
 # Probeersel met dummies (check of di gekke verdelingen uitmaken)
 
 # Met paar dummies ipv 
