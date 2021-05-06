@@ -8087,12 +8087,12 @@ Uit de analyse bleek dat verwachte inspanning (*β* = .23, *p* = .002), verwacht
 ### Verklarend model adoptie op basis van het HBM
 Daarnaast is onderzocht in hoeverre variabelen gerelateerd aan interventies gericht op gezondheid een rol spelen in het voorspellen van CoronaMelder adoptie. Hiervoor is een SEM analyse uitgevoerd met onafhankelijke variabelen zoals in het HBM gespecifieerd, en CoronaMelder gebruik als afhankelijke variabele. Hieronder is te zien welke vragen gebruikt zijn voor deze analyse:
 
-1) Vatbaarheid items :  
+1) Vatbaarheid items (*α* = .78):  
 
 - Ik loop in de komende twee maanden risico op een besmetting met het coronavirus
 - Er is een grote kans dat ik in de komende twee maanden besmet raak met het coronavirus  
 
-2) Ernst van de besmetting items:  
+2) Ernst van de besmetting items (*α* = .72):  
 
 - Ik vind het erg om besmet te raken met het coronavirus
 - Een besmetting met het coronavirus heeft voor mij grote lichamelijke, psychische of economische gevolgen  
@@ -10360,10 +10360,10 @@ ggdraw(theplot)
 
 Om de intentie tot het opvolgen van de in de melding gegeven adviezen te verklaren zijn twee voorspellende modellen getest: een voor de intentie tot opvolging in het hypothetisch geval van klachten en een voor de intentie tot opvolging in het hypothetisch geval van afwezigheid van klachten. Een overzicht van de model fit parameters is te vinden in de Appendix.
 
-*Situatie zonder symptomen.* Participanten werd gevraagd in hoeverre zij de intentie hadden om de adviezen uit de app op te volgen na het zien van een melding van de CoronaMelder, waarbij de situatie werd voorgelegd dat zijzelf geen symptomen hadden. Voor deze analyse zijn drie gedragsmaatregelen samengenomen tot één afhankelijke variabele, namelijk ‘bellen om een coronatest aan te vragen’, ‘zo lang thuisblijven als de melding adviseert’, en ‘geen bezoek ontvangen’.
-Zelfeffectiviteit hangt positief samen met de intentie tot naleving van de adviezen (*β* = .21, *p* < .001), waarbij een hogere zelfeffectiviteit leidt tot een sterkere intentie tot naleving van de adviezen. Ook de mate waarin men zichzelf ontvankelijk acht voor besmetting met het coronavirus hing significant positief samen met de intentie tot opvolging van de adviezen (*β* = .176, *p* = .002). De overige variabelen (d.w.z., gepercipieerde voordelen, gepercipieerde barrières en gepercipieerde ernst van een besmetting met het coronavirus) hadden geen significante samenhang met de intentie tot het naleven van de adviezen.
+*Situatie zonder symptomen.* Participanten werd gevraagd in hoeverre zij de intentie hadden om de adviezen uit de app op te volgen na het zien van een melding van de CoronaMelder, waarbij de situatie werd voorgelegd dat zijzelf geen symptomen hadden. Voor deze analyse zijn drie gedragsmaatregelen samengenomen tot één afhankelijke variabele, namelijk ‘bellen om een coronatest aan te vragen’, ‘zo lang thuisblijven als de melding adviseert’, en ‘geen bezoek ontvangen’ (*α* = .84).
+Zelfeffectiviteit hangt positief samen met de intentie tot naleving van de adviezen (*β* = .21, *p* < .001, *α* = .88), waarbij een hogere zelfeffectiviteit leidt tot een sterkere intentie tot naleving van de adviezen. Ook de mate waarin men zichzelf ontvankelijk acht voor besmetting met het coronavirus hing significant positief samen met de intentie tot opvolging van de adviezen (*β* = .176, *p* = .002, *α* = .78). De overige variabelen (d.w.z., gepercipieerde voordelen, *α* = .91, gepercipieerde barrières, *α* = .85, en gepercipieerde ernst van een besmetting met het coronavirus, *α* = .72) hadden geen significante samenhang met de intentie tot het naleven van de adviezen.
  	
-*Situatie met symptomen.* Net als in de situatie zonder symptomen werd aan participanten gevraagd in hoeverre zij de intentie hadden om de adviezen uit de app op te volgen na het zien van een melding van de CoronaMelder, maar dit keer in een situatie met symptomen. Wederom hing zelfeffectiviteit positief samen met de intentie tot opvolgen van de adviezen (*β* = .41, *p* < .001). Daarnaast hing gepercipieerde ernst significant positief samen met de intentie tot opvolging van de adviezen (*β* = .14, *p* = .017). De overige variabelen (d.w.z., gepercipieerde voordelen, gepercipieerde barrières en gepercipieerde ontvankelijkheid voor een besmetting met het coronavirus) hadden geen significante samenhang met de intentie tot het opvolgen vn de adviezen. 
+*Situatie met symptomen.* Net als in de situatie zonder symptomen werd aan participanten gevraagd in hoeverre zij de intentie hadden om de adviezen uit de app op te volgen na het zien van een melding van de CoronaMelder, maar dit keer in een situatie met symptomen (*α* = .87). Wederom hing zelfeffectiviteit positief samen met de intentie tot opvolgen van de adviezen (*β* = .41, *p* < .001). Daarnaast hing gepercipieerde ernst significant positief samen met de intentie tot opvolging van de adviezen (*β* = .14, *p* = .017). De overige variabelen (d.w.z., gepercipieerde voordelen, gepercipieerde barrières en gepercipieerde ontvankelijkheid voor een besmetting met het coronavirus) hadden geen significante samenhang met de intentie tot het opvolgen vn de adviezen. 
 
 
 
@@ -11336,7 +11336,7 @@ data_wave4_adherence$AdherenceSelfEfficacy_w4 <- rowMeans(data_wave4_adherence[,
 cronbach(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits")])
 
 data_wave4_adherence$AdherenceBenefits_w4 <- rowMeans(data_wave4_adherence[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits", "HBM_perceivedbenefits_GP")], na.rm = TRUE)
-cronbach(data_wave4_adherence[, c("HBM_selfefficacy_Test", "HBM_selfefficacy_Quarantaine", "HBM_selfefficacy_Visits")])
+cronbach(data_wave4_adherence[, c("HBM_perceivedbenefits_Test", "HBM_perceivedbenefits_Quarantaine", "HBM_perceivedbenefits_Visits")])
 
 data_wave4_adherence$AdherenceBarriers_w4 <- rowMeans(data_wave4_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits")], na.rm = TRUE)
 cronbach(data_wave4_adherence[, c("HBM_barriers_Test", "HBM_barriers_Quarantaine", "HBM_barriers_Visits")])
@@ -11488,6 +11488,10 @@ geslacht ~~ Media_dummy'
 fit_HBM1 <- sem(HBM_w4, data = data_wave4, ordered = TRUE, estimator = "WLSMV") #Ordered = TRUE tells us that all the endogenous variables are categorical. #In this case, this is the Behavior_UTAUT var. 
 summary(fit_HBM1, fit.measures = TRUE, standardized = TRUE, ci = TRUE)
 
+#Reliability of the scale variables
+cronbach(data_wave4[, c("HBM_PSev_self1", "HBM_PSev_self2")]) # alpha = 0.72
+cronbach(data_wave4[, c("HBM_PSus_self1", "HBM_PSus_self2")]) # alpha = 0.78
+
 # RESPECIFICATION. Assessing model fit. Ideally, Chi2 is non-significant, CFI is higher than .95, SRMR <.08, and RMSEA is acceptable below .08 (but good below <.05; with the lower bound not higher than .05 and the upper bound not higher than .10). When looking at the fit indices, model fit is good: 
 ## Chi square = 71.648
 ## CFI   = .993
@@ -11522,6 +11526,13 @@ inspect(fit_HBM1, 'r2')
 lm <- lm(Behavior_UTAUT_r ~ Beliefs_society + Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSus_other2 + HBM_PSev_other2 + Beliefs_technologyperformance_5p + lftdcat + geslacht, data = data_wave4)
 
 car::vif(lm)
+
+#Cronbach alphas of the scale variables
+cronbach(data_wave4[, c("Beliefs_fear", "Beliefs_notificationfear")]) #Beliefs_fear = .66
+cronbach(data_wave4[, c("Beliefs_Conspiracy1_resc", "Beliefs_Conspiracy2_resc")]) #Beliefs_conspiracy = .71
+cronbach(data_wave4[, c("Beliefs_locationmonitoring_resc", "Beliefs_identitymonitoring_resc")])#Beliefs_monitoring: cronbach's alpha = .74
+cronbach(data_wave4[, c("Beliefs_benefiteconomic", "Beliefs_civicduty", "Beliefs_TrustGovernment", "Beliefs_Protectriskgroups", "Beliefs_datasafety_resc")]) #Beliefs_society: cronbach's alpha = .83
+
 
 #Logistic regression
 mylogit <- glm(Behavior_UTAUT_r ~ Beliefs_society + Beliefs_fears + Beliefs_monitoring + Beliefs_conspiracy + HBM_PSus_other2 + HBM_PSev_other2 + Beliefs_technologyperformance_5p + lftdcat + geslacht, data = data_wave4, family=binomial)
